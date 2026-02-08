@@ -1,0 +1,53 @@
+{
+  "name": "thekdatepicker",
+  "version": "1.0.0",
+  "description": "A framework-agnostic date/time picker library with themes.",
+  "type": "module",
+  "main": "./dist/thekdatepicker.umd.cjs",
+  "module": "./dist/thekdatepicker.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/thekdatepicker.js",
+      "require": "./dist/thekdatepicker.umd.cjs"
+    },
+    "./min": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/thekdatepicker.min.js",
+      "require": "./dist/thekdatepicker.umd.min.cjs"
+    },
+    "./css/*": "./dist/css/*"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite --open /showcase/index.html",
+    "build": "vite build && cross-env THEK_MINIFY=1 vite build --emptyOutDir false && tsc && shx rm -rf dist/css && shx mkdir -p dist/css && (shx cp -r src/themes/*.css dist/css || shx echo \"No theme CSS files to copy\")",
+    "preview": "vite preview",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "datepicker",
+    "date",
+    "time",
+    "calendar",
+    "framework-agnostic",
+    "headless",
+    "accessible"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^25.2.1",
+    "cross-env": "^10.1.0",
+    "jsdom": "^28.0.0",
+    "shx": "^0.4.0",
+    "terser": "^5.46.0",
+    "typescript": "^5.4.5",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18"
+  }
+}
