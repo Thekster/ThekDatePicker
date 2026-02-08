@@ -28,6 +28,10 @@
   - `suspiciousMaxYear`
   - `suspiciousMessage`
   - optional exclamation indicator and warning state styling.
+- Invalid-revert indicator options:
+  - `revertWarning`
+  - `revertMessage`
+  - sticky blended-pill warning cue now includes reverted-to value and remains until corrected value or explicit null clear is committed.
 - Comprehensive showcase updates:
   - quick docs for ESM and CDN
   - theme configurator with copyable theme object
@@ -49,3 +53,5 @@
 - Mask typing behavior for separators and invalid characters.
 - Backspace behavior around time separators and AM/PM editing.
 - Trigger button/icon visual consistency and input/button vertical alignment.
+- Strict input parsing now avoids native `Date(...)` string fallback, preventing ambiguous values like `---12` from being accepted.
+- Typed values that exceed `minDate`/`maxDate` now trigger the same revert warning indicator when clamped on commit.

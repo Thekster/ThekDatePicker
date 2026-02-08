@@ -364,6 +364,8 @@ apiPicker.clear();</pre></div>
                             <tr><td>suspiciousMinYear</td><td>number</td><td>undefined</td><td>Optional absolute lower year bound for warning.</td></tr>
                             <tr><td>suspiciousMaxYear</td><td>number</td><td>undefined</td><td>Optional absolute upper year bound for warning.</td></tr>
                             <tr><td>suspiciousMessage</td><td>string</td><td>Suspicious date value</td><td>Tooltip text for warning state.</td></tr>
+                            <tr><td>revertWarning</td><td>boolean</td><td>true</td><td>Shows sticky `!` pill; tooltip includes rejected user input until corrected/null commit.</td></tr>
+                            <tr><td>revertMessage</td><td>string</td><td>Invalid input value</td><td>Tooltip text for revert indicator state.</td></tr>
                         </tbody>
                     </table>
                     <h3 class="ref-title">Instance Properties</h3>
@@ -478,6 +480,8 @@ apiPicker.clear();</pre></div>
   suspiciousMinYear: undefined,
   suspiciousMaxYear: undefined,
   suspiciousMessage: 'Suspicious date value',
+  revertWarning: true,
+  revertMessage: 'Invalid input value',
   onChange: undefined,
   onOpen: undefined,
   onClose: undefined

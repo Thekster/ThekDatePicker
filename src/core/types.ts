@@ -44,6 +44,8 @@ export interface ThekDatePickerOptions {
   suspiciousMinYear?: number;
   suspiciousMaxYear?: number;
   suspiciousMessage?: string;
+  revertWarning?: boolean;
+  revertMessage?: string;
   onChange?: (date: Date | null, formatted: string, instance: ThekDatePicker) => void;
   onOpen?: (instance: ThekDatePicker) => void;
   onClose?: (instance: ThekDatePicker) => void;
@@ -75,6 +77,8 @@ export interface ResolvedOptions {
   suspiciousMinYear: number | null;
   suspiciousMaxYear: number | null;
   suspiciousMessage: string;
+  revertWarning: boolean;
+  revertMessage: string;
   onChange?: (date: Date | null, formatted: string, instance: ThekDatePicker) => void;
   onOpen?: (instance: ThekDatePicker) => void;
   onClose?: (instance: ThekDatePicker) => void;

@@ -223,6 +223,8 @@ export function resolveOptions(options: ThekDatePickerOptions): ResolvedOptions 
   const suspiciousMinYear = merged.suspiciousMinYear ?? null;
   const suspiciousMaxYear = merged.suspiciousMaxYear ?? null;
   const suspiciousMessage = merged.suspiciousMessage ?? 'Suspicious date value';
+  const revertWarning = merged.revertWarning ?? true;
+  const revertMessage = merged.revertMessage ?? 'Invalid input value';
 
   return {
     format,
@@ -248,6 +250,8 @@ export function resolveOptions(options: ThekDatePickerOptions): ResolvedOptions 
     suspiciousMinYear,
     suspiciousMaxYear,
     suspiciousMessage,
+    revertWarning,
+    revertMessage,
     onChange: merged.onChange,
     onOpen: merged.onOpen,
     onClose: merged.onClose,
@@ -261,5 +265,20 @@ export function extractInput(input: string, options: ResolvedOptions): Date | nu
   const normalized = normalizeInputSeparatorsToFormat(input, format);
   const flexible = parseDateByFormat(normalized, format);
   if (flexible) return flexible;
-  return normalizeDateInput(input);
+
+  const relaxedFormat = format
+    .replaceAll('DD', 'D')
+    .replaceAll('MM', 'M')
+    .replaceAll('HH', 'H')
+    .replaceAll('hh', 'h')
+    .replaceAll('mm', 'm');
+  if (relaxedFormat !== format) {
+    const relaxedPrimary = parseDateByFormat(input, relaxedFormat);
+    if (relaxedPrimary) return relaxedPrimary;
+    const relaxedNormalized = normalizeInputSeparatorsToFormat(input, relaxedFormat);
+    const relaxedFlexible = parseDateByFormat(relaxedNormalized, relaxedFormat);
+    if (relaxedFlexible) return relaxedFlexible;
+  }
+
+  return null;
 }

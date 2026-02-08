@@ -121,6 +121,8 @@ setGlobalOptions({
 | `suspiciousMinYear` | `number` | `undefined` | Optional absolute lower year threshold for warnings. |
 | `suspiciousMaxYear` | `number` | `undefined` | Optional absolute upper year threshold for warnings. |
 | `suspiciousMessage` | `string` | `'Suspicious date value'` | Tooltip text shown when warning is active. |
+| `revertWarning` | `boolean` | `true` | Shows sticky `!` revert pill when invalid input is reverted; hover tooltip includes rejected user input until corrected value or null clear is committed. |
+| `revertMessage` | `string` | `'Invalid input value'` | Tooltip text for revert indicator state. |
 | `onChange` | `(date, formatted, instance) => void` | `undefined` | Called when value changes. |
 | `onOpen` | `(instance) => void` | `undefined` | Called when popover opens. |
 | `onClose` | `(instance) => void` | `undefined` | Called when popover closes. |
@@ -222,6 +224,18 @@ createDatePicker('#audit-date', {
 });
 ```
 
+## Revert Indicator
+
+```ts
+createDatePicker('#date', {
+  format: 'DD/MM/YYYY',
+  revertWarning: true,
+  revertMessage: 'Invalid value reverted',
+});
+```
+
+This also applies when a typed value is outside `minDate`/`maxDate` and gets clamped on commit.
+
 ## Theme Object
 
 | Property | Type | Description |
@@ -270,6 +284,8 @@ createDatePicker('#my-date', {
   suspiciousMinYear: undefined,
   suspiciousMaxYear: undefined,
   suspiciousMessage: 'Suspicious date value',
+  revertWarning: true,
+  revertMessage: 'Invalid input value',
   onChange: undefined,
   onOpen: undefined,
   onClose: undefined,

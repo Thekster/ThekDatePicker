@@ -9,7 +9,7 @@ import {
   rotateWeekdays,
   toLocalStartOfDay,
 } from './date-utils.js';
-import { createPickerPopover, createSuspiciousIndicator, createTriggerButton } from './thekdatepicker-dom.js';
+import { createPickerPopover, createRevertIndicator, createSuspiciousIndicator, createTriggerButton } from './thekdatepicker-dom.js';
 import { isSuspiciousDate } from './thekdatepicker-suspicious.js';
 import { applyThemeVars } from './thekdatepicker-theme.js';
 import {
@@ -35,6 +35,7 @@ export class ThekDatePicker {
   private inputWrapEl: HTMLDivElement | null = null;
   private triggerButtonEl: HTMLButtonElement | null = null;
   private suspiciousIndicatorEl: HTMLSpanElement | null = null;
+  private revertIndicatorEl: HTMLSpanElement | null = null;
   private pickerEl: HTMLDivElement;
   private monthLabelEl: HTMLSpanElement;
   private weekdaysEl: HTMLDivElement;
@@ -302,6 +303,7 @@ export class ThekDatePicker {
 
     this.selectedDate = clampDate(parsed, this.options.minDate, this.options.maxDate);
     this.viewDate = new Date(this.selectedDate);
+    this.hideRevertIndicator();
     this.syncInput();
     this.render();
     if (triggerChange) this.emitChange();
@@ -314,6 +316,7 @@ export class ThekDatePicker {
   public clear(triggerChange = true): void {
     this.selectedDate = null;
     this.input.value = '';
+    this.hideRevertIndicator();
     this.updateSuspiciousState();
     this.render();
     if (triggerChange) this.emitChange();
@@ -354,6 +357,7 @@ export class ThekDatePicker {
   public destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
+    this.hideRevertIndicator();
     this.unbind();
     this.teardownReactiveTheme();
     this.close();
@@ -404,6 +408,8 @@ export class ThekDatePicker {
 
     const suspiciousIndicator = createSuspiciousIndicator();
     wrap.appendChild(suspiciousIndicator);
+    const revertIndicator = createRevertIndicator();
+    wrap.appendChild(revertIndicator);
 
     const button = createTriggerButton();
     wrap.appendChild(button);
@@ -411,6 +417,7 @@ export class ThekDatePicker {
     this.inputWrapEl = wrap;
     this.triggerButtonEl = button;
     this.suspiciousIndicatorEl = suspiciousIndicator;
+    this.revertIndicatorEl = revertIndicator;
   }
 
   private unmountInputTrigger(): void {
@@ -422,6 +429,7 @@ export class ThekDatePicker {
     this.inputWrapEl = null;
     this.triggerButtonEl = null;
     this.suspiciousIndicatorEl = null;
+    this.revertIndicatorEl = null;
   }
 
   private maskInput(value: string): string {
@@ -454,6 +462,31 @@ export class ThekDatePicker {
       this.themeMediaQuery.removeEventListener('change', this.handleThemeMediaChange);
     }
     this.themeMediaQuery = null;
+  }
+
+  private showRevertIndicator(rejectedInput: string): void {
+    if (!this.options.revertWarning) return;
+    const detail = `${this.options.revertMessage} : ${rejectedInput}`;
+
+    this.input.classList.add('thekdp-input-reverted');
+    this.input.title = detail;
+    if (this.inputWrapEl) this.inputWrapEl.classList.add('thekdp-input-wrap-reverted');
+    if (this.revertIndicatorEl) {
+      this.revertIndicatorEl.hidden = false;
+      this.revertIndicatorEl.title = detail;
+    }
+  }
+
+  private hideRevertIndicator(): void {
+    this.input.classList.remove('thekdp-input-reverted');
+    if (this.inputWrapEl) this.inputWrapEl.classList.remove('thekdp-input-wrap-reverted');
+    if (this.revertIndicatorEl) {
+      this.revertIndicatorEl.hidden = true;
+      this.revertIndicatorEl.title = '';
+    }
+    if (!this.input.classList.contains('thekdp-input-suspicious')) {
+      this.input.removeAttribute('title');
+    }
   }
 
   private applyAutoTheme(): void {
@@ -496,9 +529,16 @@ export class ThekDatePicker {
     const parsed = extractInput(raw, this.options);
     if (!parsed) {
       this.syncInput();
+      this.showRevertIndicator(raw);
       return;
     }
-    this.setDate(parsed, true);
+    this.hideRevertIndicator();
+    const clamped = clampDate(parsed, this.options.minDate, this.options.maxDate);
+    const wasClamped = clamped.getTime() !== parsed.getTime();
+    this.setDate(clamped, true);
+    if (wasClamped) {
+      this.showRevertIndicator(raw);
+    }
   }
 
   private syncInput(): void {

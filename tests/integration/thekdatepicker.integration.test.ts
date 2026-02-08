@@ -341,4 +341,126 @@ describe('ThekDatePicker integration', () => {
     expect(indicator.hidden).toBe(true);
     picker.destroy();
   });
+
+  it('shows revert indicator when invalid input is reverted on blur', () => {
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'DD/MM/YYYY',
+      revertWarning: true,
+      revertMessage: 'Invalid value reverted',
+    });
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    picker.setDate('08/02/2026');
+
+    input.value = '---12';
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+
+    expect(input.value).toBe('08/02/2026');
+    expect(input.classList.contains('thekdp-input-reverted')).toBe(true);
+    expect(input.title).toContain('Invalid value reverted');
+    expect(input.title).toContain('---12');
+    const indicator = document.querySelector('.thekdp-revert-indicator') as HTMLSpanElement;
+    expect(indicator.hidden).toBe(false);
+    expect(indicator.querySelector('svg')).not.toBeNull();
+    expect(indicator.title).toContain('---12');
+
+    picker.destroy();
+  });
+
+  it('uses default revert tooltip format with rejected raw value', () => {
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'DD/MM/YYYY',
+      revertWarning: true,
+    });
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    picker.setDate('08/02/2026');
+
+    input.value = '--12';
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    expect(input.title).toBe('Invalid input value : --12');
+
+    picker.destroy();
+  });
+
+  it('shows revert indicator when typed value is clamped to maxDate', () => {
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'DD/MM/YYYY',
+      minDate: '2026-01-01',
+      maxDate: '2026-12-31',
+      revertWarning: true,
+    });
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    input.value = '01/01/2027';
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+
+    expect(input.value).toBe('31/12/2026');
+    expect(input.title).toBe('Invalid input value : 01/01/2027');
+    const indicator = document.querySelector('.thekdp-revert-indicator') as HTMLSpanElement;
+    expect(indicator.hidden).toBe(false);
+
+    picker.destroy();
+  });
+
+  it('shows revert indicator when typed value is clamped to minDate', () => {
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'DD/MM/YYYY',
+      minDate: '2026-01-01',
+      maxDate: '2026-12-31',
+      revertWarning: true,
+    });
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    input.value = '31/12/2025';
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+
+    expect(input.value).toBe('01/01/2026');
+    expect(input.title).toBe('Invalid input value : 31/12/2025');
+    const indicator = document.querySelector('.thekdp-revert-indicator') as HTMLSpanElement;
+    expect(indicator.hidden).toBe(false);
+
+    picker.destroy();
+  });
+
+  it('keeps revert indicator visible until corrected value is committed', async () => {
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'DD/MM/YYYY',
+      revertWarning: true,
+    });
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    const indicator = document.querySelector('.thekdp-revert-indicator') as HTMLSpanElement;
+
+    picker.setDate('08/02/2026');
+    input.value = '---12';
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    expect(indicator.hidden).toBe(false);
+
+    input.value = '09';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 2100));
+    expect(indicator.hidden).toBe(false);
+
+    input.value = '09/02/2026';
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    expect(indicator.hidden).toBe(true);
+
+    picker.destroy();
+  });
+
+  it('clears revert indicator when user commits empty value (null)', () => {
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'DD/MM/YYYY',
+      revertWarning: true,
+    });
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    const indicator = document.querySelector('.thekdp-revert-indicator') as HTMLSpanElement;
+
+    picker.setDate('08/02/2026');
+    input.value = '---12';
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    expect(indicator.hidden).toBe(false);
+
+    input.value = '';
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    expect(indicator.hidden).toBe(true);
+
+    picker.destroy();
+  });
 });

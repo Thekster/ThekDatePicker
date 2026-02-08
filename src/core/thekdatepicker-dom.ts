@@ -19,13 +19,32 @@ export function createTriggerButton(): HTMLButtonElement {
   return button;
 }
 
+function warningSvgMarkup(): string {
+  return `
+    <svg class="thekdp-indicator-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 3.5L21 19.5H3L12 3.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
+      <line x1="12" y1="9" x2="12" y2="13.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></line>
+      <circle cx="12" cy="16.4" r="1" fill="currentColor"></circle>
+    </svg>
+  `;
+}
+
 export function createSuspiciousIndicator(): HTMLSpanElement {
   const suspiciousIndicator = document.createElement('span');
   suspiciousIndicator.className = 'thekdp-suspicious-indicator';
   suspiciousIndicator.setAttribute('aria-hidden', 'true');
-  suspiciousIndicator.textContent = '!';
+  suspiciousIndicator.innerHTML = warningSvgMarkup();
   suspiciousIndicator.hidden = true;
   return suspiciousIndicator;
+}
+
+export function createRevertIndicator(): HTMLSpanElement {
+  const revertIndicator = document.createElement('span');
+  revertIndicator.className = 'thekdp-revert-indicator';
+  revertIndicator.setAttribute('aria-hidden', 'true');
+  revertIndicator.innerHTML = warningSvgMarkup();
+  revertIndicator.hidden = true;
+  return revertIndicator;
 }
 
 export function createPickerPopover(): HTMLDivElement {

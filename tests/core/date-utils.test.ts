@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { applyMaskToInput, formatDate, parseDateByFormat } from '../../src/index';
+import { MASK_SEPARATORS } from '../../src/core/date-utils';
 
 describe('date utils', () => {
   it('formats by token format', () => {
@@ -29,5 +30,66 @@ describe('date utils', () => {
   it('does not lock AM/PM while deleting', () => {
     expect(applyMaskToInput('020820260905pm', 'MM/DD/YYYY hh:mm A')).toBe('02/08/2026 09:05 PM');
     expect(applyMaskToInput('020820260905p', 'MM/DD/YYYY hh:mm A')).toBe('02/08/2026 09:05 P');
+  });
+
+  it('supports all documented format tokens for formatting', () => {
+    const date = new Date(2026, 1, 8, 21, 5);
+    const tokenExpectations: Array<[string, string]> = [
+      ['YYYY', '2026'],
+      ['YY', '26'],
+      ['MM', '02'],
+      ['M', '2'],
+      ['DD', '08'],
+      ['D', '8'],
+      ['HH', '21'],
+      ['H', '21'],
+      ['hh', '09'],
+      ['h', '9'],
+      ['mm', '05'],
+      ['m', '5'],
+      ['A', 'PM'],
+      ['a', 'pm'],
+    ];
+
+    for (const [token, expected] of tokenExpectations) {
+      expect(formatDate(date, token)).toBe(expected);
+    }
+  });
+
+  it('supports all documented token groups for parsing', () => {
+    const yyyy = parseDateByFormat('2026-02-08 21:05', 'YYYY-MM-DD HH:mm');
+    expect(yyyy?.getFullYear()).toBe(2026);
+    expect(yyyy?.getMonth()).toBe(1);
+    expect(yyyy?.getDate()).toBe(8);
+    expect(yyyy?.getHours()).toBe(21);
+    expect(yyyy?.getMinutes()).toBe(5);
+
+    const yy = parseDateByFormat('26-2-8 9:5', 'YY-M-D H:m');
+    expect(yy?.getFullYear()).toBe(2026);
+    expect(yy?.getMonth()).toBe(1);
+    expect(yy?.getDate()).toBe(8);
+    expect(yy?.getHours()).toBe(9);
+    expect(yy?.getMinutes()).toBe(5);
+
+    const meridiemUpper = parseDateByFormat('02/08/2026 09:05 PM', 'MM/DD/YYYY hh:mm A');
+    expect(meridiemUpper?.getHours()).toBe(21);
+
+    const meridiemLower = parseDateByFormat('2/8/2026 9:5 pm', 'M/D/YYYY h:m a');
+    expect(meridiemLower?.getHours()).toBe(21);
+  });
+
+  it('supports all allowed separators in mask, parse, and format', () => {
+    const date = new Date(2026, 1, 8, 21, 5);
+    for (const separator of MASK_SEPARATORS) {
+      const dateFormat = `DD${separator}MM${separator}YYYY`;
+      const expectedDateText = `08${separator}02${separator}2026`;
+      expect(applyMaskToInput('08022026', dateFormat)).toBe(expectedDateText);
+      expect(formatDate(date, dateFormat)).toBe(expectedDateText);
+      const parsedDate = parseDateByFormat(expectedDateText, dateFormat);
+      expect(parsedDate).not.toBeNull();
+      expect(parsedDate?.getFullYear()).toBe(2026);
+      expect(parsedDate?.getMonth()).toBe(1);
+      expect(parsedDate?.getDate()).toBe(8);
+    }
   });
 });
