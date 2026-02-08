@@ -1,4 +1,4 @@
-import { normalizeInputSeparatorsToFormat, parseDateByFormat, isValidDate } from './date-utils.js';
+import { formatHasTimeTokens, normalizeInputSeparatorsToFormat, parseDateByFormat, isValidDate } from './date-utils.js';
 import type {
   DateInput,
   ResolvedOptions,
@@ -180,6 +180,7 @@ export function normalizeDateInput(value: DateInput): Date | null {
 }
 
 export function fullFormat(options: Pick<ResolvedOptions, 'format' | 'timeFormat' | 'enableTime'>): string {
+  if (formatHasTimeTokens(options.format)) return options.format;
   return options.enableTime ? `${options.format} ${options.timeFormat}` : options.format;
 }
 
@@ -217,6 +218,11 @@ export function resolveOptions(options: ThekDatePickerOptions): ResolvedOptions 
       ? resolveAutoThemeTemplate(themeAttribute)
       : merged.theme;
   const theme = resolveThemeOption(effectiveTheme);
+  const suspiciousWarning = merged.suspiciousWarning ?? false;
+  const suspiciousYearSpan = Math.max(0, merged.suspiciousYearSpan ?? 100);
+  const suspiciousMinYear = merged.suspiciousMinYear ?? null;
+  const suspiciousMaxYear = merged.suspiciousMaxYear ?? null;
+  const suspiciousMessage = merged.suspiciousMessage ?? 'Suspicious date value';
 
   return {
     format,
@@ -237,6 +243,11 @@ export function resolveOptions(options: ThekDatePickerOptions): ResolvedOptions 
     reactiveTheme,
     themeAttribute,
     themeMode,
+    suspiciousWarning,
+    suspiciousYearSpan,
+    suspiciousMinYear,
+    suspiciousMaxYear,
+    suspiciousMessage,
     onChange: merged.onChange,
     onOpen: merged.onOpen,
     onClose: merged.onClose,

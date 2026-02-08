@@ -396,3 +396,18 @@ export function getAllowedInputSeparators(options: ResolvedOptions): string[] {
 export function formatUsesMeridiem(format: string): boolean {
   return format.includes('A') || format.includes('a');
 }
+
+export function formatHasTimeTokens(format: string): boolean {
+  const parts = tokenizeFormat(format);
+  return parts.some((part) => (
+    part.type === 'token'
+      && (part.value === 'HH'
+        || part.value === 'H'
+        || part.value === 'hh'
+        || part.value === 'h'
+        || part.value === 'mm'
+        || part.value === 'm'
+        || part.value === 'A'
+        || part.value === 'a')
+  ));
+}

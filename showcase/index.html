@@ -32,6 +32,7 @@
                 <li><a href="#time12">12h AM/PM</a></li>
                 <li><a href="#behavior">Behavior</a></li>
                 <li><a href="#constraints">Constraints</a></li>
+                <li><a href="#events">Events</a></li>
                 <li><a href="#api">API</a></li>
                 <li><a href="#configurator">Configurator</a></li>
                 <li><a href="#reference">Reference</a></li>
@@ -109,7 +110,7 @@ createDatePicker('#my-date', {
             <div class="demo-card">
                 <div class="demo-content">
                     <label for="basic-input">Date</label>
-                    <input id="basic-input" type="text" style="display:block; width:16.25rem; margin-top:0.5rem;">
+                    <input id="basic-input" type="text" class="showcase-picker-input">
                     <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
                     <div class="code-snippet"><pre>createDatePicker('#basic-input', {
   format: 'DD/MM/YYYY',
@@ -124,7 +125,7 @@ createDatePicker('#my-date', {
             <div class="demo-card">
                 <div class="demo-content">
                     <label for="datetime24-input">Date + Time (24h)</label>
-                    <input id="datetime24-input" type="text" style="display:block; width:16.25rem; margin-top:0.5rem;">
+                    <input id="datetime24-input" type="text" class="showcase-picker-input">
                     <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
                     <div class="code-snippet"><pre>createDatePicker('#datetime24-input', {
   format: 'YYYY-MM-DD',
@@ -141,7 +142,7 @@ createDatePicker('#my-date', {
             <div class="demo-card">
                 <div class="demo-content">
                     <label for="datetime12-input">Date + Time (12h)</label>
-                    <input id="datetime12-input" type="text" style="display:block; width:16.25rem; margin-top:0.5rem;">
+                    <input id="datetime12-input" type="text" class="showcase-picker-input">
                     <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
                     <div class="code-snippet"><pre>createDatePicker('#datetime12-input', {
   format: 'MM/DD/YYYY',
@@ -155,7 +156,7 @@ createDatePicker('#my-date', {
             <div class="demo-card">
                 <div class="demo-content">
                     <label for="datetime12-lower-input">Date + Time (12h lowercase)</label>
-                    <input id="datetime12-lower-input" type="text" style="display:block; width:16.25rem; margin-top:0.5rem;">
+                    <input id="datetime12-lower-input" type="text" class="showcase-picker-input">
                     <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
                     <div class="code-snippet"><pre>createDatePicker('#datetime12-lower-input', {
   format: 'DD.MM.YYYY',
@@ -172,7 +173,7 @@ createDatePicker('#my-date', {
             <div class="demo-card">
                 <div class="demo-content">
                     <label for="open-on-click-input">Open on input click</label>
-                    <input id="open-on-click-input" type="text" style="display:block; width:16.25rem; margin-top:0.5rem;">
+                    <input id="open-on-click-input" type="text" class="showcase-picker-input">
                     <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
                     <div class="code-snippet"><pre>createDatePicker('#open-on-click-input', {
   format: 'DD/MM/YYYY',
@@ -184,7 +185,7 @@ createDatePicker('#my-date', {
             <div class="demo-card">
                 <div class="demo-content">
                     <label for="no-button-input">No calendar button</label>
-                    <input id="no-button-input" type="text" style="display:block; width:16.25rem; margin-top:0.5rem;">
+                    <input id="no-button-input" type="text" class="showcase-picker-input">
                     <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
                     <div class="code-snippet"><pre>createDatePicker('#no-button-input', {
   format: 'YYYY/MM/DD',
@@ -199,7 +200,7 @@ createDatePicker('#my-date', {
             <div class="demo-card">
                 <div class="demo-content">
                     <label for="range-input">Min/Max</label>
-                    <input id="range-input" type="text" style="display:block; width:16.25rem; margin-top:0.5rem;">
+                    <input id="range-input" type="text" class="showcase-picker-input">
                     <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
                     <div class="code-snippet"><pre>createDatePicker('#range-input', {
   format: 'MM/DD/YYYY',
@@ -212,11 +213,51 @@ createDatePicker('#my-date', {
             <div class="demo-card">
                 <div class="demo-content">
                     <label for="monday-start-input">Week starts on Monday</label>
-                    <input id="monday-start-input" type="text" style="display:block; width:16.25rem; margin-top:0.5rem;">
+                    <input id="monday-start-input" type="text" class="showcase-picker-input">
                     <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
                     <div class="code-snippet"><pre>createDatePicker('#monday-start-input', {
   format: 'DD/MM/YYYY',
   weekStartsOn: 1
+});</pre></div>
+                </div>
+            </div>
+
+            <div class="demo-card">
+                <div class="demo-content">
+                    <label for="suspicious-input">Suspicious Date Warning</label>
+                    <input id="suspicious-input" type="text" class="showcase-picker-input">
+                    <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
+                    <div class="code-snippet"><pre>createDatePicker('#suspicious-input', {
+  format: 'YYYY-MM-DD',
+  suspiciousWarning: true,
+  suspiciousYearSpan: 100,
+  suspiciousMinYear: 1900,
+  suspiciousMaxYear: 2100
+});</pre></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="events">
+            <h2><i class="fa-regular fa-bell"></i> Events</h2>
+            <div class="demo-card">
+                <div class="demo-content">
+                    <label for="events-input">Event callbacks demo</label>
+                    <input id="events-input" type="text" class="showcase-picker-input">
+                    <p class="api-help">This demo logs `onOpen`, `onChange`, and `onClose` as they happen.</p>
+                    <div class="event-log-container">
+                        <div class="event-log-header">
+                            <span>Event Log</span>
+                            <button id="events-clear-log" class="api-btn">Clear</button>
+                        </div>
+                        <div id="events-log" class="event-log"></div>
+                    </div>
+                    <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
+                    <div class="code-snippet"><pre>createDatePicker('#events-input', {
+  format: 'DD/MM/YYYY',
+  onOpen: () => log('onOpen'),
+  onChange: (date, formatted) => log(`onChange: ${formatted}`),
+  onClose: () => log('onClose')
 });</pre></div>
                 </div>
             </div>
@@ -226,7 +267,7 @@ createDatePicker('#my-date', {
             <h2><i class="fa-solid fa-terminal"></i> API Methods</h2>
             <div class="demo-card">
                 <div class="demo-content">
-                    <input id="api-target" type="text" style="display:block; width:16.25rem;">
+                    <input id="api-target" type="text" class="showcase-picker-input">
                     <div style="display:flex; gap:0.5rem; margin-top:0.625rem; flex-wrap:wrap;">
                         <button id="api-open" class="api-btn">Open</button>
                         <button id="api-close" class="api-btn">Close</button>
@@ -304,10 +345,10 @@ apiPicker.clear();</pre></div>
                             <tr><td>format</td><td>string</td><td>DD/MM/YYYY</td><td>Date mask/parse/display format.</td></tr>
                             <tr><td>locale</td><td>string</td><td>system locale</td><td>Locale used for deriving defaults.</td></tr>
                             <tr><td>useLocaleDefaults</td><td>boolean</td><td>false</td><td>Derives format/time/week-start from locale unless explicitly set.</td></tr>
-                            <tr><td>enableTime</td><td>boolean</td><td>false</td><td>Enables time controls and parsing.</td></tr>
-                            <tr><td>timeFormat</td><td>string</td><td>HH:mm</td><td>Time token format (`HH:mm` or `hh:mm A`).</td></tr>
-                            <tr><td>minDate / maxDate</td><td>Date \| string \| number</td><td>undefined</td><td>Selection bounds.</td></tr>
-                            <tr><td>defaultDate</td><td>Date \| string \| number</td><td>undefined</td><td>Initial value.</td></tr>
+                            <tr><td>enableTime</td><td>boolean</td><td>false</td><td>Controls visibility of popover time inputs.</td></tr>
+                            <tr><td>timeFormat</td><td>string</td><td>HH:mm</td><td>Used only when `format` has no time tokens and `enableTime` is true.</td></tr>
+                            <tr><td>minDate / maxDate</td><td>Date | string | number</td><td>undefined</td><td>Selection bounds.</td></tr>
+                            <tr><td>defaultDate</td><td>Date | string | number</td><td>undefined</td><td>Initial value.</td></tr>
                             <tr><td>placeholder</td><td>string</td><td>derived</td><td>Input placeholder override.</td></tr>
                             <tr><td>disabled</td><td>boolean</td><td>false</td><td>Disables interaction.</td></tr>
                             <tr><td>appendTo</td><td>HTMLElement</td><td>document.body</td><td>Popover mount target.</td></tr>
@@ -318,7 +359,11 @@ apiPicker.clear();</pre></div>
                             <tr><td>theme</td><td>'light' | 'dark' | 'auto' | Partial&lt;ThekDatePickerTheme&gt;</td><td>{}</td><td>Per-instance template or token overrides from JavaScript.</td></tr>
                             <tr><td>reactiveTheme</td><td>boolean</td><td>false</td><td>When true and `theme: 'auto'`, follows page theme changes.</td></tr>
                             <tr><td>themeAttribute</td><td>string</td><td>data-theme</td><td>Document attribute used to detect `light`/`dark` page theme.</td></tr>
-                            <tr><td>onChange / onOpen / onClose</td><td>function</td><td>undefined</td><td>Lifecycle callbacks.</td></tr>
+                            <tr><td>suspiciousWarning</td><td>boolean</td><td>false</td><td>Enables suspicious-date warning indicator.</td></tr>
+                            <tr><td>suspiciousYearSpan</td><td>number</td><td>100</td><td>Warns when year is outside current year ± span.</td></tr>
+                            <tr><td>suspiciousMinYear</td><td>number</td><td>undefined</td><td>Optional absolute lower year bound for warning.</td></tr>
+                            <tr><td>suspiciousMaxYear</td><td>number</td><td>undefined</td><td>Optional absolute upper year bound for warning.</td></tr>
+                            <tr><td>suspiciousMessage</td><td>string</td><td>Suspicious date value</td><td>Tooltip text for warning state.</td></tr>
                         </tbody>
                     </table>
                     <h3 class="ref-title">Instance Properties</h3>
@@ -367,6 +412,22 @@ apiPicker.clear();</pre></div>
                             <tr><td>applyMaskToInput(value, format)</td><td>utility function</td><td>n/a</td><td>Applies typing mask and separators to input text.</td></tr>
                         </tbody>
                     </table>
+                    <h3 class="ref-title">Events</h3>
+                    <table class="ref-table">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Type</th>
+                                <th>Default</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>onOpen</td><td>(instance) =&gt; void</td><td>undefined</td><td>Fires when popover opens.</td></tr>
+                            <tr><td>onChange</td><td>(date, formatted, instance) =&gt; void</td><td>undefined</td><td>Fires when selected value changes.</td></tr>
+                            <tr><td>onClose</td><td>(instance) =&gt; void</td><td>undefined</td><td>Fires when popover closes.</td></tr>
+                        </tbody>
+                    </table>
                     <h3 class="ref-title">Theme Tokens</h3>
                     <table class="ref-table">
                         <thead>
@@ -412,6 +473,11 @@ apiPicker.clear();</pre></div>
   theme: {},
   reactiveTheme: false,
   themeAttribute: 'data-theme',
+  suspiciousWarning: false,
+  suspiciousYearSpan: 100,
+  suspiciousMinYear: undefined,
+  suspiciousMaxYear: undefined,
+  suspiciousMessage: 'Suspicious date value',
   onChange: undefined,
   onOpen: undefined,
   onClose: undefined
@@ -526,6 +592,36 @@ apiPicker.clear();</pre></div>
     createDatePicker('#monday-start-input', {
         format: 'DD/MM/YYYY',
         weekStartsOn: 1
+    });
+
+    createDatePicker('#suspicious-input', {
+        format: 'YYYY-MM-DD',
+        suspiciousWarning: true,
+        suspiciousYearSpan: 100,
+        suspiciousMinYear: 1900,
+        suspiciousMaxYear: 2100
+    });
+
+    const eventsLog = document.getElementById('events-log');
+    const appendEvent = (message) => {
+        const row = document.createElement('div');
+        row.className = 'log-entry';
+        row.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+        eventsLog.prepend(row);
+        while (eventsLog.children.length > 30) {
+            eventsLog.removeChild(eventsLog.lastChild);
+        }
+    };
+
+    createDatePicker('#events-input', {
+        format: 'DD/MM/YYYY',
+        onOpen: () => appendEvent('onOpen'),
+        onChange: (_date, formatted) => appendEvent(`onChange: ${formatted || '(empty)'}`),
+        onClose: () => appendEvent('onClose')
+    });
+
+    document.getElementById('events-clear-log').addEventListener('click', () => {
+        eventsLog.innerHTML = '';
     });
 
     const apiPicker = createDatePicker('#api-target', {

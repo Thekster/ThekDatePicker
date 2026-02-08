@@ -101,12 +101,12 @@ setGlobalOptions({
 | `format` | `string` | `'DD/MM/YYYY'` | Date format used for mask/parse/display. |
 | `locale` | `string` | system locale | Locale used for deriving defaults when `useLocaleDefaults` is enabled. |
 | `useLocaleDefaults` | `boolean` | `false` | If true, derives `format`, `timeFormat`, and `weekStartsOn` from locale unless explicitly provided. |
-| `enableTime` | `boolean` | `false` | Enables time controls in popover and time parsing. |
-| `timeFormat` | `string` | `'HH:mm'` | Time token format appended to `format` when `enableTime` is true. |
+| `enableTime` | `boolean` | `false` | Controls visibility of time controls in popover. |
+| `timeFormat` | `string` | `'HH:mm'` | Time token format used only when `format` has no time tokens and `enableTime` is true. |
 | `minDate` | `Date \| string \| number \| null \| undefined` | `undefined` | Minimum allowed date. Values below are clamped. |
 | `maxDate` | `Date \| string \| number \| null \| undefined` | `undefined` | Maximum allowed date. Values above are clamped. |
 | `defaultDate` | `Date \| string \| number \| null \| undefined` | `undefined` | Initial value for input/picker. |
-| `placeholder` | `string` | `format` or `format + timeFormat` | Custom placeholder text. |
+| `placeholder` | `string` | `format` or derived full format | Custom placeholder text. |
 | `disabled` | `boolean` | `false` | Disables input + trigger and blocks opening. |
 | `appendTo` | `HTMLElement` | `document.body` | Popover mount container. |
 | `weekStartsOn` | `0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6` | `0` | First weekday (`0 = Sun`, `1 = Mon`, ...). |
@@ -116,6 +116,11 @@ setGlobalOptions({
 | `theme` | `'light' \| 'dark' \| 'auto' \| Partial<ThekDatePickerTheme>` | `{}` | Per-instance theme template or token overrides without changing global theme. |
 | `reactiveTheme` | `boolean` | `false` | When true and `theme: 'auto'`, reacts to page theme changes. |
 | `themeAttribute` | `string` | `'data-theme'` | Document attribute that carries page theme (`light`/`dark`). |
+| `suspiciousWarning` | `boolean` | `false` | Enables warning indicator for suspicious date values. |
+| `suspiciousYearSpan` | `number` | `100` | Marks years outside current year ± span as suspicious. |
+| `suspiciousMinYear` | `number` | `undefined` | Optional absolute lower year threshold for warnings. |
+| `suspiciousMaxYear` | `number` | `undefined` | Optional absolute upper year threshold for warnings. |
+| `suspiciousMessage` | `string` | `'Suspicious date value'` | Tooltip text shown when warning is active. |
 | `onChange` | `(date, formatted, instance) => void` | `undefined` | Called when value changes. |
 | `onOpen` | `(instance) => void` | `undefined` | Called when popover opens. |
 | `onClose` | `(instance) => void` | `undefined` | Called when popover closes. |
@@ -177,6 +182,23 @@ setGlobalOptions({
 - `getGlobalOptions()`: returns current merged global defaults.
 - `resetGlobalOptions()`: clears global defaults.
 
+## Events
+
+```ts
+createDatePicker('#events-input', {
+  format: 'DD/MM/YYYY',
+  onOpen: () => console.log('onOpen'),
+  onChange: (date, formatted) => console.log('onChange', date, formatted),
+  onClose: () => console.log('onClose'),
+});
+```
+
+| Event | Signature | Description |
+| --- | --- | --- |
+| `onOpen` | `(instance: ThekDatePicker) => void` | Fires when popover opens. |
+| `onChange` | `(date: Date \| null, formatted: string, instance: ThekDatePicker) => void` | Fires after value changes via typing, calendar click, clear, or API set. |
+| `onClose` | `(instance: ThekDatePicker) => void` | Fires when popover closes. |
+
 ## Locale Defaults
 
 ```ts
@@ -184,6 +206,19 @@ createDatePicker('#locale-date', {
   useLocaleDefaults: true,
   locale: 'en-US',
   enableTime: true,
+});
+```
+
+## Suspicious Date Warning
+
+```ts
+createDatePicker('#audit-date', {
+  format: 'YYYY-MM-DD',
+  suspiciousWarning: true,
+  suspiciousYearSpan: 100,
+  suspiciousMinYear: 1900,
+  suspiciousMaxYear: 2100,
+  suspiciousMessage: 'Please double-check this date',
 });
 ```
 
@@ -230,6 +265,11 @@ createDatePicker('#my-date', {
   theme: {},
   reactiveTheme: false,
   themeAttribute: 'data-theme',
+  suspiciousWarning: false,
+  suspiciousYearSpan: 100,
+  suspiciousMinYear: undefined,
+  suspiciousMaxYear: undefined,
+  suspiciousMessage: 'Suspicious date value',
   onChange: undefined,
   onOpen: undefined,
   onClose: undefined,

@@ -216,6 +216,12 @@ nav a:hover, nav a.active {
 h1 { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.25rem; color: var(--brand-color); }
 .description { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 2rem; }
 
+.showcase-picker-input {
+    display: block;
+    margin-top: 0.5rem;
+    width: 16.25rem;
+}
+
 .api-help {
     color: var(--text-muted);
     font-size: 0.82rem;

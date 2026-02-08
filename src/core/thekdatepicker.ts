@@ -9,6 +9,9 @@ import {
   rotateWeekdays,
   toLocalStartOfDay,
 } from './date-utils.js';
+import { createPickerPopover, createSuspiciousIndicator, createTriggerButton } from './thekdatepicker-dom.js';
+import { isSuspiciousDate } from './thekdatepicker-suspicious.js';
+import { applyThemeVars } from './thekdatepicker-theme.js';
 import {
   clampDate,
   extractInput,
@@ -22,24 +25,8 @@ import type {
   DateInput,
   ResolvedOptions,
   ThekDatePickerOptions,
-  ThekDatePickerTheme,
   ThekDatePickerThemeOption,
 } from './types.js';
-
-const THEME_VAR_MAP: Record<keyof ThekDatePickerTheme, string> = {
-  primary: '--thekdp-primary',
-  primaryStrong: '--thekdp-primary-strong',
-  primaryContrast: '--thekdp-primary-contrast',
-  bgSurface: '--thekdp-bg-surface',
-  bgPanel: '--thekdp-bg-panel',
-  border: '--thekdp-border',
-  textMain: '--thekdp-text-main',
-  textMuted: '--thekdp-text-muted',
-  shadow: '--thekdp-shadow',
-  radius: '--thekdp-radius',
-  fontFamily: '--thekdp-font-family',
-  controlHeight: '--thekdp-control-height',
-};
 
 export class ThekDatePicker {
   public readonly input: HTMLInputElement;
@@ -47,6 +34,7 @@ export class ThekDatePicker {
 
   private inputWrapEl: HTMLDivElement | null = null;
   private triggerButtonEl: HTMLButtonElement | null = null;
+  private suspiciousIndicatorEl: HTMLSpanElement | null = null;
   private pickerEl: HTMLDivElement;
   private monthLabelEl: HTMLSpanElement;
   private weekdaysEl: HTMLDivElement;
@@ -248,28 +236,7 @@ export class ThekDatePicker {
     this.options = resolveOptions(options);
     this.mountInputTrigger();
 
-    this.pickerEl = document.createElement('div');
-    this.pickerEl.className = 'thekdp-popover';
-    this.pickerEl.hidden = true;
-    this.pickerEl.tabIndex = -1;
-    this.pickerEl.innerHTML = `
-      <div class="thekdp-header">
-        <button type="button" class="thekdp-nav-btn" data-action="prev-year" aria-label="Previous year">«</button>
-        <button type="button" class="thekdp-nav-btn" data-action="prev-month" aria-label="Previous month">‹</button>
-        <span class="thekdp-current-month"></span>
-        <button type="button" class="thekdp-nav-btn" data-action="next-month" aria-label="Next month">›</button>
-        <button type="button" class="thekdp-nav-btn" data-action="next-year" aria-label="Next year">»</button>
-      </div>
-      <div class="thekdp-weekdays" role="row"></div>
-      <div class="thekdp-days" role="grid"></div>
-      <div class="thekdp-footer">
-        <div class="thekdp-time"></div>
-        <div class="thekdp-actions">
-          <button type="button" class="thekdp-link-btn" data-action="today">Now</button>
-          <button type="button" class="thekdp-ok-btn" data-action="ok">OK</button>
-        </div>
-      </div>
-    `;
+    this.pickerEl = createPickerPopover();
 
     this.monthLabelEl = this.pickerEl.querySelector('.thekdp-current-month') as HTMLSpanElement;
     this.weekdaysEl = this.pickerEl.querySelector('.thekdp-weekdays') as HTMLDivElement;
@@ -347,6 +314,7 @@ export class ThekDatePicker {
   public clear(triggerChange = true): void {
     this.selectedDate = null;
     this.input.value = '';
+    this.updateSuspiciousState();
     this.render();
     if (triggerChange) this.emitChange();
   }
@@ -434,27 +402,15 @@ export class ThekDatePicker {
     parent.insertBefore(wrap, this.input);
     wrap.appendChild(this.input);
 
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'thekdp-trigger-btn';
-    button.setAttribute('aria-label', 'Toggle calendar');
-    button.innerHTML = `
-      <svg class="thekdp-trigger-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <rect x="3" y="4.5" width="18" height="16" rx="2.5" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.8"></rect>
-        <line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="1.8"></line>
-        <line x1="8" y1="2.5" x2="8" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></line>
-        <line x1="16" y1="2.5" x2="16" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></line>
-        <circle cx="8" cy="12.5" r="0.95" fill="currentColor"></circle>
-        <circle cx="12" cy="12.5" r="0.95" fill="currentColor"></circle>
-        <circle cx="16" cy="12.5" r="0.95" fill="currentColor"></circle>
-        <circle cx="8" cy="16.5" r="0.95" fill="currentColor"></circle>
-        <circle cx="12" cy="16.5" r="0.95" fill="currentColor"></circle>
-      </svg>
-    `;
+    const suspiciousIndicator = createSuspiciousIndicator();
+    wrap.appendChild(suspiciousIndicator);
+
+    const button = createTriggerButton();
     wrap.appendChild(button);
 
     this.inputWrapEl = wrap;
     this.triggerButtonEl = button;
+    this.suspiciousIndicatorEl = suspiciousIndicator;
   }
 
   private unmountInputTrigger(): void {
@@ -465,6 +421,7 @@ export class ThekDatePicker {
     this.inputWrapEl.remove();
     this.inputWrapEl = null;
     this.triggerButtonEl = null;
+    this.suspiciousIndicatorEl = null;
   }
 
   private maskInput(value: string): string {
@@ -513,24 +470,7 @@ export class ThekDatePicker {
   }
 
   private applyThemeVars(): void {
-    const targets = this.getThemeTargets();
-    for (const cssVar of Object.values(THEME_VAR_MAP)) {
-      for (const target of targets) {
-        target.style.removeProperty(cssVar);
-      }
-    }
-
-    const entries = Object.entries(this.options.theme) as Array<[keyof ThekDatePickerTheme, string | undefined]>;
-    if (!entries.length) return;
-
-    for (const [key, value] of entries) {
-      if (!value) continue;
-      const cssVar = THEME_VAR_MAP[key];
-      if (!cssVar) continue;
-      for (const target of targets) {
-        target.style.setProperty(cssVar, value);
-      }
-    }
+    applyThemeVars(this.options.theme, this.getThemeTargets());
   }
 
   private positionPicker(): void {
@@ -564,9 +504,32 @@ export class ThekDatePicker {
   private syncInput(): void {
     if (!this.selectedDate) {
       this.input.value = '';
+      this.updateSuspiciousState();
       return;
     }
     this.input.value = formatDate(this.selectedDate, fullFormat(this.options));
+    this.updateSuspiciousState();
+  }
+
+  private updateSuspiciousState(): void {
+    const suspicious = this.selectedDate ? isSuspiciousDate(this.selectedDate, this.options) : false;
+    this.input.classList.toggle('thekdp-input-suspicious', suspicious);
+    this.input.toggleAttribute('aria-invalid', suspicious);
+
+    if (this.inputWrapEl) {
+      this.inputWrapEl.classList.toggle('thekdp-input-wrap-suspicious', suspicious);
+    }
+
+    if (this.suspiciousIndicatorEl) {
+      this.suspiciousIndicatorEl.hidden = !suspicious;
+      this.suspiciousIndicatorEl.title = suspicious ? this.options.suspiciousMessage : '';
+    }
+
+    if (suspicious) {
+      this.input.title = this.options.suspiciousMessage;
+    } else {
+      this.input.removeAttribute('title');
+    }
   }
 
   private revalidateSelection(): void {

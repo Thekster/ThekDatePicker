@@ -39,6 +39,11 @@ export interface ThekDatePickerOptions {
   theme?: ThekDatePickerThemeOption;
   reactiveTheme?: boolean;
   themeAttribute?: string;
+  suspiciousWarning?: boolean;
+  suspiciousYearSpan?: number;
+  suspiciousMinYear?: number;
+  suspiciousMaxYear?: number;
+  suspiciousMessage?: string;
   onChange?: (date: Date | null, formatted: string, instance: ThekDatePicker) => void;
   onOpen?: (instance: ThekDatePicker) => void;
   onClose?: (instance: ThekDatePicker) => void;
@@ -65,6 +70,11 @@ export interface ResolvedOptions {
   reactiveTheme: boolean;
   themeAttribute: string;
   themeMode: ThekDatePickerThemeTemplate | 'custom';
+  suspiciousWarning: boolean;
+  suspiciousYearSpan: number;
+  suspiciousMinYear: number | null;
+  suspiciousMaxYear: number | null;
+  suspiciousMessage: string;
   onChange?: (date: Date | null, formatted: string, instance: ThekDatePicker) => void;
   onOpen?: (instance: ThekDatePicker) => void;
   onClose?: (instance: ThekDatePicker) => void;

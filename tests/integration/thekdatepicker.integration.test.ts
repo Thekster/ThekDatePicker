@@ -131,6 +131,33 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
+  it('prioritizes format when it already contains time tokens', () => {
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'YYYY-MM-DD HH:mm',
+      enableTime: true,
+      timeFormat: 'HH:mm',
+    });
+
+    picker.setDate('2026-02-08 09:05');
+    expect(input.value).toBe('2026-02-08 09:05');
+
+    picker.destroy();
+  });
+
+  it('parses format time even when enableTime is false', () => {
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'YYYY-MM-DD HH:mm',
+      enableTime: false,
+    });
+
+    picker.setDate('2026-02-08 09:05');
+    expect(input.value).toBe('2026-02-08 09:05');
+
+    picker.destroy();
+  });
+
   it('applies per-instance theme variables from options', () => {
     const picker = new ThekDatePicker('#date-input', {
       theme: {
@@ -271,6 +298,47 @@ describe('ThekDatePicker integration', () => {
     const input = document.querySelector('#date-input') as HTMLInputElement;
     expect(input.value).toBe('02/08/2026 09:05 PM');
 
+    picker.destroy();
+  });
+
+  it('does not warn for suspicious years by default', () => {
+    const picker = new ThekDatePicker('#date-input', { format: 'YYYY-MM-DD' });
+    picker.setDate('0120-12-14');
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    expect(input.classList.contains('thekdp-input-suspicious')).toBe(false);
+    picker.destroy();
+  });
+
+  it('shows suspicious warning indicator for out-of-span years when enabled', () => {
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'YYYY-MM-DD',
+      suspiciousWarning: true,
+      suspiciousYearSpan: 100,
+      suspiciousMessage: 'Date looks suspicious',
+    });
+    picker.setDate('0120-12-14');
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    const wrap = document.querySelector('.thekdp-input-wrap') as HTMLDivElement;
+    const indicator = document.querySelector('.thekdp-suspicious-indicator') as HTMLSpanElement;
+
+    expect(input.classList.contains('thekdp-input-suspicious')).toBe(true);
+    expect(wrap.classList.contains('thekdp-input-wrap-suspicious')).toBe(true);
+    expect(indicator.hidden).toBe(false);
+    expect(input.title).toBe('Date looks suspicious');
+    expect(input.getAttribute('aria-invalid')).toBe('');
+
+    picker.destroy();
+  });
+
+  it('keeps suspicious indicator hidden for empty value', () => {
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'YYYY-MM-DD',
+      suspiciousWarning: true,
+    });
+    const indicator = document.querySelector('.thekdp-suspicious-indicator') as HTMLSpanElement;
+    expect(indicator.hidden).toBe(true);
+    picker.clear();
+    expect(indicator.hidden).toBe(true);
     picker.destroy();
   });
 });

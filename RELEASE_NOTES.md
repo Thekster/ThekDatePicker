@@ -21,6 +21,13 @@
   - `useLocaleDefaults`
   - `locale`
   - derives `format`, `timeFormat`, and `weekStartsOn` when enabled.
+- Suspicious date warning options:
+  - `suspiciousWarning`
+  - `suspiciousYearSpan`
+  - `suspiciousMinYear`
+  - `suspiciousMaxYear`
+  - `suspiciousMessage`
+  - optional exclamation indicator and warning state styling.
 - Comprehensive showcase updates:
   - quick docs for ESM and CDN
   - theme configurator with copyable theme object
@@ -32,6 +39,10 @@
 - Base theme now uses system color tokens with dark-mode-aware fallbacks.
 - Styling was standardized to rem-based sizing and improved control alignment.
 - Docs and README were expanded to cover options, methods, defaults, theme usage, CDN usage, and global options.
+- Core refactor: split `ThekDatePicker` support logic into dedicated modules:
+  - `thekdatepicker-dom.ts` (DOM/template creation)
+  - `thekdatepicker-theme.ts` (theme variable application)
+  - `thekdatepicker-suspicious.ts` (suspicious date rules)
 
 ### Fixed
 - Input target validation and initialization flow issues in showcase usage.
