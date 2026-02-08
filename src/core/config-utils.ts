@@ -171,10 +171,6 @@ export function resetGlobalOptions(): void {
 export function normalizeDateInput(value: DateInput): Date | null {
   if (value == null) return null;
   if (value instanceof Date) return isValidDate(value) ? new Date(value) : null;
-  if (typeof value === 'number') {
-    const date = new Date(value);
-    return isValidDate(date) ? date : null;
-  }
   const date = new Date(value);
   return isValidDate(date) ? date : null;
 }
@@ -207,6 +203,7 @@ export function resolveOptions(options: ThekDatePickerOptions): ResolvedOptions 
   const closeOnSelect = merged.closeOnSelect ?? true;
   const showCalendarButton = merged.showCalendarButton ?? true;
   const openOnInputClick = merged.openOnInputClick ?? false;
+  const zIndex = Number.isFinite(merged.zIndex) ? Number(merged.zIndex) : 9999;
   const reactiveTheme = merged.reactiveTheme ?? false;
   const themeAttribute = merged.themeAttribute ?? 'data-theme';
   const themeMode =
@@ -241,6 +238,7 @@ export function resolveOptions(options: ThekDatePickerOptions): ResolvedOptions 
     closeOnSelect,
     showCalendarButton,
     openOnInputClick,
+    zIndex,
     theme,
     reactiveTheme,
     themeAttribute,

@@ -1,6 +1,6 @@
 import type { ThekDatePicker } from './thekdatepicker.js';
 
-export type DateInput = Date | string | number | null | undefined;
+export type DateInput = Date | string | null | undefined;
 
 export interface ThekDatePickerTheme {
   primary: string;
@@ -36,6 +36,7 @@ export interface ThekDatePickerOptions {
   closeOnSelect?: boolean;
   showCalendarButton?: boolean;
   openOnInputClick?: boolean;
+  zIndex?: number;
   theme?: ThekDatePickerThemeOption;
   reactiveTheme?: boolean;
   themeAttribute?: string;
@@ -68,6 +69,7 @@ export interface ResolvedOptions {
   closeOnSelect: boolean;
   showCalendarButton: boolean;
   openOnInputClick: boolean;
+  zIndex: number;
   theme: Partial<ThekDatePickerTheme>;
   reactiveTheme: boolean;
   themeAttribute: string;

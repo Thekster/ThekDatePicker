@@ -78,6 +78,13 @@ describe('date utils', () => {
     expect(meridiemLower?.getHours()).toBe(21);
   });
 
+  it('parses YY using 2000-2099 window', () => {
+    const y99 = parseDateByFormat('99-02-08', 'YY-MM-DD');
+    const y00 = parseDateByFormat('00-02-08', 'YY-MM-DD');
+    expect(y99?.getFullYear()).toBe(2099);
+    expect(y00?.getFullYear()).toBe(2000);
+  });
+
   it('supports all allowed separators in mask, parse, and format', () => {
     const date = new Date(2026, 1, 8, 21, 5);
     for (const separator of MASK_SEPARATORS) {

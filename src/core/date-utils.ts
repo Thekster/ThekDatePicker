@@ -2,6 +2,7 @@ import type { ResolvedOptions } from './types.js';
 
 const TOKENS = ['YYYY', 'YY', 'DD', 'D', 'MM', 'M', 'HH', 'H', 'hh', 'h', 'mm', 'm', 'A', 'a'] as const;
 type Token = (typeof TOKENS)[number];
+type FormatPart = { type: 'token'; value: Token } | { type: 'literal'; value: string };
 export const MASK_SEPARATORS = ['/', '-', '.', ',', ':', ' '] as const;
 const TOKEN_MASK_LENGTH: Record<Token, number> = {
   YYYY: 4,
@@ -55,8 +56,13 @@ function daysInMonth(year: number, monthIndex: number): number {
   return new Date(year, monthIndex + 1, 0).getDate();
 }
 
-function tokenizeFormat(format: string): Array<{ type: 'token'; value: Token } | { type: 'literal'; value: string }> {
-  const parts: Array<{ type: 'token'; value: Token } | { type: 'literal'; value: string }> = [];
+const formatTokenCache = new Map<string, readonly FormatPart[]>();
+
+function tokenizeFormat(format: string): readonly FormatPart[] {
+  const cached = formatTokenCache.get(format);
+  if (cached) return cached;
+
+  const parts: FormatPart[] = [];
   let i = 0;
 
   while (i < format.length) {
@@ -78,7 +84,9 @@ function tokenizeFormat(format: string): Array<{ type: 'token'; value: Token } |
     i += 1;
   }
 
-  return parts;
+  const tokenized = parts as readonly FormatPart[];
+  formatTokenCache.set(format, tokenized);
+  return tokenized;
 }
 
 function buildMaskFromFormat(format: string): string {

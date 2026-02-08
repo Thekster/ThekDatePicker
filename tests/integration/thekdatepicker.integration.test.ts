@@ -43,6 +43,21 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
+  it('guards against onChange re-entrancy loops', () => {
+    let calls = 0;
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'YYYY-MM-DD',
+      onChange: (_date, _formatted, instance) => {
+        calls += 1;
+        instance.setDate('2026-02-09');
+      },
+    });
+    expect(() => picker.setDate('2026-02-08')).not.toThrow();
+    expect(calls).toBe(1);
+    expect(picker.getDate()?.getDate()).toBe(9);
+    picker.destroy();
+  });
+
   it('opens and closes', () => {
     const picker = new ThekDatePicker('#date-input');
     const trigger = document.querySelector('.thekdp-trigger-btn') as HTMLButtonElement;
@@ -51,6 +66,22 @@ describe('ThekDatePicker integration', () => {
     expect(popover.hidden).toBe(false);
     picker.close();
     expect(popover.hidden).toBe(true);
+    picker.destroy();
+  });
+
+  it('supports setting date from explicit millisecond timestamp', () => {
+    const picker = new ThekDatePicker('#date-input', { format: 'YYYY-MM-DD' });
+    picker.setDateFromTimestamp(Date.UTC(2026, 1, 8));
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    expect(input.value).toBe('2026-02-08');
+    picker.destroy();
+  });
+
+  it('applies configurable popover z-index', () => {
+    const picker = new ThekDatePicker('#date-input', { zIndex: 12345 });
+    picker.open();
+    const popover = document.querySelector('.thekdp-popover') as HTMLDivElement;
+    expect(popover.style.zIndex).toBe('12345');
     picker.destroy();
   });
 
@@ -103,6 +134,101 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
+  it('preserves caret position when masking inserts separators', () => {
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    const picker = new ThekDatePicker('#date-input', { format: 'DD/MM/YYYY' });
+    input.value = '12022026';
+    input.setSelectionRange(4, 4);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(input.value).toBe('12/02/2026');
+    expect(input.selectionStart).toBe(5);
+    expect(input.selectionEnd).toBe(5);
+    picker.destroy();
+  });
+
+  it('keeps mask stable under rapid typing burst', () => {
+    vi.useFakeTimers();
+    try {
+      const input = document.querySelector('#date-input') as HTMLInputElement;
+      const picker = new ThekDatePicker('#date-input', { format: 'DD/MM/YYYY' });
+      input.value = '';
+      input.setSelectionRange(0, 0);
+
+      const chars = '1202202609';
+      for (let i = 0; i < chars.length; i += 1) {
+        setTimeout(() => {
+          input.value += chars[i];
+          const atEnd = input.value.length;
+          input.setSelectionRange(atEnd, atEnd);
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }, i * 5);
+      }
+      vi.advanceTimersByTime(50);
+
+      expect(input.value).toBe('12/02/2026');
+      expect(input.selectionStart).toBe(10);
+      expect(input.selectionEnd).toBe(10);
+      picker.destroy();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not prevent default for non-printable keys', () => {
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    const picker = new ThekDatePicker('#date-input', { format: 'DD/MM/YYYY' });
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'F5',
+      bubbles: true,
+      cancelable: true,
+    });
+    input.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+
+    picker.destroy();
+  });
+
+  it('does not prevent default for ctrl/meta shortcuts', () => {
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    const picker = new ThekDatePicker('#date-input', { format: 'DD/MM/YYYY' });
+
+    const ctrlEvent = new KeyboardEvent('keydown', {
+      key: 'p',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    input.dispatchEvent(ctrlEvent);
+    expect(ctrlEvent.defaultPrevented).toBe(false);
+
+    const metaEvent = new KeyboardEvent('keydown', {
+      key: 'p',
+      metaKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    input.dispatchEvent(metaEvent);
+    expect(metaEvent.defaultPrevented).toBe(false);
+
+    picker.destroy();
+  });
+
+  it('prevents invalid printable keys', () => {
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    const picker = new ThekDatePicker('#date-input', { format: 'DD/MM/YYYY' });
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'x',
+      bubbles: true,
+      cancelable: true,
+    });
+    input.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+
+    picker.destroy();
+  });
+
   it('removes dangling time separator during backspace flow', () => {
     const input = document.querySelector('#date-input') as HTMLInputElement;
     const picker = new ThekDatePicker('#date-input', {
@@ -115,6 +241,17 @@ describe('ThekDatePicker integration', () => {
     input.value = '2026-02-08 08:';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     expect(input.value).toBe('2026-02-08 08');
+    picker.destroy();
+  });
+
+  it('reuses day grid cells between month renders', () => {
+    const picker = new ThekDatePicker('#date-input');
+    picker.open();
+    const firstCellBefore = document.querySelector('.thekdp-days button') as HTMLButtonElement;
+    const nextMonthBtn = document.querySelector('[data-action=\"next-month\"]') as HTMLButtonElement;
+    nextMonthBtn.click();
+    const firstCellAfter = document.querySelector('.thekdp-days button') as HTMLButtonElement;
+    expect(firstCellAfter).toBe(firstCellBefore);
     picker.destroy();
   });
 
@@ -253,6 +390,22 @@ describe('ThekDatePicker integration', () => {
     expect(wrap.style.getPropertyValue('--thekdp-bg-surface')).toBe('#111827');
 
     picker.destroy();
+  });
+
+  it('does not retroactively mutate existing instance options when globals change', () => {
+    document.body.innerHTML = '<input id="date-input-a" /><input id="date-input-b" />';
+
+    setGlobalOptions({ format: 'YYYY' });
+    const p1 = new ThekDatePicker('#date-input-a');
+
+    setGlobalOptions({ format: 'DD' });
+    const p2 = new ThekDatePicker('#date-input-b');
+
+    expect(p1.options.format).toBe('YYYY');
+    expect(p2.options.format).toBe('DD');
+
+    p1.destroy();
+    p2.destroy();
   });
 
   it('lets local options override and merge global theme object', () => {
@@ -461,6 +614,90 @@ describe('ThekDatePicker integration', () => {
     input.dispatchEvent(new Event('blur', { bubbles: true }));
     expect(indicator.hidden).toBe(true);
 
+    picker.destroy();
+  });
+
+  it('removes resize and scroll listeners after many create/destroy cycles', () => {
+    const addSpy = vi.spyOn(window, 'addEventListener');
+    const removeSpy = vi.spyOn(window, 'removeEventListener');
+
+    for (let i = 0; i < 1000; i += 1) {
+      document.body.innerHTML = '<input id="date-input" />';
+      const picker = new ThekDatePicker('#date-input');
+      picker.destroy();
+    }
+
+    const addedResize = addSpy.mock.calls.filter(([type]) => type === 'resize').length;
+    const removedResize = removeSpy.mock.calls.filter(([type]) => type === 'resize').length;
+    const addedScroll = addSpy.mock.calls.filter(([type]) => type === 'scroll').length;
+    const removedScroll = removeSpy.mock.calls.filter(([type]) => type === 'scroll').length;
+
+    expect(addedResize).toBe(1000);
+    expect(removedResize).toBe(1000);
+    expect(addedScroll).toBe(1000);
+    expect(removedScroll).toBe(1000);
+
+    addSpy.mockRestore();
+    removeSpy.mockRestore();
+  });
+
+  it('does not inject HTML from malicious string values', () => {
+    const picker = new ThekDatePicker('#date-input', { format: 'DD/MM/YYYY' });
+    picker.setDate('<img src=x onerror=alert(1)>');
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    expect(input.value).toBe('');
+    expect(document.querySelector('img')).toBeNull();
+    picker.destroy();
+  });
+
+  it('can out-rank high stacking context with configured z-index', () => {
+    document.body.innerHTML = '<div id="host" style="position: relative; z-index: 10000;"><input id="date-input" /></div>';
+    const host = document.querySelector('#host') as HTMLDivElement;
+    const picker = new ThekDatePicker('#date-input', { appendTo: host, zIndex: 10001 });
+    picker.open();
+    const popover = document.querySelector('.thekdp-popover') as HTMLDivElement;
+    expect(popover.parentElement).toBe(host);
+    expect(Number(popover.style.zIndex)).toBeGreaterThan(10000);
+    picker.destroy();
+  });
+
+  it('keeps selected leap day valid when browsing to non-leap year', () => {
+    const picker = new ThekDatePicker('#date-input', { format: 'YYYY-MM-DD' });
+    picker.setDate('2024-02-29');
+    picker.open();
+    const prevYearButton = document.querySelector('[data-action="prev-year"]') as HTMLButtonElement;
+    prevYearButton.click();
+    expect(picker.getDate()?.getFullYear()).toBe(2024);
+    expect(picker.getDate()?.getMonth()).toBe(1);
+    expect(picker.getDate()?.getDate()).toBe(29);
+    picker.destroy();
+  });
+
+  it('clones Date objects passed to setDate', () => {
+    const picker = new ThekDatePicker('#date-input', { format: 'YYYY-MM-DD' });
+    const external = new Date(2026, 1, 8);
+    picker.setDate(external);
+    external.setDate(20);
+    expect(picker.getDate()?.getDate()).toBe(8);
+    picker.destroy();
+  });
+
+  it('commits on Enter and closes picker from keyboard interaction', () => {
+    const onChange = vi.fn();
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'DD/MM/YYYY',
+      openOnInputClick: true,
+      onChange,
+    });
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    input.click();
+    input.value = '08/02/2026';
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+    const popover = document.querySelector('.thekdp-popover') as HTMLDivElement;
+    expect(onChange).toHaveBeenCalled();
+    expect(popover.hidden).toBe(true);
+    expect(picker.getDate()?.getFullYear()).toBe(2026);
     picker.destroy();
   });
 });

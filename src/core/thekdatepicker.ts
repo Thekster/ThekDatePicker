@@ -40,12 +40,14 @@ export class ThekDatePicker {
   private monthLabelEl: HTMLSpanElement;
   private weekdaysEl: HTMLDivElement;
   private daysEl: HTMLDivElement;
+  private dayCellEls: HTMLButtonElement[] = [];
   private hourInputEl: HTMLInputElement | null = null;
   private minuteInputEl: HTMLInputElement | null = null;
 
   private selectedDate: Date | null = null;
   private viewDate: Date = new Date();
   private openState = false;
+  private isEmittingChange = false;
   private destroyed = false;
   private themeObserver: MutationObserver | null = null;
   private themeMediaQuery: MediaQueryList | null = null;
@@ -65,10 +67,7 @@ export class ThekDatePicker {
   };
 
   private readonly handleInput = (): void => {
-    const formatted = this.maskInput(this.input.value);
-    if (formatted !== this.input.value) {
-      this.input.value = formatted;
-    }
+    this.applyMaskedInputWithCaret();
   };
 
   private readonly handleInputKeyDown = (event: KeyboardEvent): void => {
@@ -89,31 +88,13 @@ export class ThekDatePicker {
       return;
     }
 
-    const allowedControl = [
-      'Backspace',
-      'Delete',
-      'ArrowLeft',
-      'ArrowRight',
-      'Tab',
-      'Home',
-      'End',
-    ];
-    if (allowedControl.includes(event.key) || event.ctrlKey || event.metaKey) return;
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.key.length !== 1) return;
 
     const separators = new Set(getAllowedInputSeparators(this.options));
     const usesMeridiem = formatUsesMeridiem(fullFormat(this.options));
-    if (/^\d$/.test(event.key) || separators.has(event.key)) {
-      queueMicrotask(() => {
-        this.input.value = this.maskInput(this.input.value);
-      });
-      return;
-    }
-    if (usesMeridiem && /^[aApPmM]$/.test(event.key)) {
-      queueMicrotask(() => {
-        this.input.value = this.maskInput(this.input.value);
-      });
-      return;
-    }
+    if (/^\d$/.test(event.key) || separators.has(event.key)) return;
+    if (usesMeridiem && /^[aApPmM]$/.test(event.key)) return;
     event.preventDefault();
   };
 
@@ -290,7 +271,7 @@ export class ThekDatePicker {
   public setDate(value: DateInput, triggerChange = true): void {
     if (this.destroyed) return;
     const parsed =
-      value instanceof Date || typeof value === 'number'
+      value instanceof Date
         ? normalizeDateInput(value)
         : typeof value === 'string'
           ? extractInput(value, this.options)
@@ -307,6 +288,14 @@ export class ThekDatePicker {
     this.syncInput();
     this.render();
     if (triggerChange) this.emitChange();
+  }
+
+  public setDateFromTimestamp(timestampMs: number, triggerChange = true): void {
+    if (!Number.isFinite(timestampMs)) {
+      this.clear(triggerChange);
+      return;
+    }
+    this.setDate(new Date(timestampMs), triggerChange);
   }
 
   public getDate(): Date | null {
@@ -393,7 +382,13 @@ export class ThekDatePicker {
   }
 
   private emitChange(): void {
-    this.options.onChange?.(this.getDate(), this.input.value, this);
+    if (this.isEmittingChange) return;
+    this.isEmittingChange = true;
+    try {
+      this.options.onChange?.(this.getDate(), this.input.value, this);
+    } finally {
+      this.isEmittingChange = false;
+    }
   }
 
   private mountInputTrigger(): void {
@@ -434,6 +429,46 @@ export class ThekDatePicker {
 
   private maskInput(value: string): string {
     return applyMaskToInput(value, fullFormat(this.options));
+  }
+
+  private isMaskChar(char: string, usesMeridiem: boolean): boolean {
+    if (/^\d$/.test(char)) return true;
+    if (!usesMeridiem) return false;
+    return /^[aApPmM]$/.test(char);
+  }
+
+  private countMaskChars(value: string, usesMeridiem: boolean): number {
+    let count = 0;
+    for (const char of value) {
+      if (this.isMaskChar(char, usesMeridiem)) count += 1;
+    }
+    return count;
+  }
+
+  private caretIndexForMaskCharCount(value: string, maskChars: number, usesMeridiem: boolean): number {
+    if (maskChars <= 0) return 0;
+    let count = 0;
+    for (let i = 0; i < value.length; i += 1) {
+      if (!this.isMaskChar(value[i], usesMeridiem)) continue;
+      count += 1;
+      if (count >= maskChars) return i + 1;
+    }
+    return value.length;
+  }
+
+  private applyMaskedInputWithCaret(): void {
+    const format = fullFormat(this.options);
+    const usesMeridiem = formatUsesMeridiem(format);
+    const previousValue = this.input.value;
+    const caretStart = this.input.selectionStart ?? previousValue.length;
+    const nextValue = applyMaskToInput(previousValue, format);
+    if (nextValue === previousValue) return;
+
+    const maskCharsBeforeCaret = this.countMaskChars(previousValue.slice(0, caretStart), usesMeridiem);
+    this.input.value = nextValue;
+
+    const nextCaret = this.caretIndexForMaskCharCount(nextValue, maskCharsBeforeCaret, usesMeridiem);
+    this.input.setSelectionRange(nextCaret, nextCaret);
   }
 
   private setupReactiveTheme(): void {
@@ -516,7 +551,25 @@ export class ThekDatePicker {
     this.pickerEl.style.position = 'absolute';
     this.pickerEl.style.top = `${top}px`;
     this.pickerEl.style.left = `${Math.max(window.scrollX + 8, Math.min(left, maxLeft))}px`;
-    this.pickerEl.style.zIndex = '9999';
+    this.pickerEl.style.zIndex = String(this.options.zIndex);
+  }
+
+  private ensureDayCells(): void {
+    if (this.dayCellEls.length === 42 && this.daysEl.childElementCount === 42) return;
+
+    this.dayCellEls = [];
+    this.daysEl.textContent = '';
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < 42; i += 1) {
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.setAttribute('role', 'gridcell');
+      cell.dataset.action = 'day';
+      cell.className = 'thekdp-day-cell';
+      fragment.appendChild(cell);
+      this.dayCellEls.push(cell);
+    }
+    this.daysEl.appendChild(fragment);
   }
 
   private commitInput(): void {
@@ -590,14 +643,13 @@ export class ThekDatePicker {
     const firstOfMonth = new Date(year, month, 1);
     const monthStartDay = (firstOfMonth.getDay() - this.options.weekStartsOn + 7) % 7;
     const gridStart = new Date(year, month, 1 - monthStartDay);
+    this.ensureDayCells();
 
     const today = toLocalStartOfDay(new Date());
     const selected = this.selectedDate ? toLocalStartOfDay(this.selectedDate) : null;
-
-    let html = '';
+    const current = new Date(gridStart);
     for (let i = 0; i < 42; i += 1) {
-      const current = new Date(gridStart);
-      current.setDate(gridStart.getDate() + i);
+      if (i > 0) current.setDate(current.getDate() + 1);
 
       const inCurrentMonth = current.getMonth() === month;
       const isTodayDate = isSameDay(current, today);
@@ -618,9 +670,12 @@ export class ThekDatePicker {
       if (isSelectedDate) classes.push('thekdp-day-cell-selected');
       if (disabled) classes.push('thekdp-day-cell-disabled');
 
-      html += `<button type="button" role="gridcell" class="${classes.join(' ')}" data-action="day" data-ts="${dayTs}" ${disabled ? 'disabled' : ''}>${current.getDate()}</button>`;
+      const cell = this.dayCellEls[i];
+      cell.className = classes.join(' ');
+      cell.dataset.ts = String(dayTs);
+      cell.disabled = disabled;
+      cell.textContent = String(current.getDate());
     }
-    this.daysEl.innerHTML = html;
 
     const timeContainer = this.pickerEl.querySelector('.thekdp-time') as HTMLDivElement;
     const actions = this.pickerEl.querySelector('.thekdp-actions') as HTMLDivElement;
