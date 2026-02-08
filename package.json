@@ -27,7 +27,8 @@
     "build": "vite build && cross-env THEK_MINIFY=1 vite build --emptyOutDir false && tsc && shx rm -rf dist/css && shx mkdir -p dist/css && (shx cp -r src/themes/*.css dist/css || shx echo \"No theme CSS files to copy\")",
     "preview": "vite preview",
     "test": "vitest",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run build && npm test"
   },
   "keywords": [
     "datepicker",
@@ -38,7 +39,15 @@
     "headless",
     "accessible"
   ],
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Thekster/ThekDatePicker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Thekster/ThekDatePicker/issues"
+  },
+  "homepage": "https://github.com/Thekster/ThekDatePicker#readme",
+  "author": "thekster",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^25.2.1",

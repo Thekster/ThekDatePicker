@@ -103,9 +103,9 @@ setGlobalOptions({
 | `useLocaleDefaults` | `boolean` | `false` | If true, derives `format`, `timeFormat`, and `weekStartsOn` from locale unless explicitly provided. |
 | `enableTime` | `boolean` | `false` | Controls visibility of time controls in popover. |
 | `timeFormat` | `string` | `'HH:mm'` | Time token format used only when `format` has no time tokens and `enableTime` is true. |
-| `minDate` | `Date \| string \| number \| null \| undefined` | `undefined` | Minimum allowed date. Values below are clamped. |
-| `maxDate` | `Date \| string \| number \| null \| undefined` | `undefined` | Maximum allowed date. Values above are clamped. |
-| `defaultDate` | `Date \| string \| number \| null \| undefined` | `undefined` | Initial value for input/picker. |
+| `minDate` | `Date \| string \| null \| undefined` | `undefined` | Minimum allowed date. Values below are clamped. |
+| `maxDate` | `Date \| string \| null \| undefined` | `undefined` | Maximum allowed date. Values above are clamped. |
+| `defaultDate` | `Date \| string \| null \| undefined` | `undefined` | Initial value for input/picker. |
 | `placeholder` | `string` | `format` or derived full format | Custom placeholder text. |
 | `disabled` | `boolean` | `false` | Disables input + trigger and blocks opening. |
 | `appendTo` | `HTMLElement` | `document.body` | Popover mount container. |
@@ -113,6 +113,7 @@ setGlobalOptions({
 | `closeOnSelect` | `boolean` | `true` | In date-only mode, closes popover after day click. |
 | `showCalendarButton` | `boolean` | `true` | Renders trigger button next to input. |
 | `openOnInputClick` | `boolean` | `false` | Opens popover when clicking input. |
+| `zIndex` | `number` | `9999` | Popover stacking layer value. |
 | `theme` | `'light' \| 'dark' \| 'auto' \| Partial<ThekDatePickerTheme>` | `{}` | Per-instance theme template or token overrides without changing global theme. |
 | `reactiveTheme` | `boolean` | `false` | When true and `theme: 'auto'`, reacts to page theme changes. |
 | `themeAttribute` | `string` | `'data-theme'` | Document attribute that carries page theme (`light`/`dark`). |
@@ -154,6 +155,7 @@ setGlobalOptions({
 | `close()` | `() => void` | n/a | Closes popover. |
 | `toggle()` | `() => void` | n/a | Toggles popover. |
 | `setDate(value, triggerChange?)` | `(DateInput, boolean = true) => void` | `triggerChange = true` | Sets value, syncs UI, optional callback trigger. |
+| `setDateFromTimestamp(timestampMs, triggerChange?)` | `(number, boolean = true) => void` | `triggerChange = true` | Sets value using an explicit Unix timestamp in milliseconds. |
 | `getDate()` | `() => Date \| null` | n/a | Returns selected date clone or `null`. |
 | `clear(triggerChange?)` | `(boolean = true) => void` | `triggerChange = true` | Clears value and UI. |
 | `setMinDate(value)` | `(DateInput) => void` | n/a | Updates min date and revalidates selection. |
@@ -177,6 +179,13 @@ setGlobalOptions({
 - Input mask allows flexible separators and normalizes to configured format.
 - For `A`/`a`, typing `a` or `p` is accepted and normalized.
 - Option precedence is: instance options override global options.
+
+## Migration Notes
+
+- `DateInput` no longer accepts `number` to avoid second-vs-millisecond ambiguity.
+- If you previously passed numeric timestamps to `setDate`, switch to:
+  - `setDateFromTimestamp(timestampMs)`
+  - or `setDate(new Date(timestampMs))`
 
 ## Global Defaults API
 

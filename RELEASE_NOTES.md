@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+### Upcoming Patch (Draft)
+
+#### Added
+- New explicit timestamp API: `setDateFromTimestamp(timestampMs, triggerChange?)`.
+- New `zIndex` option to configure popover stacking instead of relying on a hardcoded value.
+- Expanded test coverage for edge-cases:
+  - re-entrancy (`onChange` calling `setDate`)
+  - rapid input masking/caret stability
+  - global-options isolation across instances
+  - listener cleanup after repeated create/destroy cycles
+  - XSS safety with string input
+  - leap-year navigation, Date cloning, and Enter-key commit behavior
+
+#### Changed
+- `DateInput` is now `Date | string | null | undefined` (numeric timestamps removed for type safety).
+- Day grid rendering now reuses existing day cells instead of replacing `innerHTML` each render.
+- Keyboard filtering is less aggressive: non-printable keys and system shortcuts are no longer blocked.
+
+#### Fixed
+- Prevented `onChange` re-entrancy loops by guarding nested emits.
+- Fixed trigger/outside-click interaction ordering so trigger clicks can reliably close an open picker.
+- Removed `queueMicrotask` masking race; input masking is now synchronous with caret preservation.
+
+#### Migration
+- Replace `setDate(1707399999000)` with:
+  - `setDateFromTimestamp(1707399999000)`, or
+  - `setDate(new Date(1707399999000))`.
+
 ### Added
 - Framework-agnostic `ThekDatePicker` core with calendar popover, date/time selection, min/max constraints, and strict masking.
 - 12-hour and 24-hour time formats, including AM/PM parsing/masking (`A` / `a`).
