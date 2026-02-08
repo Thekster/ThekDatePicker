@@ -1,8 +1,8 @@
 # Release Notes
 
-## Unreleased
+## 1.0.0 - 2026-02-08
 
-### Upcoming Patch (Draft)
+### Patch Updates
 
 #### Added
 - New explicit timestamp API: `setDateFromTimestamp(timestampMs, triggerChange?)`.
