@@ -52,11 +52,11 @@
   "devDependencies": {
     "@types/node": "^25.2.1",
     "cross-env": "^10.1.0",
-    "jsdom": "^28.0.0",
+    "jsdom": "^29.0.1",
     "shx": "^0.4.0",
     "terser": "^5.46.0",
     "typescript": "^5.4.5",
-    "vite": "^7.3.1",
+    "vite": "^8.0.1",
     "vitest": "^4.0.18"
   }
 }
