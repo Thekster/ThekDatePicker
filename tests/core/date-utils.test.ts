@@ -10,6 +10,15 @@ describe('date utils', () => {
     expect(formatDate(new Date(2026, 1, 8, 21, 5), 'MM/DD/YYYY hh:mm A')).toBe('02/08/2026 09:05 PM');
   });
 
+  it('formats with literal words containing date tokens using escaping', () => {
+    const date = new Date(2026, 10, 22, 14, 30);
+    // [Date] should be treated as literal "Date"
+    expect(formatDate(date, '[Date]: DD/MM/YYYY')).toBe('Date: 22/11/2026');
+    // MMMM is not a single token, but it contains MM twice, so it becomes 1111 unless escaped
+    expect(formatDate(date, 'MMMM DD, YYYY')).toBe('1111 22, 2026');
+    expect(formatDate(date, '[MMMM] DD, YYYY')).toBe('MMMM 22, 2026');
+  });
+
   it('parses valid and rejects invalid', () => {
     const parsed = parseDateByFormat('08/02/2026 09:05', 'DD/MM/YYYY HH:mm');
     expect(parsed).not.toBeNull();
@@ -19,6 +28,27 @@ describe('date utils', () => {
     expect(parseDateByFormat('31/02/2026', 'DD/MM/YYYY')).toBeNull();
     const parsedAmPm = parseDateByFormat('02/08/2026 09:05 PM', 'MM/DD/YYYY hh:mm A');
     expect(parsedAmPm?.getHours()).toBe(21);
+  });
+
+  it('correctly identifies meridiem usage with escaped literals', async () => {
+    const { formatUsesMeridiem } = await import('../../src/core/date-utils');
+    expect(formatUsesMeridiem('DD/MM/YYYY HH:mm')).toBe(false);
+    expect(formatUsesMeridiem('hh:mm A')).toBe(true);
+    expect(formatUsesMeridiem('[Date]: DD/MM/YYYY')).toBe(false); // 'a' in 'Date' is escaped literal
+  });
+
+  it('normalizes separators with escaped literals', async () => {
+    const { normalizeInputSeparatorsToFormat } = await import('../../src/core/date-utils');
+    // 'Date: 22-11-2026' -> 'Date: 22/11/2026'
+    expect(normalizeInputSeparatorsToFormat('Date: 22-11-2026', '[Date]: DD/MM/YYYY')).toBe('Date: 22/11/2026');
+  });
+
+  it('parses dates with escaped literals', () => {
+    const date = parseDateByFormat('Date: 22/11/2026', '[Date]: DD/MM/YYYY');
+    expect(date).not.toBeNull();
+    expect(date?.getFullYear()).toBe(2026);
+    expect(date?.getMonth()).toBe(10);
+    expect(date?.getDate()).toBe(22);
   });
 
   it('does not leave trailing separators while masking', () => {

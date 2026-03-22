@@ -1,5 +1,18 @@
 # Release Notes
 
+## 1.0.1 - 2026-03-22
+
+### Fixed
+- **Literal Word Corruption in Formatting:** Date tokens like `D` or `a` are no longer replaced inside literal words (e.g., "Date" no longer becomes "22pmte").
+- **False Meridiem Triggers:** Fixed logic where literal letters 'A' or 'a' in the format string incorrectly triggered 12-hour parsing logic.
+- **Literal Escaping Support:** Added support for square-bracket escaping (e.g., `[Date]: DD/MM/YYYY`) to explicitly define literal text in format strings.
+- **Flexible Normalization:** Improved `normalizeInputSeparatorsToFormat` to correctly handle literal words during flexible date extraction.
+- **Relaxed Paste Validation:** Users can now paste fully formatted dates that include literal words.
+
+### Technical
+- Migrated test configuration from broken `vite-plus` to `vitest` for improved stability.
+- Added comprehensive regression tests for literal word handling and escaping.
+
 ## 1.0.0 - 2026-02-08
 
 ### Patch Updates

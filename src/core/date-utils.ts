@@ -66,6 +66,18 @@ function tokenizeFormat(format: string): readonly FormatPart[] {
   let i = 0;
 
   while (i < format.length) {
+    if (format[i] === '[') {
+      const end = format.indexOf(']', i);
+      if (end !== -1) {
+        const literal = format.slice(i + 1, end);
+        for (const char of literal) {
+          parts.push({ type: 'literal', value: char });
+        }
+        i = end + 1;
+        continue;
+      }
+    }
+
     let matchedToken: Token | null = null;
     for (const token of TOKENS) {
       if (format.slice(i, i + token.length) === token) {
@@ -174,6 +186,11 @@ export function normalizeInputSeparatorsToFormat(value: string, format: string):
   for (const part of parts) {
     if (part.type === 'literal') {
       const ch = input[cursor];
+      if (ch === part.value) {
+        out += part.value;
+        cursor += 1;
+        continue;
+      }
       if (ch && (MASK_SEPARATORS as readonly string[]).includes(ch)) {
         out += part.value;
         cursor += 1;
@@ -378,11 +395,8 @@ export function formatDate(date: Date, format: string): string {
     a: h24 >= 12 ? 'pm' : 'am',
   };
 
-  let out = format;
-  for (const token of TOKENS) {
-    out = out.replaceAll(token, replacements[token]);
-  }
-  return out;
+  const parts = tokenizeFormat(format);
+  return parts.map((part) => (part.type === 'token' ? replacements[part.value] : part.value)).join('');
 }
 
 export function isSameDay(a: Date, b: Date): boolean {
@@ -402,7 +416,7 @@ export function getAllowedInputSeparators(options: ResolvedOptions): string[] {
 }
 
 export function formatUsesMeridiem(format: string): boolean {
-  return format.includes('A') || format.includes('a');
+  return tokenizeFormat(format).some((part) => part.type === 'token' && (part.value === 'A' || part.value === 'a'));
 }
 
 export function formatHasTimeTokens(format: string): boolean {

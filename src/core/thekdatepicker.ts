@@ -106,10 +106,14 @@ export class ThekDatePicker {
     const text = event.clipboardData?.getData('text') ?? '';
     if (!text) return;
 
+    const format = fullFormat(this.options);
+    // Let extractInput decide if it's perfectly valid first
+    if (extractInput(text, this.options)) return;
+
     const separators = getAllowedInputSeparators(this.options)
       .map((item) => item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
       .join('');
-    const usesMeridiem = formatUsesMeridiem(fullFormat(this.options));
+    const usesMeridiem = formatUsesMeridiem(format);
     const letterSet = usesMeridiem ? 'aApPmM' : '';
     const allowed = new RegExp(`^[0-9${letterSet}${separators}]*$`);
     if (!allowed.test(text)) event.preventDefault();
