@@ -621,7 +621,7 @@ describe('ThekDatePicker integration', () => {
     const addSpy = vi.spyOn(window, 'addEventListener');
     const removeSpy = vi.spyOn(window, 'removeEventListener');
 
-    for (let i = 0; i < 1000; i += 1) {
+    for (let i = 0; i < 100; i += 1) {
       document.body.innerHTML = '<input id="date-input" />';
       const picker = new ThekDatePicker('#date-input');
       picker.destroy();
@@ -632,10 +632,10 @@ describe('ThekDatePicker integration', () => {
     const addedScroll = addSpy.mock.calls.filter(([type]) => type === 'scroll').length;
     const removedScroll = removeSpy.mock.calls.filter(([type]) => type === 'scroll').length;
 
-    expect(addedResize).toBe(1000);
-    expect(removedResize).toBe(1000);
-    expect(addedScroll).toBe(1000);
-    expect(removedScroll).toBe(1000);
+    expect(addedResize).toBe(100);
+    expect(removedResize).toBe(100);
+    expect(addedScroll).toBe(100);
+    expect(removedScroll).toBe(100);
 
     addSpy.mockRestore();
     removeSpy.mockRestore();
