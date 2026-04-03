@@ -52,16 +52,18 @@ export function createPickerPopover(): HTMLDivElement {
   picker.className = 'thekdp-popover';
   picker.hidden = true;
   picker.tabIndex = -1;
+  picker.setAttribute('role', 'dialog');
+  picker.setAttribute('aria-modal', 'false');
   picker.innerHTML = `
     <div class="thekdp-header">
       <button type="button" class="thekdp-nav-btn" data-action="prev-year" aria-label="Previous year">«</button>
       <button type="button" class="thekdp-nav-btn" data-action="prev-month" aria-label="Previous month">‹</button>
-      <span class="thekdp-current-month"></span>
+      <span class="thekdp-current-month" aria-live="polite"></span>
       <button type="button" class="thekdp-nav-btn" data-action="next-month" aria-label="Next month">›</button>
       <button type="button" class="thekdp-nav-btn" data-action="next-year" aria-label="Next year">»</button>
     </div>
     <div class="thekdp-weekdays" role="row"></div>
-    <div class="thekdp-days" role="grid"></div>
+    <div class="thekdp-days" role="grid" aria-readonly="true"></div>
     <div class="thekdp-footer">
       <div class="thekdp-time"></div>
       <div class="thekdp-actions">

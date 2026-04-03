@@ -21,7 +21,7 @@ const TOKEN_MASK_LENGTH: Record<Token, number> = {
   a: 2,
 };
 
-export const MONTH_NAMES = [
+const DEFAULT_MONTH_NAMES = [
   'January',
   'February',
   'March',
@@ -36,7 +36,7 @@ export const MONTH_NAMES = [
   'December',
 ];
 
-const WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DEFAULT_WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function pad2(value: number): string {
   return String(value).padStart(2, '0');
@@ -54,6 +54,14 @@ export function toLocalStartOfDay(date: Date): Date {
 
 function daysInMonth(year: number, monthIndex: number): number {
   return new Date(year, monthIndex + 1, 0).getDate();
+}
+
+function resolveTwoDigitYear(value: number, now = new Date()): number {
+  const currentYear = now.getFullYear();
+  let resolved = Math.floor(currentYear / 100) * 100 + value;
+  if (resolved - currentYear > 50) resolved -= 100;
+  else if (currentYear - resolved > 50) resolved += 100;
+  return resolved;
 }
 
 const formatTokenCache = new Map<string, readonly FormatPart[]>();
@@ -286,7 +294,7 @@ export function parseDateByFormat(value: string, format: string): Date | null {
       case 'YY':
         parsed = parseNumber(remaining, 2, 2);
         if (!parsed) return null;
-        year = 2000 + parsed.value;
+        year = resolveTwoDigitYear(parsed.value, now);
         break;
       case 'MM':
         parsed = parseNumber(remaining, 2, 2);
@@ -408,7 +416,43 @@ export function isSameDay(a: Date, b: Date): boolean {
 }
 
 export function rotateWeekdays(weekStartsOn: number): string[] {
-  return WEEKDAY_NAMES.slice(weekStartsOn).concat(WEEKDAY_NAMES.slice(0, weekStartsOn));
+  return DEFAULT_WEEKDAY_NAMES.slice(weekStartsOn).concat(DEFAULT_WEEKDAY_NAMES.slice(0, weekStartsOn));
+}
+
+export function getMonthNames(locale?: string): string[] {
+  try {
+    const formatter = new Intl.DateTimeFormat(locale, { month: 'long' });
+    return Array.from({ length: 12 }, (_, month) => formatter.format(new Date(2026, month, 1)));
+  } catch (_error) {
+    return [...DEFAULT_MONTH_NAMES];
+  }
+}
+
+export function getWeekdayNames(locale?: string): string[] {
+  try {
+    const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+    const sunday = new Date(Date.UTC(2026, 0, 4));
+    return Array.from({ length: 7 }, (_, offset) => formatter.format(new Date(sunday.getTime() + offset * 86400000)));
+  } catch (_error) {
+    return [...DEFAULT_WEEKDAY_NAMES];
+  }
+}
+
+export function rotateWeekdayLabels(labels: readonly string[], weekStartsOn: number): string[] {
+  return labels.slice(weekStartsOn).concat(labels.slice(0, weekStartsOn));
+}
+
+export function formatSpokenDate(date: Date, locale?: string): string {
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(date);
+  } catch (_error) {
+    return `${DEFAULT_MONTH_NAMES[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  }
 }
 
 export function getAllowedInputSeparators(options: ResolvedOptions): string[] {

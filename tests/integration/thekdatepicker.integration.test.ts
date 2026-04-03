@@ -69,6 +69,29 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
+  it('moves focus and selection through the calendar with keyboard navigation', async () => {
+    const picker = new ThekDatePicker('#date-input', { format: 'YYYY-MM-DD' });
+    picker.setDate('2026-02-08');
+    picker.open();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const popover = document.querySelector('.thekdp-popover') as HTMLDivElement;
+    popover.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+    let focused = document.activeElement as HTMLButtonElement;
+    expect(focused.dataset.ts).toBe(String(new Date(2026, 1, 9).setHours(0, 0, 0, 0)));
+
+    popover.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    expect((document.querySelector('#date-input') as HTMLInputElement).value).toBe('2026-02-09');
+
+    picker.open();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    popover.dispatchEvent(new KeyboardEvent('keydown', { key: 'PageDown', bubbles: true, cancelable: true }));
+    focused = document.activeElement as HTMLButtonElement;
+    expect(focused.dataset.ts).toBe(String(new Date(2026, 2, 9).setHours(0, 0, 0, 0)));
+
+    picker.destroy();
+  });
+
   it('supports setting date from explicit millisecond timestamp', () => {
     const picker = new ThekDatePicker('#date-input', { format: 'YYYY-MM-DD' });
     picker.setDateFromTimestamp(Date.UTC(2026, 1, 8));
@@ -454,6 +477,23 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
+  it('renders localized month and weekday labels', () => {
+    const picker = new ThekDatePicker('#date-input', {
+      locale: 'fr-FR',
+      useLocaleDefaults: true,
+      defaultDate: new Date(2026, 1, 8),
+    });
+
+    picker.open();
+    const monthLabel = document.querySelector('.thekdp-current-month') as HTMLSpanElement;
+    const weekdays = Array.from(document.querySelectorAll('.thekdp-weekday-cell')).map((item) => item.textContent);
+    const normalizedMonth = monthLabel.textContent?.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+    expect(normalizedMonth).toContain('fevr');
+    expect(weekdays.join(' ').toLowerCase()).not.toContain('sun');
+
+    picker.destroy();
+  });
+
   it('does not warn for suspicious years by default', () => {
     const picker = new ThekDatePicker('#date-input', { format: 'YYYY-MM-DD' });
     picker.setDate('0120-12-14');
@@ -641,6 +681,18 @@ describe('ThekDatePicker integration', () => {
     removeSpy.mockRestore();
   });
 
+  it('registers the scroll listener as passive and capture-based', () => {
+    const addSpy = vi.spyOn(window, 'addEventListener');
+    const picker = new ThekDatePicker('#date-input');
+
+    const scrollCall = addSpy.mock.calls.find(([type]) => type === 'scroll');
+    expect(scrollCall).toBeDefined();
+    expect(scrollCall?.[2]).toEqual({ capture: true, passive: true });
+
+    addSpy.mockRestore();
+    picker.destroy();
+  });
+
   it('does not inject HTML from malicious string values', () => {
     const picker = new ThekDatePicker('#date-input', { format: 'DD/MM/YYYY' });
     picker.setDate('<img src=x onerror=alert(1)>');
@@ -698,6 +750,20 @@ describe('ThekDatePicker integration', () => {
     expect(onChange).toHaveBeenCalled();
     expect(popover.hidden).toBe(true);
     expect(picker.getDate()?.getFullYear()).toBe(2026);
+    picker.destroy();
+  });
+
+  it('returns focus to the input when Escape closes the calendar', async () => {
+    const picker = new ThekDatePicker('#date-input', { openOnInputClick: true });
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    input.click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const popover = document.querySelector('.thekdp-popover') as HTMLDivElement;
+    popover.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+
+    expect(popover.hidden).toBe(true);
+    expect(document.activeElement).toBe(input);
     picker.destroy();
   });
 });

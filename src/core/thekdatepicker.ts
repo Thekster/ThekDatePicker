@@ -1,12 +1,14 @@
 import {
-  MONTH_NAMES,
   applyMaskToInput,
+  formatSpokenDate,
   formatUsesMeridiem,
   formatDate,
   getAllowedInputSeparators,
+  getMonthNames,
+  getWeekdayNames,
   isSameDay,
   isValidDate,
-  rotateWeekdays,
+  rotateWeekdayLabels,
   toLocalStartOfDay,
 } from './date-utils.js';
 import { createPickerPopover, createRevertIndicator, createSuspiciousIndicator, createTriggerButton } from './thekdatepicker-dom.js';
@@ -43,6 +45,10 @@ export class ThekDatePicker {
   private dayCellEls: HTMLButtonElement[] = [];
   private hourInputEl: HTMLInputElement | null = null;
   private minuteInputEl: HTMLInputElement | null = null;
+  private focusedDayTs: number | null = null;
+  private viewportFrame: number | null = null;
+  private localizedMonthNames: string[];
+  private localizedWeekdayNames: string[];
 
   private selectedDate: Date | null = null;
   private viewDate: Date = new Date();
@@ -129,12 +135,68 @@ export class ThekDatePicker {
   };
 
   private readonly handleViewportChange = (): void => {
-    if (this.openState) this.positionPicker();
+    if (!this.openState || this.viewportFrame != null) return;
+    this.viewportFrame = window.requestAnimationFrame(() => {
+      this.viewportFrame = null;
+      if (this.openState) this.positionPicker();
+    });
   };
 
   private readonly handleThemeMediaChange = (): void => {
     if (this.options.reactiveTheme && this.options.themeMode === 'auto') {
       this.applyAutoTheme();
+    }
+  };
+
+  private readonly handlePickerKeyDown = (event: KeyboardEvent): void => {
+    if (!this.openState || this.options.disabled) return;
+
+    switch (event.key) {
+      case 'Escape':
+        event.preventDefault();
+        this.close();
+        this.input.focus();
+        return;
+      case 'ArrowLeft':
+        event.preventDefault();
+        this.moveFocusedDay(-1);
+        return;
+      case 'ArrowRight':
+        event.preventDefault();
+        this.moveFocusedDay(1);
+        return;
+      case 'ArrowUp':
+        event.preventDefault();
+        this.moveFocusedDay(-7);
+        return;
+      case 'ArrowDown':
+        event.preventDefault();
+        this.moveFocusedDay(7);
+        return;
+      case 'Home':
+        event.preventDefault();
+        this.moveFocusToWeekBoundary(false);
+        return;
+      case 'End':
+        event.preventDefault();
+        this.moveFocusToWeekBoundary(true);
+        return;
+      case 'PageUp':
+        event.preventDefault();
+        this.moveFocusedMonth(event.shiftKey ? -12 : -1);
+        return;
+      case 'PageDown':
+        event.preventDefault();
+        this.moveFocusedMonth(event.shiftKey ? 12 : 1);
+        return;
+      case 'Enter':
+      case ' ':
+        if (this.focusedDayTs == null) return;
+        event.preventDefault();
+        this.selectFocusedDay();
+        return;
+      default:
+        return;
     }
   };
 
@@ -149,20 +211,16 @@ export class ThekDatePicker {
 
     switch (action) {
       case 'prev-year':
-        this.viewDate.setFullYear(this.viewDate.getFullYear() - 1);
-        this.render();
+        this.moveFocusedMonth(-12);
         return;
       case 'next-year':
-        this.viewDate.setFullYear(this.viewDate.getFullYear() + 1);
-        this.render();
+        this.moveFocusedMonth(12);
         return;
       case 'prev-month':
-        this.viewDate.setMonth(this.viewDate.getMonth() - 1);
-        this.render();
+        this.moveFocusedMonth(-1);
         return;
       case 'next-month':
-        this.viewDate.setMonth(this.viewDate.getMonth() + 1);
-        this.render();
+        this.moveFocusedMonth(1);
         return;
       case 'today': {
         const now = clampDate(new Date(), this.options.minDate, this.options.maxDate);
@@ -220,6 +278,8 @@ export class ThekDatePicker {
     this.input = input;
     this.input.classList.add('thekdp-input');
     this.options = resolveOptions(options);
+    this.localizedMonthNames = getMonthNames(this.options.locale);
+    this.localizedWeekdayNames = getWeekdayNames(this.options.locale);
     this.mountInputTrigger();
 
     this.pickerEl = createPickerPopover();
@@ -230,6 +290,7 @@ export class ThekDatePicker {
     this.applyThemeVars();
 
     this.pickerEl.addEventListener('click', this.handlePickerClick);
+    this.pickerEl.addEventListener('keydown', this.handlePickerKeyDown);
 
     const defaultDate = options.defaultDate ?? this.input.value;
     const parsedDefault = extractInput(String(defaultDate ?? ''), this.options) ?? normalizeDateInput(options.defaultDate);
@@ -255,14 +316,23 @@ export class ThekDatePicker {
       this.options.appendTo.appendChild(this.pickerEl);
     }
     this.openState = true;
+    this.ensureFocusableDay();
     this.positionPicker();
     this.pickerEl.hidden = false;
+    window.requestAnimationFrame(() => {
+      if (!this.openState) return;
+      this.focusCurrentDayCell();
+    });
     this.options.onOpen?.(this);
   }
 
   public close(): void {
     if (this.destroyed || !this.openState) return;
     this.openState = false;
+    if (this.viewportFrame != null) {
+      window.cancelAnimationFrame(this.viewportFrame);
+      this.viewportFrame = null;
+    }
     this.pickerEl.hidden = true;
     this.options.onClose?.(this);
   }
@@ -288,6 +358,7 @@ export class ThekDatePicker {
 
     this.selectedDate = clampDate(parsed, this.options.minDate, this.options.maxDate);
     this.viewDate = new Date(this.selectedDate);
+    this.focusedDayTs = toLocalStartOfDay(this.selectedDate).getTime();
     this.hideRevertIndicator();
     this.syncInput();
     this.render();
@@ -309,6 +380,8 @@ export class ThekDatePicker {
   public clear(triggerChange = true): void {
     this.selectedDate = null;
     this.input.value = '';
+    this.viewDate = new Date();
+    this.focusedDayTs = toLocalStartOfDay(this.viewDate).getTime();
     this.hideRevertIndicator();
     this.updateSuspiciousState();
     this.render();
@@ -356,6 +429,7 @@ export class ThekDatePicker {
     this.close();
     this.unmountInputTrigger();
     this.pickerEl.removeEventListener('click', this.handlePickerClick);
+    this.pickerEl.removeEventListener('keydown', this.handlePickerKeyDown);
     if (this.pickerEl.isConnected) this.pickerEl.remove();
   }
 
@@ -368,7 +442,7 @@ export class ThekDatePicker {
     this.triggerButtonEl?.addEventListener('click', this.handleTriggerClick);
     document.addEventListener('mousedown', this.handleDocumentPointerDown);
     window.addEventListener('resize', this.handleViewportChange);
-    window.addEventListener('scroll', this.handleViewportChange, true);
+    window.addEventListener('scroll', this.handleViewportChange, { capture: true, passive: true });
   }
 
   private unbind(): void {
@@ -545,6 +619,96 @@ export class ThekDatePicker {
     applyThemeVars(this.options.theme, this.getThemeTargets());
   }
 
+  private isDateDisabled(date: Date): boolean {
+    const value = toLocalStartOfDay(date);
+    if (this.options.minDate && value < toLocalStartOfDay(this.options.minDate)) return true;
+    if (this.options.maxDate && value > toLocalStartOfDay(this.options.maxDate)) return true;
+    return false;
+  }
+
+  private getDefaultFocusedDay(): Date {
+    const candidate = this.selectedDate ? new Date(this.selectedDate) : new Date();
+    const normalized = toLocalStartOfDay(candidate);
+    if (this.isDateDisabled(normalized)) {
+      if (this.options.minDate) return toLocalStartOfDay(this.options.minDate);
+      if (this.options.maxDate) return toLocalStartOfDay(this.options.maxDate);
+    }
+    return normalized;
+  }
+
+  private ensureFocusableDay(): void {
+    if (this.focusedDayTs == null) {
+      this.focusedDayTs = this.getDefaultFocusedDay().getTime();
+    }
+  }
+
+  private focusCurrentDayCell(): void {
+    const targetTs = this.focusedDayTs;
+    if (targetTs == null) return;
+    const cell = this.dayCellEls.find((item) => item.dataset.ts === String(targetTs) && !item.disabled);
+    cell?.focus();
+  }
+
+  private moveFocusedDay(deltaDays: number): void {
+    this.ensureFocusableDay();
+    const base = new Date(this.focusedDayTs ?? this.getDefaultFocusedDay().getTime());
+    base.setDate(base.getDate() + deltaDays);
+    if (this.isDateDisabled(base)) return;
+    this.focusedDayTs = toLocalStartOfDay(base).getTime();
+    this.viewDate = new Date(base);
+    this.render();
+    this.focusCurrentDayCell();
+  }
+
+  private moveFocusToWeekBoundary(toEnd: boolean): void {
+    this.ensureFocusableDay();
+    const base = new Date(this.focusedDayTs ?? this.getDefaultFocusedDay().getTime());
+    const currentDay = base.getDay();
+    const startOffset = (currentDay - this.options.weekStartsOn + 7) % 7;
+    const endOffset = 6 - startOffset;
+    base.setDate(base.getDate() + (toEnd ? endOffset : -startOffset));
+    if (this.isDateDisabled(base)) return;
+    this.focusedDayTs = toLocalStartOfDay(base).getTime();
+    this.viewDate = new Date(base);
+    this.render();
+    this.focusCurrentDayCell();
+  }
+
+  private moveFocusedMonth(deltaMonths: number): void {
+    this.ensureFocusableDay();
+    const base = new Date(this.focusedDayTs ?? this.getDefaultFocusedDay().getTime());
+    const day = base.getDate();
+    base.setDate(1);
+    base.setMonth(base.getMonth() + deltaMonths);
+    base.setDate(Math.min(day, new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate()));
+    if (this.isDateDisabled(base)) return;
+    this.focusedDayTs = toLocalStartOfDay(base).getTime();
+    this.viewDate = new Date(base);
+    this.render();
+    this.focusCurrentDayCell();
+  }
+
+  private selectFocusedDay(): void {
+    const focusedTs = this.focusedDayTs;
+    if (focusedTs == null) return;
+    const raw = new Date(focusedTs);
+    if (!isValidDate(raw) || this.isDateDisabled(raw)) return;
+    const next = new Date(
+      raw.getFullYear(),
+      raw.getMonth(),
+      raw.getDate(),
+      this.selectedDate?.getHours() ?? 0,
+      this.selectedDate?.getMinutes() ?? 0,
+      0,
+      0,
+    );
+    this.setDate(next, true);
+    if (this.options.closeOnSelect && !this.options.enableTime) {
+      this.close();
+      this.input.focus();
+    }
+  }
+
   private positionPicker(): void {
     const inputRect = this.input.getBoundingClientRect();
     const docEl = document.documentElement;
@@ -638,10 +802,12 @@ export class ThekDatePicker {
   private render(): void {
     const year = this.viewDate.getFullYear();
     const month = this.viewDate.getMonth();
-    this.monthLabelEl.textContent = `${MONTH_NAMES[month]} ${year}`;
+    this.ensureFocusableDay();
+    this.monthLabelEl.textContent = `${this.localizedMonthNames[month] ?? getMonthNames(this.options.locale)[month]} ${year}`;
+    this.pickerEl.setAttribute('aria-label', `${this.localizedMonthNames[month] ?? ''} ${year}`.trim());
 
-    this.weekdaysEl.innerHTML = rotateWeekdays(this.options.weekStartsOn)
-      .map((day) => `<div class="thekdp-weekday-cell">${day}</div>`)
+    this.weekdaysEl.innerHTML = rotateWeekdayLabels(this.localizedWeekdayNames, this.options.weekStartsOn)
+      .map((day) => `<div class="thekdp-weekday-cell" role="columnheader">${day}</div>`)
       .join('');
 
     const firstOfMonth = new Date(year, month, 1);
@@ -660,13 +826,8 @@ export class ThekDatePicker {
       const isSelectedDate = selected ? isSameDay(current, selected) : false;
       const dayTs = current.getTime();
 
-      let disabled = false;
-      if (this.options.minDate && toLocalStartOfDay(current) < toLocalStartOfDay(this.options.minDate)) {
-        disabled = true;
-      }
-      if (this.options.maxDate && toLocalStartOfDay(current) > toLocalStartOfDay(this.options.maxDate)) {
-        disabled = true;
-      }
+      const disabled = this.isDateDisabled(current);
+      const isFocusedDate = this.focusedDayTs === dayTs;
 
       const classes = ['thekdp-day-cell'];
       if (!inCurrentMonth) classes.push('thekdp-day-cell-muted');
@@ -678,6 +839,9 @@ export class ThekDatePicker {
       cell.className = classes.join(' ');
       cell.dataset.ts = String(dayTs);
       cell.disabled = disabled;
+      cell.tabIndex = !disabled && isFocusedDate ? 0 : -1;
+      cell.setAttribute('aria-selected', String(isSelectedDate));
+      cell.setAttribute('aria-label', formatSpokenDate(current, this.options.locale));
       cell.textContent = String(current.getDate());
     }
 

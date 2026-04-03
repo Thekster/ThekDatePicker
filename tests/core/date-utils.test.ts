@@ -108,10 +108,10 @@ describe('date utils', () => {
     expect(meridiemLower?.getHours()).toBe(21);
   });
 
-  it('parses YY using 2000-2099 window', () => {
+  it('parses YY using a sliding century window', () => {
     const y99 = parseDateByFormat('99-02-08', 'YY-MM-DD');
     const y00 = parseDateByFormat('00-02-08', 'YY-MM-DD');
-    expect(y99?.getFullYear()).toBe(2099);
+    expect(y99?.getFullYear()).toBe(1999);
     expect(y00?.getFullYear()).toBe(2000);
   });
 
