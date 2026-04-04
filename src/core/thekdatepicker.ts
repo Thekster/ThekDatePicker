@@ -131,7 +131,7 @@ export class ThekDatePicker {
     if (!allowed.test(text)) event.preventDefault();
   };
 
-  private readonly handleDocumentPointerDown = (event: MouseEvent): void => {
+  private readonly handleDocumentPointerDown = (event: PointerEvent): void => {
     if (!this.openState) return;
     const target = event.target as Node | null;
     if (!target) return;
@@ -316,6 +316,8 @@ export class ThekDatePicker {
 
     this.input.placeholder = this.options.placeholder;
     this.input.disabled = this.options.disabled;
+    this.input.setAttribute("inputmode", "text");
+    this.input.setAttribute("autocomplete", "off");
     if (this.triggerButtonEl) this.triggerButtonEl.disabled = this.options.disabled;
     this.syncInput();
     this.setupReactiveTheme();
@@ -453,7 +455,7 @@ export class ThekDatePicker {
     this.input.addEventListener("blur", this.handleInputBlur);
     this.input.addEventListener("paste", this.handlePaste);
     this.triggerButtonEl?.addEventListener("click", this.handleTriggerClick);
-    document.addEventListener("mousedown", this.handleDocumentPointerDown);
+    document.addEventListener("pointerdown", this.handleDocumentPointerDown);
     window.addEventListener("resize", this.handleViewportChange);
     window.addEventListener("scroll", this.handleViewportChange, this.scrollListenerOptions);
   }
@@ -465,7 +467,7 @@ export class ThekDatePicker {
     this.input.removeEventListener("blur", this.handleInputBlur);
     this.input.removeEventListener("paste", this.handlePaste);
     this.triggerButtonEl?.removeEventListener("click", this.handleTriggerClick);
-    document.removeEventListener("mousedown", this.handleDocumentPointerDown);
+    document.removeEventListener("pointerdown", this.handleDocumentPointerDown);
     window.removeEventListener("resize", this.handleViewportChange);
     window.removeEventListener("scroll", this.handleViewportChange, this.scrollListenerOptions);
     this.hourInputEl?.removeEventListener("change", this.handleTimeChange);
@@ -784,9 +786,17 @@ export class ThekDatePicker {
     this.hideRevertIndicator();
     const clamped = clampDate(parsed, this.options.minDate, this.options.maxDate);
     const wasClamped = clamped.getTime() !== parsed.getTime();
-    this.setDate(clamped, true);
     if (wasClamped) {
+      this.selectedDate = clamped;
+      this.viewDate = new Date(clamped);
+      this.focusedDayTs = toLocalStartOfDay(clamped).getTime();
+      this.input.value = formatDate(clamped, fullFormat(this.options));
+      this.updateSuspiciousState();
+      this.render();
       this.showRevertIndicator(raw);
+      this.emitChange();
+    } else {
+      this.setDate(clamped, true);
     }
   }
 
@@ -860,6 +870,7 @@ export class ThekDatePicker {
     const today = toLocalStartOfDay(new Date());
     const selected = this.selectedDate ? toLocalStartOfDay(this.selectedDate) : null;
     const current = new Date(gridStart);
+    const cssPrefix = this.options.cssPrefix;
     for (let i = 0; i < 42; i += 1) {
       if (i > 0) current.setDate(current.getDate() + 1);
 
@@ -871,14 +882,13 @@ export class ThekDatePicker {
       const disabled = this.isDateDisabled(current);
       const isFocusedDate = this.focusedDayTs === dayTs;
 
-      const classes = [`${this.options.cssPrefix}-day-cell`];
-      if (!inCurrentMonth) classes.push(`${this.options.cssPrefix}-day-cell-muted`);
-      if (isTodayDate) classes.push(`${this.options.cssPrefix}-day-cell-today`);
-      if (isSelectedDate) classes.push(`${this.options.cssPrefix}-day-cell-selected`);
-      if (disabled) classes.push(`${this.options.cssPrefix}-day-cell-disabled`);
-
       const cell = this.dayCellEls[i];
-      cell.className = classes.join(" ");
+      cell.className =
+        `${cssPrefix}-day-cell` +
+        (!inCurrentMonth ? ` ${cssPrefix}-day-cell-muted` : "") +
+        (isTodayDate ? ` ${cssPrefix}-day-cell-today` : "") +
+        (isSelectedDate ? ` ${cssPrefix}-day-cell-selected` : "") +
+        (disabled ? ` ${cssPrefix}-day-cell-disabled` : "");
       cell.dataset.ts = String(dayTs);
       cell.disabled = disabled;
       cell.tabIndex = !disabled && isFocusedDate ? 0 : -1;

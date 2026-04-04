@@ -61,6 +61,27 @@ export function isValidDate(date: Date): boolean {
   return !Number.isNaN(date.getTime());
 }
 
+const ISO_DATE_RE = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T ](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?(?:Z|[+-]\d{2}:?\d{2})?$/;
+
+export function parseIsoDateString(value: string): Date | null {
+  const match = ISO_DATE_RE.exec(value);
+  if (!match) return null;
+
+  const [, yearStr, monthStr, dayStr, hourStr, minuteStr, secondStr] = match;
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+  const day = Number(dayStr);
+  const hour = hourStr !== undefined ? Number(hourStr) : 0;
+  const minute = minuteStr !== undefined ? Number(minuteStr) : 0;
+  const second = secondStr !== undefined ? Number(secondStr) : 0;
+
+  if (month < 1 || month > 12 || day < 1 || day > daysInMonth(year, month - 1)) return null;
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) return null;
+
+  const date = new Date(year, month - 1, day, hour, minute, second, 0);
+  return isValidDate(date) ? date : null;
+}
+
 export function toLocalStartOfDay(date: Date): Date {
   const clone = new Date(date);
   clone.setHours(0, 0, 0, 0);
@@ -272,7 +293,9 @@ function parseNumber(
 }
 
 export function parseDateByFormat(value: string, format: string): Date | null {
-  const input = value.trim();
+  const input = value
+    .trim()
+    .replace(/[\u200B-\u200D\uFEFF\u00A0]/g, "");
   if (!input) return null;
 
   const parts = tokenizeFormat(format);
@@ -289,11 +312,31 @@ export function parseDateByFormat(value: string, format: string): Date | null {
 
   for (const part of parts) {
     if (part.type === "literal") {
-      if (input[cursor] !== part.value) {
-        return null;
+      if (cursor >= input.length) {
+        continue;
       }
+      if (input[cursor] === part.value) {
+        cursor += 1;
+        continue;
+      }
+      if (MASK_SEPARATORS.includes(part.value as (typeof MASK_SEPARATORS)[number])) {
+        if (MASK_SEPARATORS.includes(input[cursor] as (typeof MASK_SEPARATORS)[number])) {
+          cursor += 1;
+          continue;
+        }
+        continue;
+      }
+      if (/\s/.test(part.value) && /\s/.test(input[cursor])) {
+        while (cursor < input.length && /\s/.test(input[cursor])) {
+          cursor += 1;
+        }
+        continue;
+      }
+      return null;
+    }
+
+    while (cursor < input.length && /\s/.test(input[cursor])) {
       cursor += 1;
-      continue;
     }
 
     const remaining = input.slice(cursor);
@@ -381,6 +424,10 @@ export function parseDateByFormat(value: string, format: string): Date | null {
     }
 
     cursor += parsed.read;
+  }
+
+  while (cursor < input.length && /\s/.test(input[cursor])) {
+    cursor += 1;
   }
 
   if (cursor !== input.length) return null;

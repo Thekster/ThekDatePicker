@@ -3,6 +3,7 @@ import {
   normalizeInputSeparatorsToFormat,
   parseDateByFormat,
   isValidDate,
+  parseIsoDateString,
 } from "./date-utils.js";
 import type {
   DateInput,
@@ -180,8 +181,9 @@ export function resetGlobalOptions(): void {
 export function normalizeDateInput(value: DateInput): Date | null {
   if (value == null) return null;
   if (value instanceof Date) return isValidDate(value) ? new Date(value) : null;
-  const date = new Date(value);
-  return isValidDate(date) ? date : null;
+  const isoParsed = parseIsoDateString(value);
+  if (isoParsed) return isoParsed;
+  return null;
 }
 
 export function fullFormat(

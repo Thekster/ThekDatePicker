@@ -54,6 +54,7 @@ export function createPickerPopover(cssPrefix: string = "thekdp"): HTMLDivElemen
   picker.tabIndex = -1;
   picker.setAttribute("role", "dialog");
   picker.setAttribute("aria-modal", "false");
+  picker.style.touchAction = "manipulation";
   picker.innerHTML = `
     <div class="${cssPrefix}-header">
       <button type="button" class="${cssPrefix}-nav-btn" data-action="prev-year" aria-label="Previous year">«</button>

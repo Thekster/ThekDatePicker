@@ -1,5 +1,20 @@
 # Release Notes
 
+## 1.1.0 - 2026-04-04
+
+### Fixed
+
+- **Parser Resilience:** `parseDateByFormat` now strips zero-width spaces, non-breaking spaces, and other invisible Unicode characters from input. Whitespace between tokens is skipped gracefully, and flexible separators are accepted in literal positions.
+- **Safe Date Construction:** `normalizeDateInput` no longer uses the native `new Date(string)` constructor for string inputs. Only ISO 8601 date strings are accepted, eliminating cross-browser parsing inconsistencies (Safari vs Chrome).
+- **Render Optimization:** Day cell rendering now builds className strings directly instead of allocating intermediate arrays, reducing GC pressure during rapid month navigation.
+- **Mobile & Touch Support:** Switched from `mousedown` to `pointerdown` for unified mouse/touch/stylus handling. Added `touch-action: manipulation` on the popover to eliminate 300ms click delay. Input elements now use `inputmode="text"` and `autocomplete="off"` for better mobile behavior.
+- **Clamped Input Preservation:** When a typed date is clamped to `minDate`/`maxDate`, the revert indicator now correctly displays the user's original input in the tooltip, even when the suspicious state would otherwise clear it.
+
+### Added
+
+- **ISO 8601 Parser:** New `parseIsoDateString` utility for safe, explicit parsing of ISO date strings without relying on the native `Date` constructor.
+- **Mobile Attributes:** Input elements automatically receive `inputmode="text"` and `autocomplete="off"` on initialization.
+
 ## 1.0.1 - 2026-03-22
 
 ### Fixed
