@@ -3,6 +3,7 @@
 ## 1.0.1 - 2026-03-22
 
 ### Fixed
+
 - **Literal Word Corruption in Formatting:** Date tokens like `D` or `a` are no longer replaced inside literal words (e.g., "Date" no longer becomes "22pmte").
 - **False Meridiem Triggers:** Fixed logic where literal letters 'A' or 'a' in the format string incorrectly triggered 12-hour parsing logic.
 - **Literal Escaping Support:** Added support for square-bracket escaping (e.g., `[Date]: DD/MM/YYYY`) to explicitly define literal text in format strings.
@@ -10,6 +11,7 @@
 - **Relaxed Paste Validation:** Users can now paste fully formatted dates that include literal words.
 
 ### Technical
+
 - Migrated test configuration from broken `vite-plus` to `vitest` for improved stability.
 - Added comprehensive regression tests for literal word handling and escaping.
 
@@ -18,6 +20,7 @@
 ### Patch Updates
 
 #### Added
+
 - New explicit timestamp API: `setDateFromTimestamp(timestampMs, triggerChange?)`.
 - New `zIndex` option to configure popover stacking instead of relying on a hardcoded value.
 - Expanded test coverage for edge-cases:
@@ -29,21 +32,25 @@
   - leap-year navigation, Date cloning, and Enter-key commit behavior
 
 #### Changed
+
 - `DateInput` is now `Date | string | null | undefined` (numeric timestamps removed for type safety).
 - Day grid rendering now reuses existing day cells instead of replacing `innerHTML` each render.
 - Keyboard filtering is less aggressive: non-printable keys and system shortcuts are no longer blocked.
 
 #### Fixed
+
 - Prevented `onChange` re-entrancy loops by guarding nested emits.
 - Fixed trigger/outside-click interaction ordering so trigger clicks can reliably close an open picker.
 - Removed `queueMicrotask` masking race; input masking is now synchronous with caret preservation.
 
 #### Migration
+
 - Replace `setDate(1707399999000)` with:
   - `setDateFromTimestamp(1707399999000)`, or
   - `setDate(new Date(1707399999000))`.
 
 ### Added
+
 - Framework-agnostic `ThekDatePicker` core with calendar popover, date/time selection, min/max constraints, and strict masking.
 - 12-hour and 24-hour time formats, including AM/PM parsing/masking (`A` / `a`).
 - Global defaults API:
@@ -80,6 +87,7 @@
   - syntax-highlighted code blocks.
 
 ### Changed
+
 - Default opening behavior uses calendar button (`openOnInputClick: false` by default).
 - Base theme now uses system color tokens with dark-mode-aware fallbacks.
 - Styling was standardized to rem-based sizing and improved control alignment.
@@ -90,6 +98,7 @@
   - `thekdatepicker-suspicious.ts` (suspicious date rules)
 
 ### Fixed
+
 - Input target validation and initialization flow issues in showcase usage.
 - Mask typing behavior for separators and invalid characters.
 - Backspace behavior around time separators and AM/PM editing.

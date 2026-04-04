@@ -1,4 +1,4 @@
-import type { ThekDatePicker } from './thekdatepicker.js';
+import type { ThekDatePicker } from "./thekdatepicker.js";
 
 export type DateInput = Date | string | null | undefined;
 
@@ -17,7 +17,7 @@ export interface ThekDatePickerTheme {
   controlHeight: string;
 }
 
-export type ThekDatePickerThemeTemplate = 'light' | 'dark' | 'auto';
+export type ThekDatePickerThemeTemplate = "light" | "dark" | "auto";
 export type ThekDatePickerThemeOption = ThekDatePickerThemeTemplate | Partial<ThekDatePickerTheme>;
 
 export interface ThekDatePickerOptions {
@@ -47,6 +47,7 @@ export interface ThekDatePickerOptions {
   suspiciousMessage?: string;
   revertWarning?: boolean;
   revertMessage?: string;
+  cssPrefix?: string;
   onChange?: (date: Date | null, formatted: string, instance: ThekDatePicker) => void;
   onOpen?: (instance: ThekDatePicker) => void;
   onClose?: (instance: ThekDatePicker) => void;
@@ -73,7 +74,7 @@ export interface ResolvedOptions {
   theme: Partial<ThekDatePickerTheme>;
   reactiveTheme: boolean;
   themeAttribute: string;
-  themeMode: ThekDatePickerThemeTemplate | 'custom';
+  themeMode: ThekDatePickerThemeTemplate | "custom";
   suspiciousWarning: boolean;
   suspiciousYearSpan: number;
   suspiciousMinYear: number | null;
@@ -81,6 +82,7 @@ export interface ResolvedOptions {
   suspiciousMessage: string;
   revertWarning: boolean;
   revertMessage: string;
+  cssPrefix: string;
   onChange?: (date: Date | null, formatted: string, instance: ThekDatePicker) => void;
   onOpen?: (instance: ThekDatePicker) => void;
   onClose?: (instance: ThekDatePicker) => void;

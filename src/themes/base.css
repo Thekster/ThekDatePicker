@@ -58,7 +58,6 @@
   box-sizing: border-box;
   color: var(--thekdp-text-main);
   font-family: var(--thekdp-font-family);
-  
 }
 
 .thekdp-input::placeholder {
@@ -78,9 +77,9 @@
   height: 100%;
   font-family: var(--thekdp-font-family);
   font-size: 0.95rem;
-  line-height: normal;   /* Let the browser handle the baseline */
-  display: flex;         /* Turn the input into a flex item itself */
-  align-items: center;   /* Center text content */
+  line-height: normal; /* Let the browser handle the baseline */
+  display: flex; /* Turn the input into a flex item itself */
+  align-items: center; /* Center text content */
   margin: 0;
   min-width: 0;
   padding: 0 0.625rem;

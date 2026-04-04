@@ -1,9 +1,24 @@
-import type { ResolvedOptions } from './types.js';
+import type { ResolvedOptions } from "./types.js";
 
-const TOKENS = ['YYYY', 'YY', 'DD', 'D', 'MM', 'M', 'HH', 'H', 'hh', 'h', 'mm', 'm', 'A', 'a'] as const;
+const TOKENS = [
+  "YYYY",
+  "YY",
+  "DD",
+  "D",
+  "MM",
+  "M",
+  "HH",
+  "H",
+  "hh",
+  "h",
+  "mm",
+  "m",
+  "A",
+  "a",
+] as const;
 type Token = (typeof TOKENS)[number];
-type FormatPart = { type: 'token'; value: Token } | { type: 'literal'; value: string };
-export const MASK_SEPARATORS = ['/', '-', '.', ',', ':', ' '] as const;
+type FormatPart = { type: "token"; value: Token } | { type: "literal"; value: string };
+export const MASK_SEPARATORS = ["/", "-", ".", ",", ":", " "] as const;
 const TOKEN_MASK_LENGTH: Record<Token, number> = {
   YYYY: 4,
   YY: 2,
@@ -22,24 +37,24 @@ const TOKEN_MASK_LENGTH: Record<Token, number> = {
 };
 
 const DEFAULT_MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
-const DEFAULT_WEEKDAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DEFAULT_WEEKDAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function pad2(value: number): string {
-  return String(value).padStart(2, '0');
+  return String(value).padStart(2, "0");
 }
 
 export function isValidDate(date: Date): boolean {
@@ -74,12 +89,12 @@ function tokenizeFormat(format: string): readonly FormatPart[] {
   let i = 0;
 
   while (i < format.length) {
-    if (format[i] === '[') {
-      const end = format.indexOf(']', i);
+    if (format[i] === "[") {
+      const end = format.indexOf("]", i);
       if (end !== -1) {
         const literal = format.slice(i + 1, end);
         for (const char of literal) {
-          parts.push({ type: 'literal', value: char });
+          parts.push({ type: "literal", value: char });
         }
         i = end + 1;
         continue;
@@ -95,12 +110,12 @@ function tokenizeFormat(format: string): readonly FormatPart[] {
     }
 
     if (matchedToken) {
-      parts.push({ type: 'token', value: matchedToken });
+      parts.push({ type: "token", value: matchedToken });
       i += matchedToken.length;
       continue;
     }
 
-    parts.push({ type: 'literal', value: format[i] });
+    parts.push({ type: "literal", value: format[i] });
     i += 1;
   }
 
@@ -109,19 +124,11 @@ function tokenizeFormat(format: string): readonly FormatPart[] {
   return tokenized;
 }
 
-function buildMaskFromFormat(format: string): string {
-  return tokenizeFormat(format).map((part) => {
-    if (part.type === 'literal') return part.value;
-    if (part.value === 'A' || part.value === 'a') return 'AA';
-    return '#'.repeat(TOKEN_MASK_LENGTH[part.value]);
-  }).join('');
-}
-
 export function applyMaskToInput(value: string, format: string): string {
-  const digits = value.replace(/\D/g, '');
-  const meridiemChars = value.replace(/[^aApPmM]/g, '');
+  const digits = value.replace(/\D/g, "");
+  const meridiemChars = value.replace(/[^aApPmM]/g, "");
   const parts = tokenizeFormat(format);
-  let out = '';
+  let out = "";
   let digitIndex = 0;
   let meridiemIndex = 0;
   let hasAnyOutput = false;
@@ -131,8 +138,8 @@ export function applyMaskToInput(value: string, format: string): string {
     let m = meridiemIndex;
     for (let i = startIndex; i < parts.length; i += 1) {
       const part = parts[i];
-      if (part.type === 'literal') continue;
-      if (part.value === 'A' || part.value === 'a') {
+      if (part.type === "literal") continue;
+      if (part.value === "A" || part.value === "a") {
         if (m < meridiemChars.length) return true;
         continue;
       }
@@ -145,21 +152,21 @@ export function applyMaskToInput(value: string, format: string): string {
 
   for (let i = 0; i < parts.length; i += 1) {
     const part = parts[i];
-    if (part.type === 'literal') {
+    if (part.type === "literal") {
       if (!hasAnyOutput) break;
       if (hasRemainingTokenData(i + 1)) out += part.value;
       continue;
     }
 
-    if (part.value === 'A' || part.value === 'a') {
+    if (part.value === "A" || part.value === "a") {
       const c = meridiemChars[meridiemIndex];
       if (!c) break;
-      const isPm = c.toLowerCase() === 'p';
-      const first = part.value === 'A' ? (isPm ? 'P' : 'A') : (isPm ? 'p' : 'a');
+      const isPm = c.toLowerCase() === "p";
+      const first = part.value === "A" ? (isPm ? "P" : "A") : isPm ? "p" : "a";
       const next = meridiemChars[meridiemIndex + 1];
       const hasSecond = !!next && /[mM]/.test(next);
       if (hasSecond) {
-        out += `${first}${part.value === 'A' ? 'M' : 'm'}`;
+        out += `${first}${part.value === "A" ? "M" : "m"}`;
         meridiemIndex += 2;
       } else {
         out += first;
@@ -189,10 +196,10 @@ export function normalizeInputSeparatorsToFormat(value: string, format: string):
   if (!input) return input;
   const parts = tokenizeFormat(format);
   let cursor = 0;
-  let out = '';
+  let out = "";
 
   for (const part of parts) {
-    if (part.type === 'literal') {
+    if (part.type === "literal") {
       const ch = input[cursor];
       if (ch === part.value) {
         out += part.value;
@@ -208,11 +215,11 @@ export function normalizeInputSeparatorsToFormat(value: string, format: string):
       continue;
     }
 
-    if (part.value === 'A' || part.value === 'a') {
+    if (part.value === "A" || part.value === "a") {
       const ch = input[cursor];
       if (!ch || !/[aApP]/.test(ch)) return value;
-      const pm = ch.toLowerCase() === 'p';
-      out += part.value === 'A' ? (pm ? 'PM' : 'AM') : (pm ? 'pm' : 'am');
+      const pm = ch.toLowerCase() === "p";
+      out += part.value === "A" ? (pm ? "PM" : "AM") : pm ? "pm" : "am";
       if (/^[aApP][mM]$/.test(input.slice(cursor, cursor + 2))) cursor += 2;
       else cursor += 1;
       continue;
@@ -220,22 +227,25 @@ export function normalizeInputSeparatorsToFormat(value: string, format: string):
 
     let minDigits = 1;
     let maxDigits = 2;
-    if (part.value === 'YYYY') {
+    if (part.value === "YYYY") {
       minDigits = 4;
       maxDigits = 4;
-    } else if (part.value === 'YY') {
+    } else if (part.value === "YY") {
       minDigits = 2;
       maxDigits = 2;
     } else if (
-      part.value === 'DD' || part.value === 'MM' || part.value === 'HH' ||
-      part.value === 'hh' || part.value === 'mm'
+      part.value === "DD" ||
+      part.value === "MM" ||
+      part.value === "HH" ||
+      part.value === "hh" ||
+      part.value === "mm"
     ) {
       minDigits = 2;
       maxDigits = 2;
     }
 
     let read = 0;
-    while (read < maxDigits && /^\d$/.test(input[cursor + read] ?? '')) {
+    while (read < maxDigits && /^\d$/.test(input[cursor + read] ?? "")) {
       read += 1;
     }
     if (read < minDigits) return value;
@@ -247,7 +257,11 @@ export function normalizeInputSeparatorsToFormat(value: string, format: string):
   return out;
 }
 
-function parseNumber(source: string, minDigits: number, maxDigits: number): { value: number; read: number } | null {
+function parseNumber(
+  source: string,
+  minDigits: number,
+  maxDigits: number,
+): { value: number; read: number } | null {
   for (let len = maxDigits; len >= minDigits; len -= 1) {
     const chunk = source.slice(0, len);
     if (chunk.length !== len) continue;
@@ -271,10 +285,10 @@ export function parseDateByFormat(value: string, format: string): Date | null {
   let hour = 0;
   let minute = 0;
   let usesMeridiem = false;
-  let meridiem: 'AM' | 'PM' | null = null;
+  let meridiem: "AM" | "PM" | null = null;
 
   for (const part of parts) {
-    if (part.type === 'literal') {
+    if (part.type === "literal") {
       if (input[cursor] !== part.value) {
         return null;
       }
@@ -286,80 +300,80 @@ export function parseDateByFormat(value: string, format: string): Date | null {
     let parsed: { value: number; read: number } | null = null;
 
     switch (part.value) {
-      case 'YYYY':
+      case "YYYY":
         parsed = parseNumber(remaining, 4, 4);
         if (!parsed) return null;
         year = parsed.value;
         break;
-      case 'YY':
+      case "YY":
         parsed = parseNumber(remaining, 2, 2);
         if (!parsed) return null;
         year = resolveTwoDigitYear(parsed.value, now);
         break;
-      case 'MM':
+      case "MM":
         parsed = parseNumber(remaining, 2, 2);
         if (!parsed) return null;
         month = parsed.value;
         break;
-      case 'M':
+      case "M":
         parsed = parseNumber(remaining, 1, 2);
         if (!parsed) return null;
         month = parsed.value;
         break;
-      case 'DD':
+      case "DD":
         parsed = parseNumber(remaining, 2, 2);
         if (!parsed) return null;
         day = parsed.value;
         break;
-      case 'D':
+      case "D":
         parsed = parseNumber(remaining, 1, 2);
         if (!parsed) return null;
         day = parsed.value;
         break;
-      case 'HH':
+      case "HH":
         parsed = parseNumber(remaining, 2, 2);
         if (!parsed) return null;
         hour = parsed.value;
         break;
-      case 'H':
+      case "H":
         parsed = parseNumber(remaining, 1, 2);
         if (!parsed) return null;
         hour = parsed.value;
         break;
-      case 'hh':
+      case "hh":
         parsed = parseNumber(remaining, 2, 2);
         if (!parsed) return null;
         hour = parsed.value;
         usesMeridiem = true;
         break;
-      case 'h':
+      case "h":
         parsed = parseNumber(remaining, 1, 2);
         if (!parsed) return null;
         hour = parsed.value;
         usesMeridiem = true;
         break;
-      case 'mm':
+      case "mm":
         parsed = parseNumber(remaining, 2, 2);
         if (!parsed) return null;
         minute = parsed.value;
         break;
-      case 'm':
+      case "m":
         parsed = parseNumber(remaining, 1, 2);
         if (!parsed) return null;
         minute = parsed.value;
         break;
-      case 'A': {
+      case "A": {
         const m = remaining.slice(0, 2).toUpperCase();
-        if (m !== 'AM' && m !== 'PM') return null;
-        meridiem = m as 'AM' | 'PM';
+        if (m !== "AM" && m !== "PM") return null;
+        meridiem = m as "AM" | "PM";
         parsed = { value: 0, read: 2 };
         usesMeridiem = true;
         break;
       }
-      case 'a': {
+      case "a": {
         const m = remaining.slice(0, 2).toLowerCase();
-        if (m !== 'am' && m !== 'pm') return null;
-        meridiem = m.toUpperCase() as 'AM' | 'PM';
+        if (m !== "am" && m !== "pm") return null;
+        meridiem = m.toUpperCase() as "AM" | "PM";
         parsed = { value: 0, read: 2 };
         usesMeridiem = true;
         break;
@@ -375,7 +389,7 @@ export function parseDateByFormat(value: string, format: string): Date | null {
   if (usesMeridiem) {
     if (hour < 1 || hour > 12) return null;
     const h12 = hour % 12;
-    hour = meridiem === 'PM' ? h12 + 12 : h12;
+    hour = meridiem === "PM" ? h12 + 12 : h12;
   } else if (hour < 0 || hour > 23) return null;
   if (minute < 0 || minute > 59) return null;
 
@@ -399,12 +413,14 @@ export function formatDate(date: Date, format: string): string {
     h: String(h12),
     mm: pad2(date.getMinutes()),
     m: String(date.getMinutes()),
-    A: h24 >= 12 ? 'PM' : 'AM',
-    a: h24 >= 12 ? 'pm' : 'am',
+    A: h24 >= 12 ? "PM" : "AM",
+    a: h24 >= 12 ? "pm" : "am",
   };
 
   const parts = tokenizeFormat(format);
-  return parts.map((part) => (part.type === 'token' ? replacements[part.value] : part.value)).join('');
+  return parts
+    .map((part) => (part.type === "token" ? replacements[part.value] : part.value))
+    .join("");
 }
 
 export function isSameDay(a: Date, b: Date): boolean {
@@ -416,24 +432,28 @@ export function isSameDay(a: Date, b: Date): boolean {
 }
 
 export function rotateWeekdays(weekStartsOn: number): string[] {
-  return DEFAULT_WEEKDAY_NAMES.slice(weekStartsOn).concat(DEFAULT_WEEKDAY_NAMES.slice(0, weekStartsOn));
+  return DEFAULT_WEEKDAY_NAMES.slice(weekStartsOn).concat(
+    DEFAULT_WEEKDAY_NAMES.slice(0, weekStartsOn),
+  );
 }
 
 export function getMonthNames(locale?: string): string[] {
   try {
-    const formatter = new Intl.DateTimeFormat(locale, { month: 'long' });
+    const formatter = new Intl.DateTimeFormat(locale, { month: "long" });
     return Array.from({ length: 12 }, (_, month) => formatter.format(new Date(2026, month, 1)));
-  } catch (_error) {
+  } catch {
     return [...DEFAULT_MONTH_NAMES];
   }
 }
 
 export function getWeekdayNames(locale?: string): string[] {
   try {
-    const formatter = new Intl.DateTimeFormat(locale, { weekday: 'short' });
+    const formatter = new Intl.DateTimeFormat(locale, { weekday: "short" });
     const sunday = new Date(Date.UTC(2026, 0, 4));
-    return Array.from({ length: 7 }, (_, offset) => formatter.format(new Date(sunday.getTime() + offset * 86400000)));
-  } catch (_error) {
+    return Array.from({ length: 7 }, (_, offset) =>
+      formatter.format(new Date(sunday.getTime() + offset * 86400000)),
+    );
+  } catch {
     return [...DEFAULT_WEEKDAY_NAMES];
   }
 }
@@ -445,35 +465,38 @@ export function rotateWeekdayLabels(labels: readonly string[], weekStartsOn: num
 export function formatSpokenDate(date: Date, locale?: string): string {
   try {
     return new Intl.DateTimeFormat(locale, {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     }).format(date);
-  } catch (_error) {
+  } catch {
     return `${DEFAULT_MONTH_NAMES[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
   }
 }
 
-export function getAllowedInputSeparators(options: ResolvedOptions): string[] {
+export function getAllowedInputSeparators(_options: ResolvedOptions): string[] {
   return [...MASK_SEPARATORS];
 }
 
 export function formatUsesMeridiem(format: string): boolean {
-  return tokenizeFormat(format).some((part) => part.type === 'token' && (part.value === 'A' || part.value === 'a'));
+  return tokenizeFormat(format).some(
+    (part) => part.type === "token" && (part.value === "A" || part.value === "a"),
+  );
 }
 
 export function formatHasTimeTokens(format: string): boolean {
   const parts = tokenizeFormat(format);
-  return parts.some((part) => (
-    part.type === 'token'
-      && (part.value === 'HH'
-        || part.value === 'H'
-        || part.value === 'hh'
-        || part.value === 'h'
-        || part.value === 'mm'
-        || part.value === 'm'
-        || part.value === 'A'
-        || part.value === 'a')
-  ));
+  return parts.some(
+    (part) =>
+      part.type === "token" &&
+      (part.value === "HH" ||
+        part.value === "H" ||
+        part.value === "hh" ||
+        part.value === "h" ||
+        part.value === "mm" ||
+        part.value === "m" ||
+        part.value === "A" ||
+        part.value === "a"),
+  );
 }

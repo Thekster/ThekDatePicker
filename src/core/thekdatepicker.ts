@@ -10,10 +10,15 @@ import {
   isValidDate,
   rotateWeekdayLabels,
   toLocalStartOfDay,
-} from './date-utils.js';
-import { createPickerPopover, createRevertIndicator, createSuspiciousIndicator, createTriggerButton } from './thekdatepicker-dom.js';
-import { isSuspiciousDate } from './thekdatepicker-suspicious.js';
-import { applyThemeVars } from './thekdatepicker-theme.js';
+} from "./date-utils.js";
+import {
+  createPickerPopover,
+  createRevertIndicator,
+  createSuspiciousIndicator,
+  createTriggerButton,
+} from "./thekdatepicker-dom.js";
+import { isSuspiciousDate } from "./thekdatepicker-suspicious.js";
+import { applyThemeVars } from "./thekdatepicker-theme.js";
 import {
   clampDate,
   extractInput,
@@ -22,13 +27,13 @@ import {
   resolveAutoThemeTemplate,
   resolveThemeOption,
   resolveOptions,
-} from './config-utils.js';
+} from "./config-utils.js";
 import type {
   DateInput,
   ResolvedOptions,
   ThekDatePickerOptions,
   ThekDatePickerThemeOption,
-} from './types.js';
+} from "./types.js";
 
 export class ThekDatePicker {
   public readonly input: HTMLInputElement;
@@ -49,6 +54,7 @@ export class ThekDatePicker {
   private viewportFrame: number | null = null;
   private localizedMonthNames: string[];
   private localizedWeekdayNames: string[];
+  private readonly scrollListenerOptions = { capture: true, passive: true };
 
   private selectedDate: Date | null = null;
   private viewDate: Date = new Date();
@@ -79,16 +85,16 @@ export class ThekDatePicker {
   private readonly handleInputKeyDown = (event: KeyboardEvent): void => {
     if (this.options.disabled) return;
 
-    if (event.key === 'Escape') {
+    if (event.key === "Escape") {
       this.close();
       return;
     }
-    if (event.key === 'Enter') {
+    if (event.key === "Enter") {
       this.commitInput();
       this.close();
       return;
     }
-    if (event.key === 'ArrowDown' && event.altKey) {
+    if (event.key === "ArrowDown" && event.altKey) {
       event.preventDefault();
       this.open();
       return;
@@ -109,7 +115,7 @@ export class ThekDatePicker {
       event.preventDefault();
       return;
     }
-    const text = event.clipboardData?.getData('text') ?? '';
+    const text = event.clipboardData?.getData("text") ?? "";
     if (!text) return;
 
     const format = fullFormat(this.options);
@@ -117,10 +123,10 @@ export class ThekDatePicker {
     if (extractInput(text, this.options)) return;
 
     const separators = getAllowedInputSeparators(this.options)
-      .map((item) => item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-      .join('');
+      .map((item) => item.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+      .join("");
     const usesMeridiem = formatUsesMeridiem(format);
-    const letterSet = usesMeridiem ? 'aApPmM' : '';
+    const letterSet = usesMeridiem ? "aApPmM" : "";
     const allowed = new RegExp(`^[0-9${letterSet}${separators}]*$`);
     if (!allowed.test(text)) event.preventDefault();
   };
@@ -143,7 +149,7 @@ export class ThekDatePicker {
   };
 
   private readonly handleThemeMediaChange = (): void => {
-    if (this.options.reactiveTheme && this.options.themeMode === 'auto') {
+    if (this.options.reactiveTheme && this.options.themeMode === "auto") {
       this.applyAutoTheme();
     }
   };
@@ -152,45 +158,45 @@ export class ThekDatePicker {
     if (!this.openState || this.options.disabled) return;
 
     switch (event.key) {
-      case 'Escape':
+      case "Escape":
         event.preventDefault();
         this.close();
         this.input.focus();
         return;
-      case 'ArrowLeft':
+      case "ArrowLeft":
         event.preventDefault();
         this.moveFocusedDay(-1);
         return;
-      case 'ArrowRight':
+      case "ArrowRight":
         event.preventDefault();
         this.moveFocusedDay(1);
         return;
-      case 'ArrowUp':
+      case "ArrowUp":
         event.preventDefault();
         this.moveFocusedDay(-7);
         return;
-      case 'ArrowDown':
+      case "ArrowDown":
         event.preventDefault();
         this.moveFocusedDay(7);
         return;
-      case 'Home':
+      case "Home":
         event.preventDefault();
         this.moveFocusToWeekBoundary(false);
         return;
-      case 'End':
+      case "End":
         event.preventDefault();
         this.moveFocusToWeekBoundary(true);
         return;
-      case 'PageUp':
+      case "PageUp":
         event.preventDefault();
         this.moveFocusedMonth(event.shiftKey ? -12 : -1);
         return;
-      case 'PageDown':
+      case "PageDown":
         event.preventDefault();
         this.moveFocusedMonth(event.shiftKey ? 12 : 1);
         return;
-      case 'Enter':
-      case ' ':
+      case "Enter":
+      case " ":
         if (this.focusedDayTs == null) return;
         event.preventDefault();
         this.selectFocusedDay();
@@ -203,35 +209,35 @@ export class ThekDatePicker {
   private readonly handlePickerClick = (event: MouseEvent): void => {
     const target = event.target as HTMLElement | null;
     if (!target) return;
-    const actionEl = target.closest<HTMLElement>('[data-action]');
+    const actionEl = target.closest<HTMLElement>("[data-action]");
     if (!actionEl) return;
 
     const action = actionEl.dataset.action;
     if (!action) return;
 
     switch (action) {
-      case 'prev-year':
+      case "prev-year":
         this.moveFocusedMonth(-12);
         return;
-      case 'next-year':
+      case "next-year":
         this.moveFocusedMonth(12);
         return;
-      case 'prev-month':
+      case "prev-month":
         this.moveFocusedMonth(-1);
         return;
-      case 'next-month':
+      case "next-month":
         this.moveFocusedMonth(1);
         return;
-      case 'today': {
+      case "today": {
         const now = clampDate(new Date(), this.options.minDate, this.options.maxDate);
         this.setDate(now, true);
         if (!this.options.enableTime) this.close();
         return;
       }
-      case 'ok':
+      case "ok":
         this.close();
         return;
-      case 'day': {
+      case "day": {
         const ts = Number(actionEl.dataset.ts);
         if (Number.isNaN(ts)) return;
         const raw = new Date(ts);
@@ -267,33 +273,40 @@ export class ThekDatePicker {
   };
 
   constructor(target: string | HTMLInputElement, options: ThekDatePickerOptions = {}) {
-    const input = typeof target === 'string' ? document.querySelector<HTMLInputElement>(target) : target;
+    const input =
+      typeof target === "string" ? document.querySelector<HTMLInputElement>(target) : target;
     if (!input) {
-      throw new Error('ThekDatePicker: target input element not found.');
+      throw new Error("ThekDatePicker: target input element not found.");
     }
     if (!(input instanceof HTMLInputElement)) {
-      throw new Error('ThekDatePicker: target must be an HTMLInputElement.');
+      throw new Error("ThekDatePicker: target must be an HTMLInputElement.");
     }
 
     this.input = input;
-    this.input.classList.add('thekdp-input');
     this.options = resolveOptions(options);
+    this.input.classList.add(`${this.options.cssPrefix}-input`);
     this.localizedMonthNames = getMonthNames(this.options.locale);
     this.localizedWeekdayNames = getWeekdayNames(this.options.locale);
     this.mountInputTrigger();
 
-    this.pickerEl = createPickerPopover();
+    this.pickerEl = createPickerPopover(this.options.cssPrefix);
 
-    this.monthLabelEl = this.pickerEl.querySelector('.thekdp-current-month') as HTMLSpanElement;
-    this.weekdaysEl = this.pickerEl.querySelector('.thekdp-weekdays') as HTMLDivElement;
-    this.daysEl = this.pickerEl.querySelector('.thekdp-days') as HTMLDivElement;
+    this.monthLabelEl = this.pickerEl.querySelector(
+      `.${this.options.cssPrefix}-current-month`,
+    ) as HTMLSpanElement;
+    this.weekdaysEl = this.pickerEl.querySelector(
+      `.${this.options.cssPrefix}-weekdays`,
+    ) as HTMLDivElement;
+    this.daysEl = this.pickerEl.querySelector(`.${this.options.cssPrefix}-days`) as HTMLDivElement;
     this.applyThemeVars();
 
-    this.pickerEl.addEventListener('click', this.handlePickerClick);
-    this.pickerEl.addEventListener('keydown', this.handlePickerKeyDown);
+    this.pickerEl.addEventListener("click", this.handlePickerClick);
+    this.pickerEl.addEventListener("keydown", this.handlePickerKeyDown);
 
     const defaultDate = options.defaultDate ?? this.input.value;
-    const parsedDefault = extractInput(String(defaultDate ?? ''), this.options) ?? normalizeDateInput(options.defaultDate);
+    const parsedDefault =
+      extractInput(String(defaultDate ?? ""), this.options) ??
+      normalizeDateInput(options.defaultDate);
     if (parsedDefault) {
       this.selectedDate = clampDate(parsedDefault, this.options.minDate, this.options.maxDate);
       this.viewDate = new Date(this.selectedDate);
@@ -347,7 +360,7 @@ export class ThekDatePicker {
     const parsed =
       value instanceof Date
         ? normalizeDateInput(value)
-        : typeof value === 'string'
+        : typeof value === "string"
           ? extractInput(value, this.options)
           : null;
 
@@ -379,7 +392,7 @@ export class ThekDatePicker {
 
   public clear(triggerChange = true): void {
     this.selectedDate = null;
-    this.input.value = '';
+    this.input.value = "";
     this.viewDate = new Date();
     this.focusedDayTs = toLocalStartOfDay(this.viewDate).getTime();
     this.hideRevertIndicator();
@@ -408,14 +421,14 @@ export class ThekDatePicker {
   }
 
   public setTheme(theme: ThekDatePickerThemeOption): void {
-    if (theme === 'auto') {
-      this.options.themeMode = 'auto';
+    if (theme === "auto") {
+      this.options.themeMode = "auto";
       this.applyAutoTheme();
       if (this.options.reactiveTheme) this.setupReactiveTheme();
       return;
     }
     this.teardownReactiveTheme();
-    this.options.themeMode = typeof theme === 'string' ? theme : 'custom';
+    this.options.themeMode = typeof theme === "string" ? theme : "custom";
     this.options.theme = resolveThemeOption(theme);
     this.applyThemeVars();
   }
@@ -428,35 +441,35 @@ export class ThekDatePicker {
     this.teardownReactiveTheme();
     this.close();
     this.unmountInputTrigger();
-    this.pickerEl.removeEventListener('click', this.handlePickerClick);
-    this.pickerEl.removeEventListener('keydown', this.handlePickerKeyDown);
+    this.pickerEl.removeEventListener("click", this.handlePickerClick);
+    this.pickerEl.removeEventListener("keydown", this.handlePickerKeyDown);
     if (this.pickerEl.isConnected) this.pickerEl.remove();
   }
 
   private bind(): void {
-    this.input.addEventListener('click', this.handleInputClick);
-    this.input.addEventListener('input', this.handleInput);
-    this.input.addEventListener('keydown', this.handleInputKeyDown);
-    this.input.addEventListener('blur', this.handleInputBlur);
-    this.input.addEventListener('paste', this.handlePaste);
-    this.triggerButtonEl?.addEventListener('click', this.handleTriggerClick);
-    document.addEventListener('mousedown', this.handleDocumentPointerDown);
-    window.addEventListener('resize', this.handleViewportChange);
-    window.addEventListener('scroll', this.handleViewportChange, { capture: true, passive: true });
+    this.input.addEventListener("click", this.handleInputClick);
+    this.input.addEventListener("input", this.handleInput);
+    this.input.addEventListener("keydown", this.handleInputKeyDown);
+    this.input.addEventListener("blur", this.handleInputBlur);
+    this.input.addEventListener("paste", this.handlePaste);
+    this.triggerButtonEl?.addEventListener("click", this.handleTriggerClick);
+    document.addEventListener("mousedown", this.handleDocumentPointerDown);
+    window.addEventListener("resize", this.handleViewportChange);
+    window.addEventListener("scroll", this.handleViewportChange, this.scrollListenerOptions);
   }
 
   private unbind(): void {
-    this.input.removeEventListener('click', this.handleInputClick);
-    this.input.removeEventListener('input', this.handleInput);
-    this.input.removeEventListener('keydown', this.handleInputKeyDown);
-    this.input.removeEventListener('blur', this.handleInputBlur);
-    this.input.removeEventListener('paste', this.handlePaste);
-    this.triggerButtonEl?.removeEventListener('click', this.handleTriggerClick);
-    document.removeEventListener('mousedown', this.handleDocumentPointerDown);
-    window.removeEventListener('resize', this.handleViewportChange);
-    window.removeEventListener('scroll', this.handleViewportChange, true);
-    this.hourInputEl?.removeEventListener('change', this.handleTimeChange);
-    this.minuteInputEl?.removeEventListener('change', this.handleTimeChange);
+    this.input.removeEventListener("click", this.handleInputClick);
+    this.input.removeEventListener("input", this.handleInput);
+    this.input.removeEventListener("keydown", this.handleInputKeyDown);
+    this.input.removeEventListener("blur", this.handleInputBlur);
+    this.input.removeEventListener("paste", this.handlePaste);
+    this.triggerButtonEl?.removeEventListener("click", this.handleTriggerClick);
+    document.removeEventListener("mousedown", this.handleDocumentPointerDown);
+    window.removeEventListener("resize", this.handleViewportChange);
+    window.removeEventListener("scroll", this.handleViewportChange, this.scrollListenerOptions);
+    this.hourInputEl?.removeEventListener("change", this.handleTimeChange);
+    this.minuteInputEl?.removeEventListener("change", this.handleTimeChange);
   }
 
   private emitChange(): void {
@@ -474,17 +487,17 @@ export class ThekDatePicker {
     const parent = this.input.parentElement;
     if (!parent) return;
 
-    const wrap = document.createElement('div');
-    wrap.className = 'thekdp-input-wrap';
+    const wrap = document.createElement("div");
+    wrap.className = `${this.options.cssPrefix}-input-wrap`;
     parent.insertBefore(wrap, this.input);
     wrap.appendChild(this.input);
 
-    const suspiciousIndicator = createSuspiciousIndicator();
+    const suspiciousIndicator = createSuspiciousIndicator(this.options.cssPrefix);
     wrap.appendChild(suspiciousIndicator);
-    const revertIndicator = createRevertIndicator();
+    const revertIndicator = createRevertIndicator(this.options.cssPrefix);
     wrap.appendChild(revertIndicator);
 
-    const button = createTriggerButton();
+    const button = createTriggerButton(this.options.cssPrefix);
     wrap.appendChild(button);
 
     this.inputWrapEl = wrap;
@@ -523,7 +536,11 @@ export class ThekDatePicker {
     return count;
   }
 
-  private caretIndexForMaskCharCount(value: string, maskChars: number, usesMeridiem: boolean): number {
+  private caretIndexForMaskCharCount(
+    value: string,
+    maskChars: number,
+    usesMeridiem: boolean,
+  ): number {
     if (maskChars <= 0) return 0;
     let count = 0;
     for (let i = 0; i < value.length; i += 1) {
@@ -542,16 +559,23 @@ export class ThekDatePicker {
     const nextValue = applyMaskToInput(previousValue, format);
     if (nextValue === previousValue) return;
 
-    const maskCharsBeforeCaret = this.countMaskChars(previousValue.slice(0, caretStart), usesMeridiem);
+    const maskCharsBeforeCaret = this.countMaskChars(
+      previousValue.slice(0, caretStart),
+      usesMeridiem,
+    );
     this.input.value = nextValue;
 
-    const nextCaret = this.caretIndexForMaskCharCount(nextValue, maskCharsBeforeCaret, usesMeridiem);
+    const nextCaret = this.caretIndexForMaskCharCount(
+      nextValue,
+      maskCharsBeforeCaret,
+      usesMeridiem,
+    );
     this.input.setSelectionRange(nextCaret, nextCaret);
   }
 
   private setupReactiveTheme(): void {
     this.teardownReactiveTheme();
-    if (!this.options.reactiveTheme || this.options.themeMode !== 'auto') return;
+    if (!this.options.reactiveTheme || this.options.themeMode !== "auto") return;
 
     this.themeObserver = new MutationObserver(() => {
       this.applyAutoTheme();
@@ -562,8 +586,8 @@ export class ThekDatePicker {
     });
 
     if (window.matchMedia) {
-      this.themeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      this.themeMediaQuery.addEventListener('change', this.handleThemeMediaChange);
+      this.themeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      this.themeMediaQuery.addEventListener("change", this.handleThemeMediaChange);
     }
     this.applyAutoTheme();
   }
@@ -572,7 +596,7 @@ export class ThekDatePicker {
     this.themeObserver?.disconnect();
     this.themeObserver = null;
     if (this.themeMediaQuery) {
-      this.themeMediaQuery.removeEventListener('change', this.handleThemeMediaChange);
+      this.themeMediaQuery.removeEventListener("change", this.handleThemeMediaChange);
     }
     this.themeMediaQuery = null;
   }
@@ -581,9 +605,10 @@ export class ThekDatePicker {
     if (!this.options.revertWarning) return;
     const detail = `${this.options.revertMessage} : ${rejectedInput}`;
 
-    this.input.classList.add('thekdp-input-reverted');
+    this.input.classList.add(`${this.options.cssPrefix}-input-reverted`);
     this.input.title = detail;
-    if (this.inputWrapEl) this.inputWrapEl.classList.add('thekdp-input-wrap-reverted');
+    if (this.inputWrapEl)
+      this.inputWrapEl.classList.add(`${this.options.cssPrefix}-input-wrap-reverted`);
     if (this.revertIndicatorEl) {
       this.revertIndicatorEl.hidden = false;
       this.revertIndicatorEl.title = detail;
@@ -591,14 +616,15 @@ export class ThekDatePicker {
   }
 
   private hideRevertIndicator(): void {
-    this.input.classList.remove('thekdp-input-reverted');
-    if (this.inputWrapEl) this.inputWrapEl.classList.remove('thekdp-input-wrap-reverted');
+    this.input.classList.remove(`${this.options.cssPrefix}-input-reverted`);
+    if (this.inputWrapEl)
+      this.inputWrapEl.classList.remove(`${this.options.cssPrefix}-input-wrap-reverted`);
     if (this.revertIndicatorEl) {
       this.revertIndicatorEl.hidden = true;
-      this.revertIndicatorEl.title = '';
+      this.revertIndicatorEl.title = "";
     }
-    if (!this.input.classList.contains('thekdp-input-suspicious')) {
-      this.input.removeAttribute('title');
+    if (!this.input.classList.contains(`${this.options.cssPrefix}-input-suspicious`)) {
+      this.input.removeAttribute("title");
     }
   }
 
@@ -645,7 +671,9 @@ export class ThekDatePicker {
   private focusCurrentDayCell(): void {
     const targetTs = this.focusedDayTs;
     if (targetTs == null) return;
-    const cell = this.dayCellEls.find((item) => item.dataset.ts === String(targetTs) && !item.disabled);
+    const cell = this.dayCellEls.find(
+      (item) => item.dataset.ts === String(targetTs) && !item.disabled,
+    );
     cell?.focus();
   }
 
@@ -716,7 +744,7 @@ export class ThekDatePicker {
     const left = inputRect.left + window.scrollX;
     const maxLeft = window.scrollX + docEl.clientWidth - 300;
 
-    this.pickerEl.style.position = 'absolute';
+    this.pickerEl.style.position = "absolute";
     this.pickerEl.style.top = `${top}px`;
     this.pickerEl.style.left = `${Math.max(window.scrollX + 8, Math.min(left, maxLeft))}px`;
     this.pickerEl.style.zIndex = String(this.options.zIndex);
@@ -726,14 +754,14 @@ export class ThekDatePicker {
     if (this.dayCellEls.length === 42 && this.daysEl.childElementCount === 42) return;
 
     this.dayCellEls = [];
-    this.daysEl.textContent = '';
+    this.daysEl.textContent = "";
     const fragment = document.createDocumentFragment();
     for (let i = 0; i < 42; i += 1) {
-      const cell = document.createElement('button');
-      cell.type = 'button';
-      cell.setAttribute('role', 'gridcell');
-      cell.dataset.action = 'day';
-      cell.className = 'thekdp-day-cell';
+      const cell = document.createElement("button");
+      cell.type = "button";
+      cell.setAttribute("role", "gridcell");
+      cell.dataset.action = "day";
+      cell.className = `${this.options.cssPrefix}-day-cell`;
       fragment.appendChild(cell);
       this.dayCellEls.push(cell);
     }
@@ -764,7 +792,7 @@ export class ThekDatePicker {
 
   private syncInput(): void {
     if (!this.selectedDate) {
-      this.input.value = '';
+      this.input.value = "";
       this.updateSuspiciousState();
       return;
     }
@@ -773,23 +801,28 @@ export class ThekDatePicker {
   }
 
   private updateSuspiciousState(): void {
-    const suspicious = this.selectedDate ? isSuspiciousDate(this.selectedDate, this.options) : false;
-    this.input.classList.toggle('thekdp-input-suspicious', suspicious);
-    this.input.toggleAttribute('aria-invalid', suspicious);
+    const suspicious = this.selectedDate
+      ? isSuspiciousDate(this.selectedDate, this.options)
+      : false;
+    this.input.classList.toggle(`${this.options.cssPrefix}-input-suspicious`, suspicious);
+    this.input.toggleAttribute("aria-invalid", suspicious);
 
     if (this.inputWrapEl) {
-      this.inputWrapEl.classList.toggle('thekdp-input-wrap-suspicious', suspicious);
+      this.inputWrapEl.classList.toggle(
+        `${this.options.cssPrefix}-input-wrap-suspicious`,
+        suspicious,
+      );
     }
 
     if (this.suspiciousIndicatorEl) {
       this.suspiciousIndicatorEl.hidden = !suspicious;
-      this.suspiciousIndicatorEl.title = suspicious ? this.options.suspiciousMessage : '';
+      this.suspiciousIndicatorEl.title = suspicious ? this.options.suspiciousMessage : "";
     }
 
     if (suspicious) {
       this.input.title = this.options.suspiciousMessage;
     } else {
-      this.input.removeAttribute('title');
+      this.input.removeAttribute("title");
     }
   }
 
@@ -804,11 +837,20 @@ export class ThekDatePicker {
     const month = this.viewDate.getMonth();
     this.ensureFocusableDay();
     this.monthLabelEl.textContent = `${this.localizedMonthNames[month] ?? getMonthNames(this.options.locale)[month]} ${year}`;
-    this.pickerEl.setAttribute('aria-label', `${this.localizedMonthNames[month] ?? ''} ${year}`.trim());
+    this.pickerEl.setAttribute(
+      "aria-label",
+      `${this.localizedMonthNames[month] ?? ""} ${year}`.trim(),
+    );
 
-    this.weekdaysEl.innerHTML = rotateWeekdayLabels(this.localizedWeekdayNames, this.options.weekStartsOn)
-      .map((day) => `<div class="thekdp-weekday-cell" role="columnheader">${day}</div>`)
-      .join('');
+    this.weekdaysEl.innerHTML = rotateWeekdayLabels(
+      this.localizedWeekdayNames,
+      this.options.weekStartsOn,
+    )
+      .map(
+        (day) =>
+          `<div class="${this.options.cssPrefix}-weekday-cell" role="columnheader">${day}</div>`,
+      )
+      .join("");
 
     const firstOfMonth = new Date(year, month, 1);
     const monthStartDay = (firstOfMonth.getDay() - this.options.weekStartsOn + 7) % 7;
@@ -829,46 +871,55 @@ export class ThekDatePicker {
       const disabled = this.isDateDisabled(current);
       const isFocusedDate = this.focusedDayTs === dayTs;
 
-      const classes = ['thekdp-day-cell'];
-      if (!inCurrentMonth) classes.push('thekdp-day-cell-muted');
-      if (isTodayDate) classes.push('thekdp-day-cell-today');
-      if (isSelectedDate) classes.push('thekdp-day-cell-selected');
-      if (disabled) classes.push('thekdp-day-cell-disabled');
+      const classes = [`${this.options.cssPrefix}-day-cell`];
+      if (!inCurrentMonth) classes.push(`${this.options.cssPrefix}-day-cell-muted`);
+      if (isTodayDate) classes.push(`${this.options.cssPrefix}-day-cell-today`);
+      if (isSelectedDate) classes.push(`${this.options.cssPrefix}-day-cell-selected`);
+      if (disabled) classes.push(`${this.options.cssPrefix}-day-cell-disabled`);
 
       const cell = this.dayCellEls[i];
-      cell.className = classes.join(' ');
+      cell.className = classes.join(" ");
       cell.dataset.ts = String(dayTs);
       cell.disabled = disabled;
       cell.tabIndex = !disabled && isFocusedDate ? 0 : -1;
-      cell.setAttribute('aria-selected', String(isSelectedDate));
-      cell.setAttribute('aria-label', formatSpokenDate(current, this.options.locale));
+      cell.setAttribute("aria-selected", String(isSelectedDate));
+      cell.setAttribute("aria-label", formatSpokenDate(current, this.options.locale));
       cell.textContent = String(current.getDate());
     }
 
-    const timeContainer = this.pickerEl.querySelector('.thekdp-time') as HTMLDivElement;
-    const actions = this.pickerEl.querySelector('.thekdp-actions') as HTMLDivElement;
+    const timeContainer = this.pickerEl.querySelector(
+      `.${this.options.cssPrefix}-time`,
+    ) as HTMLDivElement;
+    const actions = this.pickerEl.querySelector(
+      `.${this.options.cssPrefix}-actions`,
+    ) as HTMLDivElement;
     if (this.options.enableTime) {
       const selectedDate = this.selectedDate ?? new Date();
       timeContainer.innerHTML = `
-        <label class="thekdp-time-label">Time</label>
-        <input class="thekdp-time-input" type="number" min="0" max="23" value="${selectedDate.getHours()}" />
+        <label class="${this.options.cssPrefix}-time-label">Time</label>
+        <input class="${this.options.cssPrefix}-time-input" type="number" min="0" max="23" data-time-unit="hour" value="${selectedDate.getHours()}" />
         <span>:</span>
-        <input class="thekdp-time-input" type="number" min="0" max="59" value="${selectedDate.getMinutes()}" />
+        <input class="${this.options.cssPrefix}-time-input" type="number" min="0" max="59" data-time-unit="minute" value="${selectedDate.getMinutes()}" />
       `;
-      actions.classList.add('thekdp-actions-with-ok');
-      this.hourInputEl = timeContainer.querySelectorAll<HTMLInputElement>('input')[0] ?? null;
-      this.minuteInputEl = timeContainer.querySelectorAll<HTMLInputElement>('input')[1] ?? null;
-      this.hourInputEl?.addEventListener('change', this.handleTimeChange);
-      this.minuteInputEl?.addEventListener('change', this.handleTimeChange);
+      actions.classList.add(`${this.options.cssPrefix}-actions-with-ok`);
+      this.hourInputEl =
+        timeContainer.querySelector<HTMLInputElement>('[data-time-unit="hour"]') ?? null;
+      this.minuteInputEl =
+        timeContainer.querySelector<HTMLInputElement>('[data-time-unit="minute"]') ?? null;
+      this.hourInputEl?.addEventListener("change", this.handleTimeChange);
+      this.minuteInputEl?.addEventListener("change", this.handleTimeChange);
     } else {
-      timeContainer.innerHTML = '';
-      actions.classList.remove('thekdp-actions-with-ok');
+      timeContainer.innerHTML = "";
+      actions.classList.remove(`${this.options.cssPrefix}-actions-with-ok`);
       this.hourInputEl = null;
       this.minuteInputEl = null;
     }
   }
 }
 
-export function createDatePicker(target: string | HTMLInputElement, options?: ThekDatePickerOptions): ThekDatePicker {
+export function createDatePicker(
+  target: string | HTMLInputElement,
+  options?: ThekDatePickerOptions,
+): ThekDatePicker {
   return new ThekDatePicker(target, options);
 }
