@@ -88,6 +88,7 @@ describe("ThekDatePicker integration", () => {
     expect((document.querySelector("#date-input") as HTMLInputElement).value).toBe("2026-02-09");
 
     picker.open();
+    await new Promise((resolve) => requestAnimationFrame(resolve));
     await new Promise((resolve) => setTimeout(resolve, 0));
     popover.dispatchEvent(
       new KeyboardEvent("keydown", { key: "PageDown", bubbles: true, cancelable: true }),
