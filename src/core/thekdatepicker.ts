@@ -135,7 +135,8 @@ export class ThekDatePicker {
     if (!this.openState) return;
     const target = event.target as Node | null;
     if (!target) return;
-    if (this.pickerEl.contains(target) || this.input.contains(target)) return;
+    const path = event.composedPath();
+    if (path.includes(this.pickerEl) || path.includes(this.input)) return;
     this.close();
     this.commitInput();
   };
@@ -318,6 +319,13 @@ export class ThekDatePicker {
     this.input.disabled = this.options.disabled;
     this.input.setAttribute("inputmode", "text");
     this.input.setAttribute("autocomplete", "off");
+    this.input.setAttribute("aria-haspopup", "dialog");
+    this.input.setAttribute("aria-expanded", "false");
+    if (!this.pickerEl.id) {
+      this.pickerEl.id = `thekdp-picker-${Math.random().toString(36).slice(2, 9)}`;
+    }
+    this.input.setAttribute("aria-controls", this.pickerEl.id);
+
     if (this.triggerButtonEl) this.triggerButtonEl.disabled = this.options.disabled;
     this.syncInput();
     this.setupReactiveTheme();
@@ -331,6 +339,7 @@ export class ThekDatePicker {
       this.options.appendTo.appendChild(this.pickerEl);
     }
     this.openState = true;
+    this.input.setAttribute("aria-expanded", "true");
     this.ensureFocusableDay();
     this.positionPicker();
     this.pickerEl.hidden = false;
@@ -344,6 +353,7 @@ export class ThekDatePicker {
   public close(): void {
     if (this.destroyed || !this.openState) return;
     this.openState = false;
+    this.input.setAttribute("aria-expanded", "false");
     if (this.viewportFrame != null) {
       window.cancelAnimationFrame(this.viewportFrame);
       this.viewportFrame = null;
@@ -357,7 +367,7 @@ export class ThekDatePicker {
     else this.open();
   }
 
-  public setDate(value: DateInput, triggerChange = true): void {
+  public setDate(value: DateInput | null | undefined, triggerChange = true): void {
     if (this.destroyed) return;
     const parsed =
       value instanceof Date
@@ -438,6 +448,12 @@ export class ThekDatePicker {
   public destroy(): void {
     if (this.destroyed) return;
     this.destroyed = true;
+
+    if (this.viewportFrame != null) {
+      window.cancelAnimationFrame(this.viewportFrame);
+      this.viewportFrame = null;
+    }
+
     this.hideRevertIndicator();
     this.unbind();
     this.teardownReactiveTheme();
@@ -753,19 +769,26 @@ export class ThekDatePicker {
   }
 
   private ensureDayCells(): void {
-    if (this.dayCellEls.length === 42 && this.daysEl.childElementCount === 42) return;
+    const hasRows = this.daysEl.querySelectorAll(`.${this.options.cssPrefix}-days-row`).length === 6;
+    if (hasRows && this.dayCellEls.length === 42) return;
 
     this.dayCellEls = [];
     this.daysEl.textContent = "";
     const fragment = document.createDocumentFragment();
-    for (let i = 0; i < 42; i += 1) {
-      const cell = document.createElement("button");
-      cell.type = "button";
-      cell.setAttribute("role", "gridcell");
-      cell.dataset.action = "day";
-      cell.className = `${this.options.cssPrefix}-day-cell`;
-      fragment.appendChild(cell);
-      this.dayCellEls.push(cell);
+    for (let r = 0; r < 6; r += 1) {
+      const row = document.createElement("div");
+      row.className = `${this.options.cssPrefix}-days-row`;
+      row.setAttribute("role", "row");
+      for (let c = 0; c < 7; c += 1) {
+        const cell = document.createElement("button");
+        cell.type = "button";
+        cell.setAttribute("role", "gridcell");
+        cell.dataset.action = "day";
+        cell.className = `${this.options.cssPrefix}-day-cell`;
+        row.appendChild(cell);
+        this.dayCellEls.push(cell);
+      }
+      fragment.appendChild(row);
     }
     this.daysEl.appendChild(fragment);
   }

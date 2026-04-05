@@ -1,6 +1,6 @@
 import type { ThekDatePicker } from "./thekdatepicker.js";
 
-export type DateInput = Date | string | null | undefined;
+export type DateInput = Date | string;
 
 export interface ThekDatePickerTheme {
   primary: string;
@@ -26,9 +26,9 @@ export interface ThekDatePickerOptions {
   useLocaleDefaults?: boolean;
   enableTime?: boolean;
   timeFormat?: string;
-  minDate?: DateInput;
-  maxDate?: DateInput;
-  defaultDate?: DateInput;
+  minDate?: DateInput | null;
+  maxDate?: DateInput | null;
+  defaultDate?: DateInput | null;
   placeholder?: string;
   disabled?: boolean;
   appendTo?: HTMLElement;

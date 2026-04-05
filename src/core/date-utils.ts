@@ -313,7 +313,9 @@ export function parseDateByFormat(value: string, format: string): Date | null {
   for (const part of parts) {
     if (part.type === "literal") {
       if (cursor >= input.length) {
-        continue;
+        // If it's a separator and optional, we might skip, but let's be strict for now
+        // if it's in the format, it should be in the input.
+        return null;
       }
       if (input[cursor] === part.value) {
         cursor += 1;
@@ -324,7 +326,7 @@ export function parseDateByFormat(value: string, format: string): Date | null {
           cursor += 1;
           continue;
         }
-        continue;
+        return null;
       }
       if (/\s/.test(part.value) && /\s/.test(input[cursor])) {
         while (cursor < input.length && /\s/.test(input[cursor])) {
@@ -496,10 +498,12 @@ export function getMonthNames(locale?: string): string[] {
 export function getWeekdayNames(locale?: string): string[] {
   try {
     const formatter = new Intl.DateTimeFormat(locale, { weekday: "short" });
-    const sunday = new Date(Date.UTC(2026, 0, 4));
-    return Array.from({ length: 7 }, (_, offset) =>
-      formatter.format(new Date(sunday.getTime() + offset * 86400000)),
-    );
+    const sunday = new Date(2026, 0, 4);
+    return Array.from({ length: 7 }, (_, offset) => {
+      const d = new Date(sunday);
+      d.setDate(sunday.getDate() + offset);
+      return formatter.format(d);
+    });
   } catch {
     return [...DEFAULT_WEEKDAY_NAMES];
   }
