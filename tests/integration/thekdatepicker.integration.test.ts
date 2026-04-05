@@ -92,6 +92,7 @@ describe("ThekDatePicker integration", () => {
     popover.dispatchEvent(
       new KeyboardEvent("keydown", { key: "PageDown", bubbles: true, cancelable: true }),
     );
+    await new Promise((resolve) => setTimeout(resolve, 0));
     focused = document.activeElement as HTMLButtonElement;
     expect(focused.dataset.ts).toBe(String(new Date(2026, 2, 9).setHours(0, 0, 0, 0)));
 

@@ -1,5 +1,21 @@
 # Release Notes
 
+## 1.1.1 - 2026-04-05
+
+### Fixed
+
+- **Timezone-Blind Internationalization:** Fixed a critical bug where localized weekday names shifted in western timezones due to UTC anchor date usage. Now uses a local anchor date for consistent labeling. (SEV-1)
+- **Grid Accessibility:** Added `role="row"` to the calendar grid and grouped day cells into rows for full W3C ARIA compliance. (SEV-2)
+- **Input Accessibility:** Enhanced the main input with `aria-haspopup`, `aria-expanded`, and `aria-controls` for better screen reader support. (SEV-2)
+- **Outside Click Resilience:** Switched to `event.composedPath()` for outside click detection, ensuring the picker doesn't prematurely close when clicking dynamic or unmounting elements. (SEV-3)
+- **Memory Leak Protection:** Explicitly cancel pending `requestAnimationFrame` calls during component destruction to prevent ghost callbacks and memory leaks. (SEV-3)
+- **Strict Parsing:** Improved `parseDateByFormat` to strictly enforce separator presence, preventing silent format truncation or incorrect date interpretation. (SEV-4)
+- **Type Safety:** Refined `DateInput` and `setDate` types to be more explicit about handling `null` and `undefined` values for clearing state. (SEV-4)
+
+### Changed
+
+- **Build Pipeline:** CSS is now correctly integrated into the Vite pipeline, ensuring `base.css` is minified and correctly distributed without manual copy scripts. (SEV-3)
+
 ## 1.1.0 - 2026-04-04
 
 ### Fixed

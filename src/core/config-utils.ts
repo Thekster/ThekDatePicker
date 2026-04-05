@@ -178,7 +178,7 @@ export function resetGlobalOptions(): void {
   globalOptions = {};
 }
 
-export function normalizeDateInput(value: DateInput): Date | null {
+export function normalizeDateInput(value: DateInput | null | undefined): Date | null {
   if (value == null) return null;
   if (value instanceof Date) return isValidDate(value) ? new Date(value) : null;
   const isoParsed = parseIsoDateString(value);
