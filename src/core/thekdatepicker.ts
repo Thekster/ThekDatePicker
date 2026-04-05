@@ -191,9 +191,9 @@ export class ThekDatePicker {
         event.preventDefault();
         this.moveFocusedMonth(event.shiftKey ? -12 : -1);
         return;
-      case "PageDown":
+      case "PageDown": console.log("PageDown hit", this.focusedDayTs);
         event.preventDefault();
-        this.moveFocusedMonth(event.shiftKey ? 12 : 1);
+        this.moveFocusedMonth(event.shiftKey ? 12 : 1); console.log("After PageDown", this.focusedDayTs);
         return;
       case "Enter":
       case " ":
