@@ -4,7 +4,7 @@
 
 - **Project Name**: ThekDatePicker
 - **Type**: Framework-agnostic date/time picker library
-- **Core Functionality**: A date/time picker with strict input masking, flexible separators, calendar popover, and themeable styles
+- **Core Functionality**: A single-date/date-time picker with strict input masking, flexible separators, calendar popover, and themeable styles
 - **Target Users**: Web developers needing a vanilla JS date picker that works with any framework
 
 ## Technology Stack
@@ -90,68 +90,68 @@ createDatePicker(target: string | HTMLInputElement, options?: ThekDatePickerOpti
 
 ### Instance Methods
 
-| Method | Description |
-|--------|-------------|
-| `open()` | Opens popover |
-| `close()` | Closes popover |
-| `toggle()` | Toggles popover state |
-| `setDate(value, triggerChange?)` | Sets date value |
-| `setDateFromTimestamp(timestampMs, triggerChange?)` | Sets from Unix timestamp |
-| `getDate()` | Returns Date clone or null |
-| `clear(triggerChange?)` | Clears value |
-| `setMinDate(value)` | Updates min date |
-| `setMaxDate(value)` | Updates max date |
-| `setDisabled(disabled)` | Enables/disables control |
-| `setTheme(theme)` | Updates theme |
-| `destroy()` | Cleanup and remove |
+| Method                                              | Description                |
+| --------------------------------------------------- | -------------------------- |
+| `open()`                                            | Opens popover              |
+| `close()`                                           | Closes popover             |
+| `toggle()`                                          | Toggles popover state      |
+| `setDate(value, triggerChange?)`                    | Sets date value            |
+| `setDateFromTimestamp(timestampMs, triggerChange?)` | Sets from Unix timestamp   |
+| `getDate()`                                         | Returns Date clone or null |
+| `clear(triggerChange?)`                             | Clears value               |
+| `setMinDate(value)`                                 | Updates min date           |
+| `setMaxDate(value)`                                 | Updates max date           |
+| `setDisabled(disabled)`                             | Enables/disables control   |
+| `setTheme(theme)`                                   | Updates theme              |
+| `destroy()`                                         | Cleanup and remove         |
 
 ### Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| format | string | 'DD/MM/YYYY' | Date format mask |
-| locale | string | system | Locale for defaults |
-| useLocaleDefaults | boolean | false | Derive format/timeFormat/weekStartsOn from locale |
-| enableTime | boolean | false | Show time picker |
-| timeFormat | string | 'HH:mm' | Time format when no time tokens in format |
-| minDate | DateInput | undefined | Minimum allowed date |
-| maxDate | DateInput | undefined | Maximum allowed date |
-| defaultDate | DateInput | undefined | Initial value |
-| placeholder | string | derived | Placeholder text |
-| disabled | boolean | false | Disable input |
-| appendTo | HTMLElement | document.body | Popover container |
-| weekStartsOn | 0-6 | 0 | First day of week |
-| closeOnSelect | boolean | true | Close after day selection |
-| showCalendarButton | boolean | true | Show trigger button |
-| openOnInputClick | boolean | false | Open on input click |
-| zIndex | number | 9999 | Popover z-index |
-| theme | string/object | {} | Theme template or overrides |
-| reactiveTheme | boolean | false | React to document theme |
-| themeAttribute | string | 'data-theme' | Theme attribute name |
-| suspiciousWarning | boolean | false | Enable suspicious date warning |
-| suspiciousYearSpan | number | 100 | Year span for warning |
-| suspiciousMinYear | number | undefined | Absolute min year |
-| suspiciousMaxYear | number | undefined | Absolute max year |
-| suspiciousMessage | string | 'Suspicious date value' | Warning tooltip |
-| revertWarning | boolean | true | Show revert indicator |
-| revertMessage | string | 'Invalid input value' | Revert tooltip |
+| Option             | Type          | Default                 | Description                                       |
+| ------------------ | ------------- | ----------------------- | ------------------------------------------------- |
+| format             | string        | 'DD/MM/YYYY'            | Date format mask                                  |
+| locale             | string        | system                  | Locale for defaults                               |
+| useLocaleDefaults  | boolean       | false                   | Derive format/timeFormat/weekStartsOn from locale |
+| enableTime         | boolean       | false                   | Show time picker                                  |
+| timeFormat         | string        | 'HH:mm'                 | Time format when no time tokens in format         |
+| minDate            | DateInput     | undefined               | Minimum allowed date                              |
+| maxDate            | DateInput     | undefined               | Maximum allowed date                              |
+| defaultDate        | DateInput     | undefined               | Initial value                                     |
+| placeholder        | string        | derived                 | Placeholder text                                  |
+| disabled           | boolean       | false                   | Disable input                                     |
+| appendTo           | HTMLElement   | document.body           | Popover container                                 |
+| weekStartsOn       | 0-6           | 0                       | First day of week                                 |
+| closeOnSelect      | boolean       | true                    | Close after day selection                         |
+| showCalendarButton | boolean       | true                    | Show trigger button                               |
+| openOnInputClick   | boolean       | false                   | Open on input click                               |
+| zIndex             | number        | 9999                    | Popover z-index                                   |
+| theme              | string/object | {}                      | Theme template or overrides                       |
+| reactiveTheme      | boolean       | false                   | React to document theme                           |
+| themeAttribute     | string        | 'data-theme'            | Theme attribute name                              |
+| suspiciousWarning  | boolean       | false                   | Enable suspicious date warning                    |
+| suspiciousYearSpan | number        | 100                     | Year span for warning                             |
+| suspiciousMinYear  | number        | undefined               | Absolute min year                                 |
+| suspiciousMaxYear  | number        | undefined               | Absolute max year                                 |
+| suspiciousMessage  | string        | 'Suspicious date value' | Warning tooltip                                   |
+| revertWarning      | boolean       | true                    | Show revert indicator                             |
+| revertMessage      | string        | 'Invalid input value'   | Revert tooltip                                    |
 
 ### Events
 
-| Event | Signature | Description |
-|-------|-----------|-------------|
-| onOpen | (instance) => void | Popover opened |
-| onChange | (date, formatted, instance) => void | Value changed |
-| onClose | (instance) => void | Popover closed |
+| Event    | Signature                           | Description    |
+| -------- | ----------------------------------- | -------------- |
+| onOpen   | (instance) => void                  | Popover opened |
+| onChange | (date, formatted, instance) => void | Value changed  |
+| onClose  | (instance) => void                  | Popover closed |
 
 ## Styling Hooks
 
-| CSS Class | Description |
-|-----------|-------------|
-| .thekdp-input-wrap | Input wrapper |
-| .thekdp-input | Input element |
-| .thekdp-trigger-btn | Calendar button |
-| .thekdp-popover | Popover container |
+| CSS Class           | Description       |
+| ------------------- | ----------------- |
+| .thekdp-input-wrap  | Input wrapper     |
+| .thekdp-input       | Input element     |
+| .thekdp-trigger-btn | Calendar button   |
+| .thekdp-popover     | Popover container |
 
 ## Option Precedence
 
@@ -166,7 +166,8 @@ createDatePicker(target: string | HTMLInputElement, options?: ThekDatePickerOpti
 - `dist/thekdatepicker.min.js` - Minified ES
 - `dist/thekdatepicker.umd.min.cjs` - Minified UMD
 - `dist/index.d.ts` - TypeScript definitions
-- `dist/css/base.css` - CSS styles
+- `dist/css/base.css` - Documented CSS entrypoint
+- `dist/css/thekdatepicker.css` - Canonical bundled CSS asset
 
 ## Testing
 

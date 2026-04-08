@@ -11,12 +11,14 @@ createDatePicker(target: string | HTMLInputElement, options?: ThekDatePickerOpti
 ```
 
 **Parameters:**
+
 - `target` - CSS selector string or input element
 - `options` - Optional configuration object
 
 **Returns:** ThekDatePicker instance
 
 **Example:**
+
 ```ts
 const picker = createDatePicker("#my-input", {
   format: "DD/MM/YYYY",
@@ -33,6 +35,7 @@ setGlobalOptions(options: Partial<ThekDatePickerOptions>): void
 ```
 
 **Example:**
+
 ```ts
 setGlobalOptions({
   format: "YYYY-MM-DD",
@@ -92,6 +95,7 @@ picker.setDate(value: DateInput, triggerChange?: boolean): void
 ```
 
 **Parameters:**
+
 - `value` - Date, string, null, or undefined
 - `triggerChange` - Whether to fire onChange callback (default: true)
 
@@ -419,22 +423,22 @@ onClose?: (instance: ThekDatePicker) => void
 
 ## Format Tokens
 
-| Token | Type | Description |
-|-------|------|-------------|
-| YYYY | year | 4-digit year |
-| YY | year | 2-digit year |
-| MM | month | 2-digit month (01-12) |
-| M | month | 1-2 digit month (1-12) |
-| DD | day | 2-digit day (01-31) |
-| D | day | 1-2 digit day (1-31) |
-| HH | time (24h) | 2-digit hour (00-23) |
-| H | time (24h) | 1-2 digit hour (0-23) |
-| hh | time (12h) | 2-digit hour (01-12) |
-| h | time (12h) | 1-2 digit hour (1-12) |
-| mm | time | 2-digit minutes (00-59) |
-| m | time | 1-2 digit minutes (0-59) |
-| A | meridiem | AM or PM |
-| a | meridiem | am or pm |
+| Token | Type       | Description              |
+| ----- | ---------- | ------------------------ |
+| YYYY  | year       | 4-digit year             |
+| YY    | year       | 2-digit year             |
+| MM    | month      | 2-digit month (01-12)    |
+| M     | month      | 1-2 digit month (1-12)   |
+| DD    | day        | 2-digit day (01-31)      |
+| D     | day        | 1-2 digit day (1-31)     |
+| HH    | time (24h) | 2-digit hour (00-23)     |
+| H     | time (24h) | 1-2 digit hour (0-23)    |
+| hh    | time (12h) | 2-digit hour (01-12)     |
+| h     | time (12h) | 1-2 digit hour (1-12)    |
+| mm    | time       | 2-digit minutes (00-59)  |
+| m     | time       | 1-2 digit minutes (0-59) |
+| A     | meridiem   | AM or PM                 |
+| a     | meridiem   | am or pm                 |
 
 ## Utility Functions
 
@@ -467,7 +471,7 @@ applyMaskToInput(value: string, format: string): string
 ### DateInput
 
 ```ts
-type DateInput = Date | string | null | undefined
+type DateInput = Date | string | null | undefined;
 ```
 
 ### ThekDatePickerTheme
@@ -492,5 +496,5 @@ interface ThekDatePickerTheme {
 ### ThekDatePickerThemeOption
 
 ```ts
-type ThekDatePickerThemeOption = 'light' | 'dark' | 'auto' | Partial<ThekDatePickerTheme>
+type ThekDatePickerThemeOption = "light" | "dark" | "auto" | Partial<ThekDatePickerTheme>;
 ```

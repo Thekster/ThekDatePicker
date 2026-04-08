@@ -69,6 +69,21 @@ describe("ThekDatePicker integration", () => {
     picker.destroy();
   });
 
+  it("closes when the trigger is clicked again while open", () => {
+    const picker = new ThekDatePicker("#date-input");
+    const trigger = document.querySelector(".thekdp-trigger-btn") as HTMLButtonElement;
+
+    trigger.click();
+    const popover = document.querySelector(".thekdp-popover") as HTMLDivElement;
+    expect(popover.hidden).toBe(false);
+
+    trigger.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
+    trigger.click();
+    expect(popover.hidden).toBe(true);
+
+    picker.destroy();
+  });
+
   it("moves focus and selection through the calendar with keyboard navigation", async () => {
     const picker = new ThekDatePicker("#date-input", { format: "YYYY-MM-DD" });
     picker.setDate("2026-02-08");
@@ -112,6 +127,22 @@ describe("ThekDatePicker integration", () => {
     picker.open();
     const popover = document.querySelector(".thekdp-popover") as HTMLDivElement;
     expect(popover.style.zIndex).toBe("12345");
+    picker.destroy();
+  });
+
+  it("positions the popover relative to appendTo hosts", () => {
+    document.body.innerHTML =
+      '<div id="host" style="position: relative; overflow: auto; width: 600px; height: 400px;"><div style="padding: 40px;"><input id="date-input" /></div></div>';
+
+    const host = document.querySelector("#host") as HTMLDivElement;
+    const picker = new ThekDatePicker("#date-input", { appendTo: host });
+    picker.open();
+
+    const popover = document.querySelector(".thekdp-popover") as HTMLDivElement;
+    expect(popover.parentElement).toBe(host);
+    expect(popover.style.top).not.toBe("");
+    expect(popover.style.left).not.toBe("");
+
     picker.destroy();
   });
 
@@ -438,6 +469,19 @@ describe("ThekDatePicker integration", () => {
     p2.destroy();
   });
 
+  it("honors global defaultDate for new instances", () => {
+    setGlobalOptions({
+      format: "YYYY-MM-DD",
+      defaultDate: "2026-02-08",
+    });
+
+    const picker = new ThekDatePicker("#date-input");
+    expect((document.querySelector("#date-input") as HTMLInputElement).value).toBe("2026-02-08");
+    expect(picker.getDate()?.getFullYear()).toBe(2026);
+
+    picker.destroy();
+  });
+
   it("lets local options override and merge global theme object", () => {
     setGlobalOptions({
       format: "YYYY-MM-DD",
@@ -480,6 +524,20 @@ describe("ThekDatePicker integration", () => {
     picker.setDate("02/08/2026 09:05 PM");
     const input = document.querySelector("#date-input") as HTMLInputElement;
     expect(input.value).toBe("02/08/2026 09:05 PM");
+
+    picker.destroy();
+  });
+
+  it("accepts formatted min and max dates through the public setters", () => {
+    const picker = new ThekDatePicker("#date-input", { format: "DD/MM/YYYY" });
+    picker.setMinDate("10/01/2026");
+    picker.setMaxDate("20/01/2026");
+
+    picker.setDate("01/01/2026");
+    expect((document.querySelector("#date-input") as HTMLInputElement).value).toBe("10/01/2026");
+
+    picker.setDate("30/01/2026");
+    expect((document.querySelector("#date-input") as HTMLInputElement).value).toBe("20/01/2026");
 
     picker.destroy();
   });
@@ -780,5 +838,26 @@ describe("ThekDatePicker integration", () => {
     expect(popover.hidden).toBe(true);
     expect(document.activeElement).toBe(input);
     picker.destroy();
+  });
+
+  it("restores input attributes and classes on destroy", () => {
+    const picker = new ThekDatePicker("#date-input", {
+      format: "YYYY-MM-DD",
+      suspiciousWarning: true,
+    });
+    picker.setDate("0120-12-14");
+
+    const input = document.querySelector("#date-input") as HTMLInputElement;
+    expect(input.classList.contains("thekdp-input")).toBe(true);
+    expect(input.getAttribute("aria-haspopup")).toBe("dialog");
+    expect(input.hasAttribute("aria-invalid")).toBe(true);
+
+    picker.destroy();
+
+    expect(input.classList.contains("thekdp-input")).toBe(false);
+    expect(input.classList.contains("thekdp-input-suspicious")).toBe(false);
+    expect(input.getAttribute("aria-haspopup")).toBeNull();
+    expect(input.getAttribute("aria-controls")).toBeNull();
+    expect(input.getAttribute("aria-invalid")).toBeNull();
   });
 });

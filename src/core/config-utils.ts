@@ -186,6 +186,20 @@ export function normalizeDateInput(value: DateInput | null | undefined): Date | 
   return null;
 }
 
+function parseConfiguredDateInput(
+  value: DateInput | null | undefined,
+  options: Pick<ResolvedOptions, "format" | "timeFormat" | "enableTime">,
+): Date | null {
+  if (value == null) return null;
+  if (value instanceof Date) return isValidDate(value) ? new Date(value) : null;
+  const parsedByFormat = parseDateByFormat(value, fullFormat(options));
+  if (parsedByFormat) return parsedByFormat;
+  const normalized = normalizeInputSeparatorsToFormat(value, fullFormat(options));
+  const normalizedParsed = parseDateByFormat(normalized, fullFormat(options));
+  if (normalizedParsed) return normalizedParsed;
+  return normalizeDateInput(value);
+}
+
 export function fullFormat(
   options: Pick<ResolvedOptions, "format" | "timeFormat" | "enableTime">,
 ): string {
@@ -238,8 +252,9 @@ export function resolveOptions(options: ThekDatePickerOptions): ResolvedOptions 
     useLocaleDefaults,
     enableTime,
     timeFormat,
-    minDate: normalizeDateInput(merged.minDate),
-    maxDate: normalizeDateInput(merged.maxDate),
+    defaultDate: parseConfiguredDateInput(merged.defaultDate, { format, timeFormat, enableTime }),
+    minDate: parseConfiguredDateInput(merged.minDate, { format, timeFormat, enableTime }),
+    maxDate: parseConfiguredDateInput(merged.maxDate, { format, timeFormat, enableTime }),
     placeholder,
     disabled,
     appendTo,

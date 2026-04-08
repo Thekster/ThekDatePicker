@@ -3,12 +3,10 @@
   "version": "1.1.1",
   "description": "A framework-agnostic date/time picker library with themes.",
   "keywords": [
-    "accessible",
     "calendar",
     "date",
     "datepicker",
     "framework-agnostic",
-    "headless",
     "time"
   ],
   "homepage": "https://github.com/Thekster/ThekDatePicker#readme",
@@ -25,7 +23,9 @@
     "dist"
   ],
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "main": "./dist/thekdatepicker.umd.cjs",
   "module": "./dist/thekdatepicker.js",
   "types": "./dist/index.d.ts",
@@ -40,11 +40,13 @@
       "import": "./dist/thekdatepicker.min.js",
       "require": "./dist/thekdatepicker.umd.min.cjs"
     },
+    "./css/base.css": "./dist/css/base.css",
+    "./css/thekdatepicker.css": "./dist/css/thekdatepicker.css",
     "./css/*": "./dist/css/*"
   },
   "scripts": {
     "dev": "vite --open /showcase/index.html",
-    "build": "vite build && cross-env THEK_MINIFY=1 vite build --emptyOutDir false && tsc",
+    "build": "vite build && cross-env THEK_MINIFY=1 vite build --emptyOutDir false && tsc && shx mkdir -p dist/themes && shx cp dist/css/thekdatepicker.css dist/css/base.css && shx cp dist/css/thekdatepicker.css dist/themes/base.css",
     "preview": "vite preview",
     "test": "vitest",
     "coverage": "vitest run --coverage",

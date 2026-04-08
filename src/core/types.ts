@@ -61,6 +61,7 @@ export interface ResolvedOptions {
   useLocaleDefaults: boolean;
   enableTime: boolean;
   timeFormat: string;
+  defaultDate: Date | null;
   minDate: Date | null;
   maxDate: Date | null;
   placeholder: string;

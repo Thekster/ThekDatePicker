@@ -1,6 +1,6 @@
 # ThekDatePicker
 
-Framework-agnostic date/time picker with strict input masking, flexible separators, calendar popover, and themeable styles.
+Framework-agnostic single-date/date-time picker with strict input masking, flexible separators, calendar popover, and themeable styles.
 
 ## Installation
 
@@ -179,6 +179,8 @@ setGlobalOptions({
 - Input mask allows flexible separators and normalizes to configured format.
 - For `A`/`a`, typing `a` or `p` is accepted and normalized.
 - Option precedence is: instance options override global options.
+- This library supports single-date selection only. It does not implement range or multi-date selection.
+- For non-`document.body` `appendTo` containers, mount into a positioned host (`position: relative|absolute|fixed|sticky`) so absolute popover coordinates stay scoped to that container.
 
 ## Migration Notes
 

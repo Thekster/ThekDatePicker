@@ -1,0 +1,18 @@
+import type { ResolvedOptions } from "./types.js";
+export declare const MASK_SEPARATORS: readonly ["/", "-", ".", ",", ":", " "];
+export declare function isValidDate(date: Date): boolean;
+export declare function parseIsoDateString(value: string): Date | null;
+export declare function toLocalStartOfDay(date: Date): Date;
+export declare function applyMaskToInput(value: string, format: string): string;
+export declare function normalizeInputSeparatorsToFormat(value: string, format: string): string;
+export declare function parseDateByFormat(value: string, format: string): Date | null;
+export declare function formatDate(date: Date, format: string): string;
+export declare function isSameDay(a: Date, b: Date): boolean;
+export declare function rotateWeekdays(weekStartsOn: number): string[];
+export declare function getMonthNames(locale?: string): string[];
+export declare function getWeekdayNames(locale?: string): string[];
+export declare function rotateWeekdayLabels(labels: readonly string[], weekStartsOn: number): string[];
+export declare function formatSpokenDate(date: Date, locale?: string): string;
+export declare function getAllowedInputSeparators(_options: ResolvedOptions): string[];
+export declare function formatUsesMeridiem(format: string): boolean;
+export declare function formatHasTimeTokens(format: string): boolean;

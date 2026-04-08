@@ -15,6 +15,7 @@ import "thekdatepicker/css/base.css";
 ```
 
 Or in HTML:
+
 ```html
 <link rel="stylesheet" href="https://unpkg.com/thekdatepicker/dist/css/base.css" />
 ```

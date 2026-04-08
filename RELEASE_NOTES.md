@@ -1,5 +1,18 @@
 # Release Notes
 
+## 1.1.2 - 2026-04-08
+
+### Fixed
+
+- **Release Surface Alignment:** Corrected package metadata and build output so the documented CSS entrypoint now ships as `dist/css/base.css`, the bundled CSS still ships as `dist/css/thekdatepicker.css`, and declaration-side CSS imports resolve against a real file in `dist/themes/base.css`. (SEV-1)
+- **Publish Artifact Drift:** Rebuilt the package output to match current source modules, preventing `src`/`dist` divergence from shipping stale runtime behavior. (SEV-1)
+- **Trigger Close Ordering:** Fixed trigger/outside-click interaction so clicking the calendar button while open closes the popover instead of racing `pointerdown` against `click` and reopening it. (SEV-2)
+- **Constraint Parsing Consistency:** `setMinDate()` and `setMaxDate()` now accept values in the configured picker format before falling back to ISO parsing, matching the public API contract. (SEV-2)
+- **Global Default Date:** New instances now honor `defaultDate` supplied through global options instead of ignoring it during construction. (SEV-2)
+- **Mounted Host Positioning:** Popover coordinates are now calculated relative to non-body `appendTo` hosts instead of always using page coordinates. (SEV-2)
+- **Destroy Cleanup:** `destroy()` now removes picker-added input classes and ARIA/input attributes instead of leaving stale DOM state behind. (SEV-3)
+- **Day Semantics:** Added `aria-current` to the rendered current-day cell and explicit labels to time inputs for better assistive-technology hints. (SEV-3)
+
 ## 1.1.1 - 2026-04-05
 
 ### Fixed
