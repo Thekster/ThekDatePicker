@@ -1,5 +1,5 @@
-import { applyMaskToInput, formatUsesMeridiem, getAllowedInputSeparators } from "./date-utils.js";
-import type { ResolvedOptions } from "./types.js";
+import { applyMaskToInput, formatUsesMeridiem, getAllowedInputSeparators } from './date-utils.js';
+import type { ResolvedOptions } from './types.js';
 
 function isMaskChar(char: string, usesMeridiem: boolean): boolean {
   if (/^\d$/.test(char)) return true;
@@ -18,7 +18,7 @@ function countMaskChars(value: string, usesMeridiem: boolean): number {
 function caretIndexForMaskCharCount(
   value: string,
   maskChars: number,
-  usesMeridiem: boolean,
+  usesMeridiem: boolean
 ): number {
   if (maskChars <= 0) return 0;
   let count = 0;
@@ -47,7 +47,7 @@ export function applyMaskedInputWithCaret(input: HTMLInputElement, format: strin
 export function isAllowedInputKey(
   key: string,
   format: string,
-  allowedSeparators: readonly string[],
+  allowedSeparators: readonly string[]
 ): boolean {
   const separators = new Set(allowedSeparators);
   if (/^\d$/.test(key) || separators.has(key)) return true;
@@ -56,8 +56,8 @@ export function isAllowedInputKey(
 
 export function buildPasteAllowedPattern(format: string, options: ResolvedOptions): RegExp {
   const separators = getAllowedInputSeparators(options)
-    .map((item) => item.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-    .join("");
-  const letterSet = formatUsesMeridiem(format) ? "aApPmM" : "";
+    .map((item) => item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('');
+  const letterSet = formatUsesMeridiem(format) ? 'aApPmM' : '';
   return new RegExp(`^[0-9${letterSet}${separators}]*$`);
 }

@@ -911,20 +911,20 @@ createDatePicker('#my-date', {
     </div>
 
     <script type="module">
-      import { createDatePicker, setGlobalOptions } from "../src/index.ts";
+      import { createDatePicker, setGlobalOptions } from '../src/index.ts';
 
       window.toggleCode = (btn) => {
         const snippet = btn.nextElementSibling;
-        snippet.classList.toggle("visible");
-        btn.textContent = snippet.classList.contains("visible") ? "Hide Code" : "Show Code";
+        snippet.classList.toggle('visible');
+        btn.textContent = snippet.classList.contains('visible') ? 'Hide Code' : 'Show Code';
       };
 
       const ensureCodeTag = (pre, lang) => {
-        let code = pre.querySelector("code");
+        let code = pre.querySelector('code');
         if (!code) {
-          code = document.createElement("code");
-          code.textContent = pre.textContent ?? "";
-          pre.textContent = "";
+          code = document.createElement('code');
+          code.textContent = pre.textContent ?? '';
+          pre.textContent = '';
           pre.appendChild(code);
         }
         if (lang) code.className = `language-${lang}`;
@@ -934,11 +934,11 @@ createDatePicker('#my-date', {
       const inferLang = (pre) => {
         const explicit = pre.dataset.lang;
         if (explicit) return explicit;
-        const text = pre.textContent || "";
-        if (text.includes("&lt;") || text.includes("<script")) return "html";
-        if (text.includes("npm ") || text.includes("pnpm ") || text.includes("yarn "))
-          return "bash";
-        return "javascript";
+        const text = pre.textContent || '';
+        if (text.includes('&lt;') || text.includes('<script')) return 'html';
+        if (text.includes('npm ') || text.includes('pnpm ') || text.includes('yarn '))
+          return 'bash';
+        return 'javascript';
       };
 
       const highlightPre = (pre, lang) => {
@@ -949,86 +949,86 @@ createDatePicker('#my-date', {
 
       const highlightAllCode = () => {
         if (!window.hljs) return;
-        document.querySelectorAll("pre").forEach((pre) => {
+        document.querySelectorAll('pre').forEach((pre) => {
           highlightPre(pre);
         });
       };
 
-      const pageThemeSelect = document.getElementById("page-theme-select");
+      const pageThemeSelect = document.getElementById('page-theme-select');
 
       const applyPageTheme = (theme) => {
-        const resolved = theme === "dark" ? "dark" : "light";
-        document.documentElement.setAttribute("data-showcase-theme", resolved);
+        const resolved = theme === 'dark' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-showcase-theme', resolved);
         pageThemeSelect.value = resolved;
       };
 
-      pageThemeSelect.addEventListener("change", (e) => applyPageTheme(e.target.value));
+      pageThemeSelect.addEventListener('change', (e) => applyPageTheme(e.target.value));
 
       setGlobalOptions({
-        theme: "auto",
+        theme: 'auto',
         reactiveTheme: true,
-        themeAttribute: "data-showcase-theme",
+        themeAttribute: 'data-showcase-theme'
       });
 
-      createDatePicker("#basic-input", {
-        format: "DD/MM/YYYY",
-        defaultDate: new Date(),
+      createDatePicker('#basic-input', {
+        format: 'DD/MM/YYYY',
+        defaultDate: new Date()
       });
 
-      createDatePicker("#datetime24-input", {
-        format: "YYYY-MM-DD",
+      createDatePicker('#datetime24-input', {
+        format: 'YYYY-MM-DD',
         enableTime: true,
-        timeFormat: "HH:mm",
-        defaultDate: new Date(),
+        timeFormat: 'HH:mm',
+        defaultDate: new Date()
       });
 
-      createDatePicker("#datetime12-input", {
-        format: "MM/DD/YYYY",
+      createDatePicker('#datetime12-input', {
+        format: 'MM/DD/YYYY',
         enableTime: true,
-        timeFormat: "hh:mm A",
-        defaultDate: new Date(),
+        timeFormat: 'hh:mm A',
+        defaultDate: new Date()
       });
 
-      createDatePicker("#datetime12-lower-input", {
-        format: "DD.MM.YYYY",
+      createDatePicker('#datetime12-lower-input', {
+        format: 'DD.MM.YYYY',
         enableTime: true,
-        timeFormat: "hh:mm a",
-        defaultDate: new Date(),
+        timeFormat: 'hh:mm a',
+        defaultDate: new Date()
       });
 
-      createDatePicker("#open-on-click-input", {
-        format: "DD/MM/YYYY",
-        openOnInputClick: true,
+      createDatePicker('#open-on-click-input', {
+        format: 'DD/MM/YYYY',
+        openOnInputClick: true
       });
 
-      createDatePicker("#no-button-input", {
-        format: "YYYY/MM/DD",
-        showCalendarButton: false,
+      createDatePicker('#no-button-input', {
+        format: 'YYYY/MM/DD',
+        showCalendarButton: false
       });
 
-      createDatePicker("#range-input", {
-        format: "MM/DD/YYYY",
-        minDate: "2026-01-10",
-        maxDate: "2026-12-20",
+      createDatePicker('#range-input', {
+        format: 'MM/DD/YYYY',
+        minDate: '2026-01-10',
+        maxDate: '2026-12-20'
       });
 
-      createDatePicker("#monday-start-input", {
-        format: "DD/MM/YYYY",
-        weekStartsOn: 1,
+      createDatePicker('#monday-start-input', {
+        format: 'DD/MM/YYYY',
+        weekStartsOn: 1
       });
 
-      createDatePicker("#suspicious-input", {
-        format: "YYYY-MM-DD",
+      createDatePicker('#suspicious-input', {
+        format: 'YYYY-MM-DD',
         suspiciousWarning: true,
         suspiciousYearSpan: 100,
         suspiciousMinYear: 1900,
-        suspiciousMaxYear: 2100,
+        suspiciousMaxYear: 2100
       });
 
-      const eventsLog = document.getElementById("events-log");
+      const eventsLog = document.getElementById('events-log');
       const appendEvent = (message) => {
-        const row = document.createElement("div");
-        row.className = "log-entry";
+        const row = document.createElement('div');
+        row.className = 'log-entry';
         row.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
         eventsLog.prepend(row);
         while (eventsLog.children.length > 30) {
@@ -1036,118 +1036,118 @@ createDatePicker('#my-date', {
         }
       };
 
-      createDatePicker("#events-input", {
-        format: "DD/MM/YYYY",
-        onOpen: () => appendEvent("onOpen"),
-        onChange: (_date, formatted) => appendEvent(`onChange: ${formatted || "(empty)"}`),
-        onClose: () => appendEvent("onClose"),
+      createDatePicker('#events-input', {
+        format: 'DD/MM/YYYY',
+        onOpen: () => appendEvent('onOpen'),
+        onChange: (_date, formatted) => appendEvent(`onChange: ${formatted || '(empty)'}`),
+        onClose: () => appendEvent('onClose')
       });
 
-      document.getElementById("events-clear-log").addEventListener("click", () => {
-        eventsLog.innerHTML = "";
+      document.getElementById('events-clear-log').addEventListener('click', () => {
+        eventsLog.innerHTML = '';
       });
 
-      const apiPicker = createDatePicker("#api-target", {
-        format: "DD/MM/YYYY HH:mm",
-        enableTime: true,
+      const apiPicker = createDatePicker('#api-target', {
+        format: 'DD/MM/YYYY HH:mm',
+        enableTime: true
       });
-      let configPreviewPicker = createDatePicker("#config-preview-input", {
-        format: "DD/MM/YYYY",
-        defaultDate: new Date(),
+      let configPreviewPicker = createDatePicker('#config-preview-input', {
+        format: 'DD/MM/YYYY',
+        defaultDate: new Date()
       });
 
-      const output = document.getElementById("api-output");
+      const output = document.getElementById('api-output');
       const renderValue = () => {
         const val = apiPicker.getDate();
-        output.textContent = val ? `Current: ${val.toISOString()}` : "Current: (empty)";
+        output.textContent = val ? `Current: ${val.toISOString()}` : 'Current: (empty)';
       };
 
-      document.getElementById("api-open").addEventListener("click", () => apiPicker.open());
-      document.getElementById("api-close").addEventListener("click", () => apiPicker.close());
-      document.getElementById("api-now").addEventListener("click", () => {
+      document.getElementById('api-open').addEventListener('click', () => apiPicker.open());
+      document.getElementById('api-close').addEventListener('click', () => apiPicker.close());
+      document.getElementById('api-now').addEventListener('click', () => {
         apiPicker.setDate(new Date());
         renderValue();
       });
-      document.getElementById("api-clear").addEventListener("click", () => {
+      document.getElementById('api-clear').addEventListener('click', () => {
         apiPicker.clear();
         renderValue();
       });
 
       const configFields = [
-        "cfg-primary",
-        "cfg-primary-strong",
-        "cfg-primary-contrast",
-        "cfg-surface",
-        "cfg-panel",
-        "cfg-border",
-        "cfg-text-main",
-        "cfg-text-muted",
-        "cfg-shadow",
-        "cfg-font",
-        "cfg-radius",
-        "cfg-height",
+        'cfg-primary',
+        'cfg-primary-strong',
+        'cfg-primary-contrast',
+        'cfg-surface',
+        'cfg-panel',
+        'cfg-border',
+        'cfg-text-main',
+        'cfg-text-muted',
+        'cfg-shadow',
+        'cfg-font',
+        'cfg-radius',
+        'cfg-height'
       ];
       const templateDefaults = {
         light: {
-          "cfg-primary": "#2f7fe4",
-          "cfg-primary-strong": "#1f6bcc",
-          "cfg-primary-contrast": "#ffffff",
-          "cfg-surface": "#ffffff",
-          "cfg-panel": "#ebf0f7",
-          "cfg-border": "#d8dee6",
-          "cfg-text-main": "#1d2838",
-          "cfg-text-muted": "#6b7a90",
-          "cfg-shadow": "0 0.875rem 1.875rem rgba(13, 21, 33, 0.18)",
-          "cfg-font": "inherit",
-          "cfg-radius": "0.625rem",
-          "cfg-height": "2rem",
+          'cfg-primary': '#2f7fe4',
+          'cfg-primary-strong': '#1f6bcc',
+          'cfg-primary-contrast': '#ffffff',
+          'cfg-surface': '#ffffff',
+          'cfg-panel': '#ebf0f7',
+          'cfg-border': '#d8dee6',
+          'cfg-text-main': '#1d2838',
+          'cfg-text-muted': '#6b7a90',
+          'cfg-shadow': '0 0.875rem 1.875rem rgba(13, 21, 33, 0.18)',
+          'cfg-font': 'inherit',
+          'cfg-radius': '0.625rem',
+          'cfg-height': '2rem'
         },
         dark: {
-          "cfg-primary": "#60a5fa",
-          "cfg-primary-strong": "#3b82f6",
-          "cfg-primary-contrast": "#0f172a",
-          "cfg-surface": "#111827",
-          "cfg-panel": "#1f2937",
-          "cfg-border": "#374151",
-          "cfg-text-main": "#f3f4f6",
-          "cfg-text-muted": "#9ca3af",
-          "cfg-shadow": "0 1rem 2.125rem rgba(0, 0, 0, 0.45)",
-          "cfg-font": "inherit",
-          "cfg-radius": "0.625rem",
-          "cfg-height": "2rem",
-        },
+          'cfg-primary': '#60a5fa',
+          'cfg-primary-strong': '#3b82f6',
+          'cfg-primary-contrast': '#0f172a',
+          'cfg-surface': '#111827',
+          'cfg-panel': '#1f2937',
+          'cfg-border': '#374151',
+          'cfg-text-main': '#f3f4f6',
+          'cfg-text-muted': '#9ca3af',
+          'cfg-shadow': '0 1rem 2.125rem rgba(0, 0, 0, 0.45)',
+          'cfg-font': 'inherit',
+          'cfg-radius': '0.625rem',
+          'cfg-height': '2rem'
+        }
       };
       const colorOptions = [
-        { label: "Ocean Blue", value: "#2f7fe4" },
-        { label: "Navy", value: "#1e3a8a" },
-        { label: "Indigo", value: "#4f46e5" },
-        { label: "Emerald", value: "#10b981" },
-        { label: "Forest", value: "#166534" },
-        { label: "Rose", value: "#e11d48" },
-        { label: "Orange", value: "#f97316" },
-        { label: "Amber", value: "#f59e0b" },
-        { label: "Slate", value: "#334155" },
-        { label: "Snow", value: "#ffffff" },
-        { label: "Ink", value: "#0f172a" },
+        { label: 'Ocean Blue', value: '#2f7fe4' },
+        { label: 'Navy', value: '#1e3a8a' },
+        { label: 'Indigo', value: '#4f46e5' },
+        { label: 'Emerald', value: '#10b981' },
+        { label: 'Forest', value: '#166534' },
+        { label: 'Rose', value: '#e11d48' },
+        { label: 'Orange', value: '#f97316' },
+        { label: 'Amber', value: '#f59e0b' },
+        { label: 'Slate', value: '#334155' },
+        { label: 'Snow', value: '#ffffff' },
+        { label: 'Ink', value: '#0f172a' }
       ];
       const colorDefaults = {
-        "cfg-primary": "#2f7fe4",
-        "cfg-primary-strong": "#1f6bcc",
-        "cfg-primary-contrast": "#ffffff",
-        "cfg-surface": "#ffffff",
-        "cfg-panel": "#ebf0f7",
-        "cfg-border": "#d8dee6",
-        "cfg-text-main": "#1d2838",
-        "cfg-text-muted": "#6b7a90",
+        'cfg-primary': '#2f7fe4',
+        'cfg-primary-strong': '#1f6bcc',
+        'cfg-primary-contrast': '#ffffff',
+        'cfg-surface': '#ffffff',
+        'cfg-panel': '#ebf0f7',
+        'cfg-border': '#d8dee6',
+        'cfg-text-main': '#1d2838',
+        'cfg-text-muted': '#6b7a90'
       };
       const colorFieldIds = Object.keys(colorDefaults);
       const ensureSelectOption = (select, value) => {
         if (!value) return;
         const exists = Array.from(select.options).some(
-          (o) => o.value.toLowerCase() === String(value).toLowerCase(),
+          (o) => o.value.toLowerCase() === String(value).toLowerCase()
         );
         if (exists) return;
-        const custom = document.createElement("option");
+        const custom = document.createElement('option');
         custom.value = value;
         custom.textContent = `Custom (${value})`;
         select.appendChild(custom);
@@ -1155,7 +1155,7 @@ createDatePicker('#my-date', {
       colorFieldIds.forEach((id) => {
         const select = document.getElementById(id);
         colorOptions.forEach((opt) => {
-          const o = document.createElement("option");
+          const o = document.createElement('option');
           o.value = opt.value;
           o.textContent = `${opt.label} (${opt.value})`;
           select.appendChild(o);
@@ -1163,14 +1163,14 @@ createDatePicker('#my-date', {
         ensureSelectOption(select, colorDefaults[id]);
         select.value = colorDefaults[id];
       });
-      const configCssOutput = document.getElementById("config-css-output");
-      const cfgTemplate = document.getElementById("cfg-template");
+      const configCssOutput = document.getElementById('config-css-output');
+      const cfgTemplate = document.getElementById('cfg-template');
       const applyTemplate = (template) => {
         const data = templateDefaults[template] || templateDefaults.light;
         Object.entries(data).forEach(([id, value]) => {
           const el = document.getElementById(id);
           if (!el) return;
-          if (el.tagName === "SELECT") {
+          if (el.tagName === 'SELECT') {
             ensureSelectOption(el, value);
           }
           el.value = value;
@@ -1178,33 +1178,33 @@ createDatePicker('#my-date', {
         applyConfigurator();
       };
       const createThemeFromFields = () => ({
-        primary: document.getElementById("cfg-primary").value,
-        primaryStrong: document.getElementById("cfg-primary-strong").value,
-        primaryContrast: document.getElementById("cfg-primary-contrast").value,
-        bgSurface: document.getElementById("cfg-surface").value,
-        bgPanel: document.getElementById("cfg-panel").value,
-        border: document.getElementById("cfg-border").value,
-        textMain: document.getElementById("cfg-text-main").value,
-        textMuted: document.getElementById("cfg-text-muted").value,
-        shadow: document.getElementById("cfg-shadow").value,
-        radius: document.getElementById("cfg-radius").value,
-        fontFamily: document.getElementById("cfg-font").value,
-        controlHeight: document.getElementById("cfg-height").value,
+        primary: document.getElementById('cfg-primary').value,
+        primaryStrong: document.getElementById('cfg-primary-strong').value,
+        primaryContrast: document.getElementById('cfg-primary-contrast').value,
+        bgSurface: document.getElementById('cfg-surface').value,
+        bgPanel: document.getElementById('cfg-panel').value,
+        border: document.getElementById('cfg-border').value,
+        textMain: document.getElementById('cfg-text-main').value,
+        textMuted: document.getElementById('cfg-text-muted').value,
+        shadow: document.getElementById('cfg-shadow').value,
+        radius: document.getElementById('cfg-radius').value,
+        fontFamily: document.getElementById('cfg-font').value,
+        controlHeight: document.getElementById('cfg-height').value
       });
       const toThemeObjectSnippet = (theme) => `const theme = ${JSON.stringify(theme, null, 2)};`;
       const applyConfigurator = () => {
         const theme = createThemeFromFields();
         configPreviewPicker.setTheme(theme);
         configCssOutput.textContent = toThemeObjectSnippet(theme);
-        highlightPre(configCssOutput, "javascript");
+        highlightPre(configCssOutput, 'javascript');
       };
       configFields.forEach((id) => {
         const el = document.getElementById(id);
-        el.addEventListener("input", applyConfigurator);
-        el.addEventListener("change", applyConfigurator);
+        el.addEventListener('input', applyConfigurator);
+        el.addEventListener('change', applyConfigurator);
       });
-      document.getElementById("copy-theme-css").addEventListener("click", async () => {
-        const text = configCssOutput.textContent || "";
+      document.getElementById('copy-theme-css').addEventListener('click', async () => {
+        const text = configCssOutput.textContent || '';
         if (!text.trim()) return;
         try {
           await navigator.clipboard.writeText(text);
@@ -1212,27 +1212,27 @@ createDatePicker('#my-date', {
           // no-op
         }
       });
-      cfgTemplate.addEventListener("change", (e) => {
+      cfgTemplate.addEventListener('change', (e) => {
         applyTemplate(e.target.value);
       });
-      applyTemplate("light");
+      applyTemplate('light');
 
       const prefersDark =
-        window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       const selectedTheme = pageThemeSelect.value;
-      const initialTheme = selectedTheme || (prefersDark ? "dark" : "light");
+      const initialTheme = selectedTheme || (prefersDark ? 'dark' : 'light');
       applyPageTheme(initialTheme);
       highlightAllCode();
       renderValue();
-      window.addEventListener("scroll", () => {
-        const sections = document.querySelectorAll("section");
-        const links = document.querySelectorAll("nav a");
-        let current = "";
+      window.addEventListener('scroll', () => {
+        const sections = document.querySelectorAll('section');
+        const links = document.querySelectorAll('nav a');
+        let current = '';
         sections.forEach((section) => {
           if (window.scrollY >= section.offsetTop - 100) current = section.id;
         });
         links.forEach((link) => {
-          link.classList.toggle("active", link.getAttribute("href") === `#${current}`);
+          link.classList.toggle('active', link.getAttribute('href') === `#${current}`);
         });
       });
     </script>

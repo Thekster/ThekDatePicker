@@ -20,9 +20,9 @@ createDatePicker(target: string | HTMLInputElement, options?: ThekDatePickerOpti
 **Example:**
 
 ```ts
-const picker = createDatePicker("#my-input", {
-  format: "DD/MM/YYYY",
-  enableTime: true,
+const picker = createDatePicker('#my-input', {
+  format: 'DD/MM/YYYY',
+  enableTime: true
 });
 ```
 
@@ -38,9 +38,9 @@ setGlobalOptions(options: Partial<ThekDatePickerOptions>): void
 
 ```ts
 setGlobalOptions({
-  format: "YYYY-MM-DD",
-  theme: "auto",
-  useLocaleDefaults: true,
+  format: 'YYYY-MM-DD',
+  theme: 'auto',
+  useLocaleDefaults: true
 });
 ```
 
@@ -496,5 +496,5 @@ interface ThekDatePickerTheme {
 ### ThekDatePickerThemeOption
 
 ```ts
-type ThekDatePickerThemeOption = "light" | "dark" | "auto" | Partial<ThekDatePickerTheme>;
+type ThekDatePickerThemeOption = 'light' | 'dark' | 'auto' | Partial<ThekDatePickerTheme>;
 ```

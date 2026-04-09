@@ -1,1 +1,1 @@
-export { getGlobalOptions, resetGlobalOptions, setGlobalOptions } from "./config-utils.js";
+export { getGlobalOptions, resetGlobalOptions, setGlobalOptions } from './config-utils.js';

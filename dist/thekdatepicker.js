@@ -515,6 +515,12 @@ function createRevertIndicator(cssPrefix = "thekdp") {
 	revertIndicator.hidden = true;
 	return revertIndicator;
 }
+function createAssistiveText(cssPrefix = "thekdp", suffix) {
+	const text = document.createElement("span");
+	text.className = `${cssPrefix}-sr-only`;
+	text.id = `${cssPrefix}-${suffix}-${Math.random().toString(36).slice(2, 9)}`;
+	return text;
+}
 function createPickerPopover(cssPrefix = "thekdp") {
 	const picker = document.createElement("div");
 	picker.className = `${cssPrefix}-popover`;
@@ -718,21 +724,32 @@ function renderDayGrid(args) {
 		cell.textContent = String(current.getDate());
 	}
 }
-function renderTimeInputs(timeContainer, actions, cssPrefix, selectedDate) {
-	timeContainer.innerHTML = `
-    <label class="${cssPrefix}-time-label" for="${cssPrefix}-time-hour">Time</label>
-    <input id="${cssPrefix}-time-hour" aria-label="Hour" class="${cssPrefix}-time-input" type="number" min="0" max="23" data-time-unit="hour" value="${selectedDate.getHours()}" />
-    <span>:</span>
-    <input aria-label="Minute" class="${cssPrefix}-time-input" type="number" min="0" max="59" data-time-unit="minute" value="${selectedDate.getMinutes()}" />
-  `;
+function ensureTimeInputs(timeContainer, actions, cssPrefix) {
+	let hourInputEl = timeContainer.querySelector("[data-time-unit=\"hour\"]");
+	let minuteInputEl = timeContainer.querySelector("[data-time-unit=\"minute\"]");
+	if (!hourInputEl || !minuteInputEl) {
+		timeContainer.innerHTML = `
+      <label class="${cssPrefix}-time-label" for="${cssPrefix}-time-hour">Time</label>
+      <input id="${cssPrefix}-time-hour" aria-label="Hour" class="${cssPrefix}-time-input" type="number" min="0" max="23" data-time-unit="hour" />
+      <span>:</span>
+      <input aria-label="Minute" class="${cssPrefix}-time-input" type="number" min="0" max="59" data-time-unit="minute" />
+    `;
+		hourInputEl = timeContainer.querySelector("[data-time-unit=\"hour\"]");
+		minuteInputEl = timeContainer.querySelector("[data-time-unit=\"minute\"]");
+	}
+	timeContainer.hidden = false;
 	actions.classList.add(`${cssPrefix}-actions-with-ok`);
 	return {
-		hourInputEl: timeContainer.querySelector("[data-time-unit=\"hour\"]") ?? null,
-		minuteInputEl: timeContainer.querySelector("[data-time-unit=\"minute\"]") ?? null
+		hourInputEl: hourInputEl ?? null,
+		minuteInputEl: minuteInputEl ?? null
 	};
 }
-function clearTimeInputs(timeContainer, actions, cssPrefix) {
-	timeContainer.innerHTML = "";
+function syncTimeInputs(hourInputEl, minuteInputEl, selectedDate) {
+	if (hourInputEl) hourInputEl.value = String(selectedDate.getHours());
+	if (minuteInputEl) minuteInputEl.value = String(selectedDate.getMinutes());
+}
+function hideTimeInputs(timeContainer, actions, cssPrefix) {
+	timeContainer.hidden = true;
 	actions.classList.remove(`${cssPrefix}-actions-with-ok`);
 }
 //#endregion
@@ -824,7 +841,8 @@ function resolveAutoThemeTemplate(themeAttribute) {
 	const attr = document.documentElement.getAttribute(themeAttribute);
 	if (attr === "dark") return "dark";
 	if (attr === "light") return "light";
-	return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+	if (typeof window === "undefined" || typeof window.matchMedia !== "function") return "light";
+	return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 function mergeThemeOptions(baseTheme, overrideTheme) {
 	if (overrideTheme == null) return baseTheme;
@@ -897,7 +915,7 @@ function resolveOptions(options) {
 		enableTime
 	});
 	const disabled = merged.disabled ?? false;
-	const appendTo = merged.appendTo ?? document.body;
+	const appendTo = merged.appendTo ?? null;
 	const weekStartsOn = merged.weekStartsOn ?? localeDefaults.weekStartsOn ?? 0;
 	const closeOnSelect = merged.closeOnSelect ?? true;
 	const showCalendarButton = merged.showCalendarButton ?? true;
@@ -977,6 +995,37 @@ function extractInput(input, options) {
 	return null;
 }
 //#endregion
+//#region src/core/thekdatepicker-global.ts
+var registeredPickers = /* @__PURE__ */ new Set();
+var scrollListenerOptions = {
+	capture: true,
+	passive: true
+};
+function handleDocumentPointerDown(event) {
+	for (const picker of registeredPickers) picker.onGlobalPointerDown(event);
+}
+function handleViewportChange() {
+	for (const picker of registeredPickers) picker.onGlobalViewportChange();
+}
+function bindGlobalListeners() {
+	document.addEventListener("pointerdown", handleDocumentPointerDown);
+	window.addEventListener("resize", handleViewportChange);
+	window.addEventListener("scroll", handleViewportChange, scrollListenerOptions);
+}
+function unbindGlobalListeners() {
+	document.removeEventListener("pointerdown", handleDocumentPointerDown);
+	window.removeEventListener("resize", handleViewportChange);
+	window.removeEventListener("scroll", handleViewportChange, scrollListenerOptions);
+}
+function registerGlobalPicker(picker) {
+	if (registeredPickers.size === 0) bindGlobalListeners();
+	registeredPickers.add(picker);
+}
+function unregisterGlobalPicker(picker) {
+	registeredPickers.delete(picker);
+	if (registeredPickers.size === 0) unbindGlobalListeners();
+}
+//#endregion
 //#region src/core/thekdatepicker.ts
 var ThekDatePicker = class {
 	input;
@@ -985,6 +1034,7 @@ var ThekDatePicker = class {
 	triggerButtonEl = null;
 	suspiciousIndicatorEl = null;
 	revertIndicatorEl = null;
+	statusTextEl = null;
 	pickerEl;
 	monthLabelEl;
 	weekdaysEl;
@@ -997,10 +1047,6 @@ var ThekDatePicker = class {
 	viewportFrame = null;
 	localizedMonthNames;
 	localizedWeekdayNames;
-	scrollListenerOptions = {
-		capture: true,
-		passive: true
-	};
 	selectedDate = null;
 	viewDate = /* @__PURE__ */ new Date();
 	openState = false;
@@ -1058,7 +1104,7 @@ var ThekDatePicker = class {
 		if (extractInput(text, this.options)) return;
 		if (!buildPasteAllowedPattern(format, this.options).test(text)) event.preventDefault();
 	};
-	handleDocumentPointerDown = (event) => {
+	onGlobalPointerDown = (event) => {
 		if (!this.openState) return;
 		if (!event.target) return;
 		const path = event.composedPath();
@@ -1066,7 +1112,7 @@ var ThekDatePicker = class {
 		this.close();
 		this.commitInput();
 	};
-	handleViewportChange = () => {
+	onGlobalViewportChange = () => {
 		if (!this.openState || this.viewportFrame != null) return;
 		this.viewportFrame = window.requestAnimationFrame(() => {
 			this.viewportFrame = null;
@@ -1182,6 +1228,7 @@ var ThekDatePicker = class {
 		if (!(input instanceof HTMLInputElement)) throw new Error("ThekDatePicker: target must be an HTMLInputElement.");
 		this.input = input;
 		this.options = resolveOptions(options);
+		this.options.appendTo ??= document.body;
 		this.input.classList.add(`${this.options.cssPrefix}-input`);
 		this.localizedMonthNames = getMonthNames(this.options.locale);
 		this.localizedWeekdayNames = getWeekdayNames(this.options.locale);
@@ -1207,6 +1254,9 @@ var ThekDatePicker = class {
 		this.input.setAttribute("aria-expanded", "false");
 		if (!this.pickerEl.id) this.pickerEl.id = `thekdp-picker-${Math.random().toString(36).slice(2, 9)}`;
 		this.input.setAttribute("aria-controls", this.pickerEl.id);
+		if (!this.monthLabelEl.id) this.monthLabelEl.id = `thekdp-month-${Math.random().toString(36).slice(2, 9)}`;
+		this.pickerEl.setAttribute("aria-labelledby", this.monthLabelEl.id);
+		this.daysEl.setAttribute("aria-labelledby", this.monthLabelEl.id);
 		if (this.triggerButtonEl) this.triggerButtonEl.disabled = this.options.disabled;
 		this.syncInput();
 		this.setupReactiveTheme();
@@ -1215,7 +1265,7 @@ var ThekDatePicker = class {
 	}
 	open() {
 		if (this.destroyed || this.openState || this.options.disabled) return;
-		if (!this.pickerEl.isConnected) this.options.appendTo.appendChild(this.pickerEl);
+		if (!this.pickerEl.isConnected) this.getAppendTarget().appendChild(this.pickerEl);
 		this.openState = true;
 		this.input.setAttribute("aria-expanded", "true");
 		this.ensureFocusableDay();
@@ -1329,6 +1379,7 @@ var ThekDatePicker = class {
 		this.input.removeAttribute("aria-haspopup");
 		this.input.removeAttribute("aria-expanded");
 		this.input.removeAttribute("aria-controls");
+		this.input.removeAttribute("aria-describedby");
 		this.input.removeAttribute("aria-invalid");
 		this.input.removeAttribute("title");
 		this.pickerEl.removeEventListener("click", this.handlePickerClick);
@@ -1342,9 +1393,7 @@ var ThekDatePicker = class {
 		this.input.addEventListener("blur", this.handleInputBlur);
 		this.input.addEventListener("paste", this.handlePaste);
 		this.triggerButtonEl?.addEventListener("click", this.handleTriggerClick);
-		document.addEventListener("pointerdown", this.handleDocumentPointerDown);
-		window.addEventListener("resize", this.handleViewportChange);
-		window.addEventListener("scroll", this.handleViewportChange, this.scrollListenerOptions);
+		registerGlobalPicker(this);
 	}
 	unbind() {
 		this.input.removeEventListener("click", this.handleInputClick);
@@ -1353,9 +1402,7 @@ var ThekDatePicker = class {
 		this.input.removeEventListener("blur", this.handleInputBlur);
 		this.input.removeEventListener("paste", this.handlePaste);
 		this.triggerButtonEl?.removeEventListener("click", this.handleTriggerClick);
-		document.removeEventListener("pointerdown", this.handleDocumentPointerDown);
-		window.removeEventListener("resize", this.handleViewportChange);
-		window.removeEventListener("scroll", this.handleViewportChange, this.scrollListenerOptions);
+		unregisterGlobalPicker(this);
 		this.hourInputEl?.removeEventListener("change", this.handleTimeChange);
 		this.minuteInputEl?.removeEventListener("change", this.handleTimeChange);
 	}
@@ -1380,12 +1427,15 @@ var ThekDatePicker = class {
 		wrap.appendChild(suspiciousIndicator);
 		const revertIndicator = createRevertIndicator(this.options.cssPrefix);
 		wrap.appendChild(revertIndicator);
+		const statusText = createAssistiveText(this.options.cssPrefix, "status");
+		wrap.appendChild(statusText);
 		const button = createTriggerButton(this.options.cssPrefix);
 		wrap.appendChild(button);
 		this.inputWrapEl = wrap;
 		this.triggerButtonEl = button;
 		this.suspiciousIndicatorEl = suspiciousIndicator;
 		this.revertIndicatorEl = revertIndicator;
+		this.statusTextEl = statusText;
 	}
 	unmountInputTrigger() {
 		if (!this.inputWrapEl) return;
@@ -1397,6 +1447,7 @@ var ThekDatePicker = class {
 		this.triggerButtonEl = null;
 		this.suspiciousIndicatorEl = null;
 		this.revertIndicatorEl = null;
+		this.statusTextEl = null;
 	}
 	applyMaskedInputWithCaret() {
 		applyMaskedInputWithCaret(this.input, fullFormat(this.options));
@@ -1433,6 +1484,7 @@ var ThekDatePicker = class {
 			this.revertIndicatorEl.hidden = false;
 			this.revertIndicatorEl.title = detail;
 		}
+		this.syncStatusDescription(detail);
 	}
 	hideRevertIndicator() {
 		this.input.classList.remove(`${this.options.cssPrefix}-input-reverted`);
@@ -1442,6 +1494,7 @@ var ThekDatePicker = class {
 			this.revertIndicatorEl.title = "";
 		}
 		if (!this.input.classList.contains(`${this.options.cssPrefix}-input-suspicious`)) this.input.removeAttribute("title");
+		this.syncStatusDescription();
 	}
 	applyAutoTheme() {
 		const template = resolveAutoThemeTemplate(this.options.themeAttribute);
@@ -1456,6 +1509,17 @@ var ThekDatePicker = class {
 	}
 	applyThemeVars() {
 		applyThemeVars(this.options.theme, this.getThemeTargets());
+	}
+	setTimeInputs(hourInputEl, minuteInputEl) {
+		if (this.hourInputEl && this.hourInputEl !== hourInputEl) this.hourInputEl.removeEventListener("change", this.handleTimeChange);
+		if (this.minuteInputEl && this.minuteInputEl !== minuteInputEl) this.minuteInputEl.removeEventListener("change", this.handleTimeChange);
+		if (hourInputEl && this.hourInputEl !== hourInputEl) hourInputEl.addEventListener("change", this.handleTimeChange);
+		if (minuteInputEl && this.minuteInputEl !== minuteInputEl) minuteInputEl.addEventListener("change", this.handleTimeChange);
+		this.hourInputEl = hourInputEl;
+		this.minuteInputEl = minuteInputEl;
+	}
+	getAppendTarget() {
+		return this.options.appendTo ?? document.body;
 	}
 	isDateDisabled(date) {
 		const value = toLocalStartOfDay(date);
@@ -1521,19 +1585,54 @@ var ThekDatePicker = class {
 			this.input.focus();
 		}
 	}
+	measurePickerRect() {
+		const wasHidden = this.pickerEl.hidden;
+		const prevVisibility = this.pickerEl.style.visibility;
+		const prevPointerEvents = this.pickerEl.style.pointerEvents;
+		if (wasHidden) {
+			this.pickerEl.hidden = false;
+			this.pickerEl.style.visibility = "hidden";
+			this.pickerEl.style.pointerEvents = "none";
+		}
+		const rect = this.pickerEl.getBoundingClientRect();
+		if (wasHidden) {
+			this.pickerEl.hidden = true;
+			this.pickerEl.style.visibility = prevVisibility;
+			this.pickerEl.style.pointerEvents = prevPointerEvents;
+		}
+		return rect;
+	}
 	positionPicker() {
 		const inputRect = this.input.getBoundingClientRect();
-		const appendTo = this.options.appendTo;
+		const pickerRect = this.measurePickerRect();
+		const appendTo = this.getAppendTarget();
 		const isBodyMount = appendTo === document.body;
 		const containerRect = isBodyMount ? null : appendTo.getBoundingClientRect();
 		const scrollLeft = isBodyMount ? window.scrollX : appendTo.scrollLeft;
 		const scrollTop = isBodyMount ? window.scrollY : appendTo.scrollTop;
-		const top = inputRect.bottom - (containerRect?.top ?? 0) + scrollTop + 6;
-		const left = inputRect.left - (containerRect?.left ?? 0) + scrollLeft;
-		const maxLeft = scrollLeft + (isBodyMount ? document.documentElement.clientWidth : appendTo.clientWidth) - 300;
+		const viewportPadding = 8;
+		const offset = 6;
+		const containerWidth = isBodyMount ? document.documentElement.clientWidth : appendTo.clientWidth;
+		const containerHeight = isBodyMount ? document.documentElement.clientHeight : appendTo.clientHeight;
+		const pickerWidth = Math.max(pickerRect.width, this.pickerEl.offsetWidth, 0);
+		const pickerHeight = Math.max(pickerRect.height, this.pickerEl.offsetHeight, 0);
+		const localTop = inputRect.top - (containerRect?.top ?? 0) + scrollTop;
+		const localBottom = inputRect.bottom - (containerRect?.top ?? 0) + scrollTop;
+		const localLeft = inputRect.left - (containerRect?.left ?? 0) + scrollLeft;
+		const availableAbove = isBodyMount ? inputRect.top : inputRect.top - (containerRect?.top ?? 0);
+		const availableBelow = isBodyMount ? document.documentElement.clientHeight - inputRect.bottom : (containerRect?.bottom ?? 0) - inputRect.bottom;
+		const preferredTop = localBottom + offset;
+		const flippedTop = localTop - pickerHeight - offset;
+		const minTop = scrollTop + viewportPadding;
+		const maxTop = scrollTop + Math.max(viewportPadding, containerHeight - pickerHeight - viewportPadding);
+		const shouldFlip = pickerHeight > 0 && availableBelow < pickerHeight + offset && availableAbove > availableBelow;
+		const top = Math.min(maxTop, Math.max(minTop, shouldFlip ? flippedTop : preferredTop));
+		const minLeft = scrollLeft + viewportPadding;
+		const maxLeft = scrollLeft + Math.max(viewportPadding, containerWidth - pickerWidth - viewportPadding);
+		const left = Math.min(maxLeft, Math.max(minLeft, localLeft));
 		this.pickerEl.style.position = "absolute";
 		this.pickerEl.style.top = `${top}px`;
-		this.pickerEl.style.left = `${Math.max(scrollLeft + 8, Math.min(left, maxLeft))}px`;
+		this.pickerEl.style.left = `${left}px`;
 		this.pickerEl.style.zIndex = String(this.options.zIndex);
 	}
 	ensureDayCells() {
@@ -1585,6 +1684,18 @@ var ThekDatePicker = class {
 		}
 		if (suspicious) this.input.title = this.options.suspiciousMessage;
 		else this.input.removeAttribute("title");
+		this.syncStatusDescription();
+	}
+	syncStatusDescription(overrideMessage) {
+		const messages = /* @__PURE__ */ new Set();
+		if (overrideMessage) messages.add(overrideMessage);
+		else if (this.revertIndicatorEl && !this.revertIndicatorEl.hidden && this.revertIndicatorEl.title) messages.add(this.revertIndicatorEl.title);
+		if (this.suspiciousIndicatorEl && !this.suspiciousIndicatorEl.hidden && this.options.suspiciousMessage) messages.add(this.options.suspiciousMessage);
+		if (!this.statusTextEl) return;
+		const text = [...messages].join(" ");
+		this.statusTextEl.textContent = text;
+		if (text) this.input.setAttribute("aria-describedby", this.statusTextEl.id);
+		else this.input.removeAttribute("aria-describedby");
 	}
 	revalidateSelection() {
 		if (!this.selectedDate) return;
@@ -1613,16 +1724,10 @@ var ThekDatePicker = class {
 		const actions = this.pickerEl.querySelector(`.${this.options.cssPrefix}-actions`);
 		if (this.options.enableTime) {
 			const selectedDate = this.selectedDate ?? /* @__PURE__ */ new Date();
-			const inputs = renderTimeInputs(timeContainer, actions, this.options.cssPrefix, selectedDate);
-			this.hourInputEl = inputs.hourInputEl;
-			this.minuteInputEl = inputs.minuteInputEl;
-			this.hourInputEl?.addEventListener("change", this.handleTimeChange);
-			this.minuteInputEl?.addEventListener("change", this.handleTimeChange);
-		} else {
-			clearTimeInputs(timeContainer, actions, this.options.cssPrefix);
-			this.hourInputEl = null;
-			this.minuteInputEl = null;
-		}
+			const inputs = ensureTimeInputs(timeContainer, actions, this.options.cssPrefix);
+			this.setTimeInputs(inputs.hourInputEl, inputs.minuteInputEl);
+			syncTimeInputs(this.hourInputEl, this.minuteInputEl, selectedDate);
+		} else hideTimeInputs(timeContainer, actions, this.options.cssPrefix);
 	}
 };
 function createDatePicker(target, options) {

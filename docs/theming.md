@@ -7,16 +7,16 @@ ThekDatePicker supports multiple theme modes and custom theme objects.
 ### Light Theme
 
 ```ts
-createDatePicker("#my-input", {
-  theme: "light",
+createDatePicker('#my-input', {
+  theme: 'light'
 });
 ```
 
 ### Dark Theme
 
 ```ts
-createDatePicker("#my-input", {
-  theme: "dark",
+createDatePicker('#my-input', {
+  theme: 'dark'
 });
 ```
 
@@ -25,10 +25,10 @@ createDatePicker("#my-input", {
 Automatically detects the page theme from the `data-theme` attribute:
 
 ```ts
-createDatePicker("#my-input", {
-  theme: "auto",
+createDatePicker('#my-input', {
+  theme: 'auto',
   reactiveTheme: true, // Listen for theme changes
-  themeAttribute: "data-theme", // Default attribute
+  themeAttribute: 'data-theme' // Default attribute
 });
 ```
 
@@ -45,12 +45,12 @@ HTML:
 Override specific theme tokens:
 
 ```ts
-createDatePicker("#my-input", {
+createDatePicker('#my-input', {
   theme: {
-    primary: "#e11d48",
-    bgSurface: "#fff1f2",
-    border: "#fecdd3",
-  },
+    primary: '#e11d48',
+    bgSurface: '#fff1f2',
+    border: '#fecdd3'
+  }
 });
 ```
 
@@ -76,12 +76,12 @@ createDatePicker("#my-input", {
 Set theme globally for all pickers:
 
 ```ts
-import { setGlobalOptions } from "thekdatepicker";
+import { setGlobalOptions } from 'thekdatepicker';
 
 setGlobalOptions({
-  theme: "auto",
+  theme: 'auto',
   reactiveTheme: true,
-  themeAttribute: "data-theme",
+  themeAttribute: 'data-theme'
 });
 ```
 
@@ -90,14 +90,14 @@ setGlobalOptions({
 Change theme after creation:
 
 ```ts
-const picker = createDatePicker("#my-input", { theme: "light" });
+const picker = createDatePicker('#my-input', { theme: 'light' });
 
 // Later, switch to dark
-picker.setTheme("dark");
+picker.setTheme('dark');
 
 // Or use custom theme
 picker.setTheme({
-  primary: "#8b5cf6",
+  primary: '#8b5cf6'
 });
 ```
 

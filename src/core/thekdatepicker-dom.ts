@@ -1,8 +1,8 @@
-export function createTriggerButton(cssPrefix: string = "thekdp"): HTMLButtonElement {
-  const button = document.createElement("button");
-  button.type = "button";
+export function createTriggerButton(cssPrefix: string = 'thekdp'): HTMLButtonElement {
+  const button = document.createElement('button');
+  button.type = 'button';
   button.className = `${cssPrefix}-trigger-btn`;
-  button.setAttribute("aria-label", "Toggle calendar");
+  button.setAttribute('aria-label', 'Toggle calendar');
   button.innerHTML = `
     <svg class="${cssPrefix}-trigger-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <rect x="3" y="4.5" width="18" height="16" rx="2.5" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.8"></rect>
@@ -19,7 +19,7 @@ export function createTriggerButton(cssPrefix: string = "thekdp"): HTMLButtonEle
   return button;
 }
 
-function warningSvgMarkup(cssPrefix: string = "thekdp"): string {
+function warningSvgMarkup(cssPrefix: string = 'thekdp'): string {
   return `
     <svg class="${cssPrefix}-indicator-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path d="M12 3.5L21 19.5H3L12 3.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
@@ -29,32 +29,39 @@ function warningSvgMarkup(cssPrefix: string = "thekdp"): string {
   `;
 }
 
-export function createSuspiciousIndicator(cssPrefix: string = "thekdp"): HTMLSpanElement {
-  const suspiciousIndicator = document.createElement("span");
+export function createSuspiciousIndicator(cssPrefix: string = 'thekdp'): HTMLSpanElement {
+  const suspiciousIndicator = document.createElement('span');
   suspiciousIndicator.className = `${cssPrefix}-suspicious-indicator`;
-  suspiciousIndicator.setAttribute("aria-hidden", "true");
+  suspiciousIndicator.setAttribute('aria-hidden', 'true');
   suspiciousIndicator.innerHTML = warningSvgMarkup(cssPrefix);
   suspiciousIndicator.hidden = true;
   return suspiciousIndicator;
 }
 
-export function createRevertIndicator(cssPrefix: string = "thekdp"): HTMLSpanElement {
-  const revertIndicator = document.createElement("span");
+export function createRevertIndicator(cssPrefix: string = 'thekdp'): HTMLSpanElement {
+  const revertIndicator = document.createElement('span');
   revertIndicator.className = `${cssPrefix}-revert-indicator`;
-  revertIndicator.setAttribute("aria-hidden", "true");
+  revertIndicator.setAttribute('aria-hidden', 'true');
   revertIndicator.innerHTML = warningSvgMarkup(cssPrefix);
   revertIndicator.hidden = true;
   return revertIndicator;
 }
 
-export function createPickerPopover(cssPrefix: string = "thekdp"): HTMLDivElement {
-  const picker = document.createElement("div");
+export function createAssistiveText(cssPrefix: string = 'thekdp', suffix: string): HTMLSpanElement {
+  const text = document.createElement('span');
+  text.className = `${cssPrefix}-sr-only`;
+  text.id = `${cssPrefix}-${suffix}-${Math.random().toString(36).slice(2, 9)}`;
+  return text;
+}
+
+export function createPickerPopover(cssPrefix: string = 'thekdp'): HTMLDivElement {
+  const picker = document.createElement('div');
   picker.className = `${cssPrefix}-popover`;
   picker.hidden = true;
   picker.tabIndex = -1;
-  picker.setAttribute("role", "dialog");
-  picker.setAttribute("aria-modal", "false");
-  picker.style.touchAction = "manipulation";
+  picker.setAttribute('role', 'dialog');
+  picker.setAttribute('aria-modal', 'false');
+  picker.style.touchAction = 'manipulation';
   picker.innerHTML = `
     <div class="${cssPrefix}-header">
       <button type="button" class="${cssPrefix}-nav-btn" data-action="prev-year" aria-label="Previous year">«</button>

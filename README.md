@@ -1,6 +1,10 @@
 # ThekDatePicker
 
-Framework-agnostic single-date/date-time picker with strict input masking, flexible separators, calendar popover, and themeable styles.
+[![Deploy Showcase](https://github.com/Thekster/ThekDatePicker/actions/workflows/pages.yml/badge.svg)](https://github.com/Thekster/ThekDatePicker/actions/workflows/pages.yml)
+
+Framework-agnostic, browser-first single-date/date-time picker with strict input masking, flexible separators, calendar popover, and themeable styles.
+
+Live showcase: https://thekster.github.io/ThekDatePicker/
 
 ## Installation
 
@@ -11,7 +15,7 @@ npm install thekdatepicker
 ## CSS
 
 ```ts
-import "thekdatepicker/css/base.css";
+import 'thekdatepicker/css/base.css';
 ```
 
 ## Quick Start
@@ -21,22 +25,24 @@ import "thekdatepicker/css/base.css";
 ```
 
 ```ts
-import { createDatePicker, setGlobalOptions } from "thekdatepicker";
+import { createDatePicker, setGlobalOptions } from 'thekdatepicker';
 
 setGlobalOptions({
-  format: "YYYY-MM-DD",
-  theme: "auto",
+  format: 'YYYY-MM-DD',
+  theme: 'auto',
   reactiveTheme: true,
-  themeAttribute: "data-theme",
+  themeAttribute: 'data-theme',
   useLocaleDefaults: true,
-  locale: "en-US",
+  locale: 'en-US'
 });
 
-const picker = createDatePicker("#my-date", {
+const picker = createDatePicker('#my-date', {
   enableTime: true,
-  timeFormat: "hh:mm A",
+  timeFormat: 'hh:mm A'
 });
 ```
+
+If you use SSR or prerendering, import and instantiate it only on the client. Runtime defaults such as `appendTo` and auto-theme detection are resolved against browser APIs at instantiation time.
 
 ## Browser CDN
 
@@ -46,38 +52,38 @@ const picker = createDatePicker("#my-date", {
 <script src="https://unpkg.com/thekdatepicker/dist/thekdatepicker.umd.cjs"></script>
 <script>
   ThekDatePicker.setGlobalOptions({
-    theme: "auto",
+    theme: 'auto',
     reactiveTheme: true,
-    themeAttribute: "data-theme",
+    themeAttribute: 'data-theme'
   });
-  ThekDatePicker.createDatePicker("#my-date");
+  ThekDatePicker.createDatePicker('#my-date');
 </script>
 ```
 
 ## Theme Usage
 
 ```ts
-import { createDatePicker, setGlobalOptions } from "thekdatepicker";
+import { createDatePicker, setGlobalOptions } from 'thekdatepicker';
 
-createDatePicker("#date-a", { theme: "dark" });
+createDatePicker('#date-a', { theme: 'dark' });
 
-createDatePicker("#date-auto", {
-  theme: "auto",
+createDatePicker('#date-auto', {
+  theme: 'auto',
   reactiveTheme: true,
-  themeAttribute: "data-theme",
+  themeAttribute: 'data-theme'
 });
 
-createDatePicker("#date-b", {
+createDatePicker('#date-b', {
   theme: {
-    primary: "#e11d48",
-    bgSurface: "#fff1f2",
-    border: "#fecdd3",
-  },
+    primary: '#e11d48',
+    bgSurface: '#fff1f2',
+    border: '#fecdd3'
+  }
 });
 
 setGlobalOptions({
-  format: "YYYY-MM-DD",
-  theme: "light",
+  format: 'YYYY-MM-DD',
+  theme: 'light'
 });
 ```
 
@@ -181,6 +187,7 @@ setGlobalOptions({
 - Option precedence is: instance options override global options.
 - This library supports single-date selection only. It does not implement range or multi-date selection.
 - For non-`document.body` `appendTo` containers, mount into a positioned host (`position: relative|absolute|fixed|sticky`) so absolute popover coordinates stay scoped to that container.
+- Keyboard interaction and ARIA labeling are implemented for browser use, but the component is not yet screen-reader-audited against the full WAI-ARIA date picker authoring pattern.
 
 ## Migration Notes
 
@@ -198,11 +205,11 @@ setGlobalOptions({
 ## Events
 
 ```ts
-createDatePicker("#events-input", {
-  format: "DD/MM/YYYY",
-  onOpen: () => console.log("onOpen"),
-  onChange: (date, formatted) => console.log("onChange", date, formatted),
-  onClose: () => console.log("onClose"),
+createDatePicker('#events-input', {
+  format: 'DD/MM/YYYY',
+  onOpen: () => console.log('onOpen'),
+  onChange: (date, formatted) => console.log('onChange', date, formatted),
+  onClose: () => console.log('onClose')
 });
 ```
 
@@ -215,33 +222,33 @@ createDatePicker("#events-input", {
 ## Locale Defaults
 
 ```ts
-createDatePicker("#locale-date", {
+createDatePicker('#locale-date', {
   useLocaleDefaults: true,
-  locale: "en-US",
-  enableTime: true,
+  locale: 'en-US',
+  enableTime: true
 });
 ```
 
 ## Suspicious Date Warning
 
 ```ts
-createDatePicker("#audit-date", {
-  format: "YYYY-MM-DD",
+createDatePicker('#audit-date', {
+  format: 'YYYY-MM-DD',
   suspiciousWarning: true,
   suspiciousYearSpan: 100,
   suspiciousMinYear: 1900,
   suspiciousMaxYear: 2100,
-  suspiciousMessage: "Please double-check this date",
+  suspiciousMessage: 'Please double-check this date'
 });
 ```
 
 ## Revert Indicator
 
 ```ts
-createDatePicker("#date", {
-  format: "DD/MM/YYYY",
+createDatePicker('#date', {
+  format: 'DD/MM/YYYY',
   revertWarning: true,
-  revertMessage: "Invalid value reverted",
+  revertMessage: 'Invalid value reverted'
 });
 ```
 
@@ -273,10 +280,10 @@ You can also pass a template string:
 ## Default Init (All Defaults Explicit)
 
 ```ts
-createDatePicker("#my-date", {
-  format: "DD/MM/YYYY",
+createDatePicker('#my-date', {
+  format: 'DD/MM/YYYY',
   enableTime: false,
-  timeFormat: "HH:mm",
+  timeFormat: 'HH:mm',
   minDate: undefined,
   maxDate: undefined,
   defaultDate: undefined,
@@ -289,17 +296,17 @@ createDatePicker("#my-date", {
   openOnInputClick: false,
   theme: {},
   reactiveTheme: false,
-  themeAttribute: "data-theme",
+  themeAttribute: 'data-theme',
   suspiciousWarning: false,
   suspiciousYearSpan: 100,
   suspiciousMinYear: undefined,
   suspiciousMaxYear: undefined,
-  suspiciousMessage: "Suspicious date value",
+  suspiciousMessage: 'Suspicious date value',
   revertWarning: true,
-  revertMessage: "Invalid input value",
+  revertMessage: 'Invalid input value',
   onChange: undefined,
   onOpen: undefined,
-  onClose: undefined,
+  onClose: undefined
 });
 ```
 

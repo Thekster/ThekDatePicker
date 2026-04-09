@@ -1,4 +1,4 @@
-import type { ThekDatePicker } from "./thekdatepicker.js";
+import type { ThekDatePicker } from './thekdatepicker.js';
 export type DateInput = Date | string;
 export interface ThekDatePickerTheme {
     primary: string;
@@ -14,7 +14,7 @@ export interface ThekDatePickerTheme {
     fontFamily: string;
     controlHeight: string;
 }
-export type ThekDatePickerThemeTemplate = "light" | "dark" | "auto";
+export type ThekDatePickerThemeTemplate = 'light' | 'dark' | 'auto';
 export type ThekDatePickerThemeOption = ThekDatePickerThemeTemplate | Partial<ThekDatePickerTheme>;
 export interface ThekDatePickerOptions {
     format?: string;
@@ -60,7 +60,7 @@ export interface ResolvedOptions {
     maxDate: Date | null;
     placeholder: string;
     disabled: boolean;
-    appendTo: HTMLElement;
+    appendTo: HTMLElement | null;
     weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6;
     closeOnSelect: boolean;
     showCalendarButton: boolean;
@@ -69,7 +69,7 @@ export interface ResolvedOptions {
     theme: Partial<ThekDatePickerTheme>;
     reactiveTheme: boolean;
     themeAttribute: string;
-    themeMode: ThekDatePickerThemeTemplate | "custom";
+    themeMode: ThekDatePickerThemeTemplate | 'custom';
     suspiciousWarning: boolean;
     suspiciousYearSpan: number;
     suspiciousMinYear: number | null;

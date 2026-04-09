@@ -1,4 +1,4 @@
-import type { ResolvedOptions } from "./types.js";
+import type { ResolvedOptions } from './types.js';
 export declare const MASK_SEPARATORS: readonly ["/", "-", ".", ",", ":", " "];
 export declare function isValidDate(date: Date): boolean;
 export declare function parseIsoDateString(value: string): Date | null;

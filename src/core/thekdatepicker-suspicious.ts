@@ -1,11 +1,11 @@
-import type { ResolvedOptions } from "./types.js";
+import type { ResolvedOptions } from './types.js';
 
 export function isSuspiciousDate(
   date: Date,
   options: Pick<
     ResolvedOptions,
-    "suspiciousWarning" | "suspiciousYearSpan" | "suspiciousMinYear" | "suspiciousMaxYear"
-  >,
+    'suspiciousWarning' | 'suspiciousYearSpan' | 'suspiciousMinYear' | 'suspiciousMaxYear'
+  >
 ): boolean {
   if (!options.suspiciousWarning) return false;
   const year = date.getFullYear();

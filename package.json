@@ -1,6 +1,6 @@
 {
   "name": "thekdatepicker",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A framework-agnostic date/time picker library with themes.",
   "keywords": [
     "calendar",
@@ -47,21 +47,23 @@
   "scripts": {
     "dev": "vite --open /showcase/index.html",
     "build": "vite build && cross-env THEK_MINIFY=1 vite build --emptyOutDir false && tsc && shx mkdir -p dist/themes && shx cp dist/css/thekdatepicker.css dist/css/base.css && shx cp dist/css/thekdatepicker.css dist/themes/base.css",
+    "build:showcase": "vite build --config vite.showcase.config.ts",
     "preview": "vite preview",
     "test": "vitest",
+    "test:run": "vitest run",
     "coverage": "vitest run --coverage",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt --check",
     "format:write": "oxfmt --write",
-    "prepublishOnly": "npm run build && npm test && npm run lint"
+    "release:check": "npm run lint && npm run format && npm run build && npm run test:run",
+    "prepublishOnly": "npm run release:check"
   },
   "devDependencies": {
     "@types/node": "^25.2.1",
     "cross-env": "^10.1.0",
-    "esbuild": "^0.27.7",
     "jsdom": "^29.0.1",
-    "oxfmt": "^0.43.0",
+    "oxfmt": "^0.44.0",
     "oxlint": "^1.58.0",
     "shx": "^0.4.0",
     "terser": "^5.46.0",

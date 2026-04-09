@@ -1,22 +1,22 @@
-import { formatSpokenDate, getMonthNames, isSameDay, toLocalStartOfDay } from "./date-utils.js";
+import { formatSpokenDate, getMonthNames, isSameDay, toLocalStartOfDay } from './date-utils.js';
 
 export function renderWeekdays(
   weekdaysEl: HTMLDivElement,
   weekdayNames: string[],
   weekStartsOn: number,
   rotateWeekdayLabels: (weekdayNames: string[], weekStartsOn: number) => string[],
-  cssPrefix: string,
+  cssPrefix: string
 ): void {
   weekdaysEl.innerHTML = rotateWeekdayLabels(weekdayNames, weekStartsOn)
     .map((day) => `<div class="${cssPrefix}-weekday-cell" role="columnheader">${day}</div>`)
-    .join("");
+    .join('');
 }
 
 export function resolveMonthLabel(
   localizedMonthNames: string[],
   month: number,
   year: number,
-  locale: string | undefined,
+  locale: string | undefined
 ): string {
   return `${localizedMonthNames[month] ?? getMonthNames(locale)[month]} ${year}`;
 }
@@ -27,17 +27,17 @@ export function ensureDayCells(daysEl: HTMLDivElement, cssPrefix: string): HTMLB
   if (hasRows && existingCells.length === 42) return [...existingCells];
 
   const dayCellEls: HTMLButtonElement[] = [];
-  daysEl.textContent = "";
+  daysEl.textContent = '';
   const fragment = document.createDocumentFragment();
   for (let r = 0; r < 6; r += 1) {
-    const row = document.createElement("div");
+    const row = document.createElement('div');
     row.className = `${cssPrefix}-days-row`;
-    row.setAttribute("role", "row");
+    row.setAttribute('role', 'row');
     for (let c = 0; c < 7; c += 1) {
-      const cell = document.createElement("button");
-      cell.type = "button";
-      cell.setAttribute("role", "gridcell");
-      cell.dataset.action = "day";
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.setAttribute('role', 'gridcell');
+      cell.dataset.action = 'day';
       cell.className = `${cssPrefix}-day-cell`;
       row.appendChild(cell);
       dayCellEls.push(cell);
@@ -66,7 +66,7 @@ export function renderDayGrid(args: {
     locale,
     weekStartsOn,
     cssPrefix,
-    isDateDisabled,
+    isDateDisabled
   } = args;
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -91,45 +91,61 @@ export function renderDayGrid(args: {
     const cell = dayCellEls[i];
     cell.className =
       `${cssPrefix}-day-cell` +
-      (!inCurrentMonth ? ` ${cssPrefix}-day-cell-muted` : "") +
-      (isTodayDate ? ` ${cssPrefix}-day-cell-today` : "") +
-      (isSelectedDate ? ` ${cssPrefix}-day-cell-selected` : "") +
-      (disabled ? ` ${cssPrefix}-day-cell-disabled` : "");
+      (!inCurrentMonth ? ` ${cssPrefix}-day-cell-muted` : '') +
+      (isTodayDate ? ` ${cssPrefix}-day-cell-today` : '') +
+      (isSelectedDate ? ` ${cssPrefix}-day-cell-selected` : '') +
+      (disabled ? ` ${cssPrefix}-day-cell-disabled` : '');
     cell.dataset.ts = String(dayTs);
     cell.disabled = disabled;
     cell.tabIndex = !disabled && isFocusedDate ? 0 : -1;
-    cell.setAttribute("aria-selected", String(isSelectedDate));
-    cell.toggleAttribute("aria-current", isTodayDate);
-    cell.setAttribute("aria-label", formatSpokenDate(current, locale));
+    cell.setAttribute('aria-selected', String(isSelectedDate));
+    cell.toggleAttribute('aria-current', isTodayDate);
+    cell.setAttribute('aria-label', formatSpokenDate(current, locale));
     cell.textContent = String(current.getDate());
   }
 }
 
-export function renderTimeInputs(
+export function ensureTimeInputs(
   timeContainer: HTMLDivElement,
   actions: HTMLDivElement,
-  cssPrefix: string,
-  selectedDate: Date,
+  cssPrefix: string
 ): { hourInputEl: HTMLInputElement | null; minuteInputEl: HTMLInputElement | null } {
-  timeContainer.innerHTML = `
-    <label class="${cssPrefix}-time-label" for="${cssPrefix}-time-hour">Time</label>
-    <input id="${cssPrefix}-time-hour" aria-label="Hour" class="${cssPrefix}-time-input" type="number" min="0" max="23" data-time-unit="hour" value="${selectedDate.getHours()}" />
-    <span>:</span>
-    <input aria-label="Minute" class="${cssPrefix}-time-input" type="number" min="0" max="59" data-time-unit="minute" value="${selectedDate.getMinutes()}" />
-  `;
+  let hourInputEl = timeContainer.querySelector<HTMLInputElement>('[data-time-unit="hour"]');
+  let minuteInputEl = timeContainer.querySelector<HTMLInputElement>('[data-time-unit="minute"]');
+
+  if (!hourInputEl || !minuteInputEl) {
+    timeContainer.innerHTML = `
+      <label class="${cssPrefix}-time-label" for="${cssPrefix}-time-hour">Time</label>
+      <input id="${cssPrefix}-time-hour" aria-label="Hour" class="${cssPrefix}-time-input" type="number" min="0" max="23" data-time-unit="hour" />
+      <span>:</span>
+      <input aria-label="Minute" class="${cssPrefix}-time-input" type="number" min="0" max="59" data-time-unit="minute" />
+    `;
+    hourInputEl = timeContainer.querySelector<HTMLInputElement>('[data-time-unit="hour"]');
+    minuteInputEl = timeContainer.querySelector<HTMLInputElement>('[data-time-unit="minute"]');
+  }
+
+  timeContainer.hidden = false;
   actions.classList.add(`${cssPrefix}-actions-with-ok`);
   return {
-    hourInputEl: timeContainer.querySelector<HTMLInputElement>('[data-time-unit="hour"]') ?? null,
-    minuteInputEl:
-      timeContainer.querySelector<HTMLInputElement>('[data-time-unit="minute"]') ?? null,
+    hourInputEl: hourInputEl ?? null,
+    minuteInputEl: minuteInputEl ?? null
   };
 }
 
-export function clearTimeInputs(
+export function syncTimeInputs(
+  hourInputEl: HTMLInputElement | null,
+  minuteInputEl: HTMLInputElement | null,
+  selectedDate: Date
+): void {
+  if (hourInputEl) hourInputEl.value = String(selectedDate.getHours());
+  if (minuteInputEl) minuteInputEl.value = String(selectedDate.getMinutes());
+}
+
+export function hideTimeInputs(
   timeContainer: HTMLDivElement,
   actions: HTMLDivElement,
-  cssPrefix: string,
+  cssPrefix: string
 ): void {
-  timeContainer.innerHTML = "";
+  timeContainer.hidden = true;
   actions.classList.remove(`${cssPrefix}-actions-with-ok`);
 }

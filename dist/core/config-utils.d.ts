@@ -1,11 +1,11 @@
-import type { DateInput, ResolvedOptions, ThekDatePickerGlobalOptions, ThekDatePickerOptions, ThekDatePickerTheme, ThekDatePickerThemeOption } from "./types.js";
+import type { DateInput, ResolvedOptions, ThekDatePickerGlobalOptions, ThekDatePickerOptions, ThekDatePickerTheme, ThekDatePickerThemeOption } from './types.js';
 export declare function resolveThemeOption(theme?: ThekDatePickerThemeOption): Partial<ThekDatePickerTheme>;
-export declare function resolveAutoThemeTemplate(themeAttribute: string): "light" | "dark";
+export declare function resolveAutoThemeTemplate(themeAttribute: string): 'light' | 'dark';
 export declare function setGlobalOptions(options: ThekDatePickerGlobalOptions): void;
 export declare function getGlobalOptions(): ThekDatePickerGlobalOptions;
 export declare function resetGlobalOptions(): void;
 export declare function normalizeDateInput(value: DateInput | null | undefined): Date | null;
-export declare function fullFormat(options: Pick<ResolvedOptions, "format" | "timeFormat" | "enableTime">): string;
+export declare function fullFormat(options: Pick<ResolvedOptions, 'format' | 'timeFormat' | 'enableTime'>): string;
 export declare function clampDate(date: Date, minDate: Date | null, maxDate: Date | null): Date;
 export declare function resolveOptions(options: ThekDatePickerOptions): ResolvedOptions;
 export declare function extractInput(input: string, options: ResolvedOptions): Date | null;

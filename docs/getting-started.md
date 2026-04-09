@@ -11,7 +11,7 @@ npm install thekdatepicker
 ### 1. Import CSS
 
 ```ts
-import "thekdatepicker/css/base.css";
+import 'thekdatepicker/css/base.css';
 ```
 
 Or in HTML:
@@ -27,12 +27,12 @@ Or in HTML:
 ```
 
 ```ts
-import { createDatePicker } from "thekdatepicker";
+import { createDatePicker } from 'thekdatepicker';
 
-const picker = createDatePicker("#my-date", {
-  format: "YYYY-MM-DD",
+const picker = createDatePicker('#my-date', {
+  format: 'YYYY-MM-DD',
   enableTime: true,
-  timeFormat: "hh:mm A",
+  timeFormat: 'hh:mm A'
 });
 ```
 
@@ -40,7 +40,7 @@ const picker = createDatePicker("#my-date", {
 
 ```ts
 // Set a date
-picker.setDate(new Date("2024-01-15"));
+picker.setDate(new Date('2024-01-15'));
 
 // Get the current date
 const date = picker.getDate();
@@ -64,7 +64,7 @@ picker.destroy();
 <input id="my-date" type="text" />
 <script src="https://unpkg/thekdatepicker/dist/thekdatepicker.umd.cjs"></script>
 <script>
-  ThekDatePicker.createDatePicker("#my-date");
+  ThekDatePicker.createDatePicker('#my-date');
 </script>
 ```
 

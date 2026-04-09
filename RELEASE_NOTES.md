@@ -1,17 +1,27 @@
 # Release Notes
 
-## 1.1.2 - 2026-04-08
+## 1.1.2 - 2026-04-09
 
 ### Fixed
 
 - **Release Surface Alignment:** Corrected package metadata and build output so the documented CSS entrypoint now ships as `dist/css/base.css`, the bundled CSS still ships as `dist/css/thekdatepicker.css`, and declaration-side CSS imports resolve against a real file in `dist/themes/base.css`. (SEV-1)
 - **Publish Artifact Drift:** Rebuilt the package output to match current source modules, preventing `src`/`dist` divergence from shipping stale runtime behavior. (SEV-1)
-- **Trigger Close Ordering:** Fixed trigger/outside-click interaction so clicking the calendar button while open closes the popover instead of racing `pointerdown` against `click` and reopening it. (SEV-2)
+- **Workflow Readiness:** Fixed CI, publish, and GitHub Pages deployment flow so releases validate with non-watch tests, formatted sources, provenance publishing, and an auto-deployed showcase. (SEV-1)
 - **Constraint Parsing Consistency:** `setMinDate()` and `setMaxDate()` now accept values in the configured picker format before falling back to ISO parsing, matching the public API contract. (SEV-2)
 - **Global Default Date:** New instances now honor `defaultDate` supplied through global options instead of ignoring it during construction. (SEV-2)
-- **Mounted Host Positioning:** Popover coordinates are now calculated relative to non-body `appendTo` hosts instead of always using page coordinates. (SEV-2)
+- **Popover Placement:** Popover positioning now measures the real panel, shifts within the available container width, and flips above the input when there is not enough vertical space below. (SEV-2)
+- **Global Listener Fan-Out:** Document/window interaction listeners are now shared across live picker instances instead of being attached independently by every instance. (SEV-2)
+- **SSR-Safe Option Resolution:** Browser-only defaults such as `appendTo` and auto-theme detection are deferred until instantiation so option resolution no longer eagerly touches `document` or `window`. (SEV-2)
+- **Time Control Churn:** Time controls now persist across rerenders instead of being rebuilt with fresh listeners on every render pass. (SEV-3)
+- **Accessible Status Messaging:** Picker dialog labeling now follows the current month heading, and warning/revert messages are exposed through `aria-describedby` instead of relying only on hidden visual indicators. (SEV-3)
 - **Destroy Cleanup:** `destroy()` now removes picker-added input classes and ARIA/input attributes instead of leaving stale DOM state behind. (SEV-3)
 - **Day Semantics:** Added `aria-current` to the rendered current-day cell and explicit labels to time inputs for better assistive-technology hints. (SEV-3)
+
+### Changed
+
+- **Release Validation Order:** `release:check` now builds before package-artifact tests so package verification runs against actual generated output.
+- **Generated Artifact Tooling:** `showcase-dist` is now ignored by formatter/linter config so local Pages builds do not pollute source-quality checks.
+- **Documentation Scope:** README copy now describes the library as browser-first and explicitly notes the current SSR/client-only boundary and accessibility scope.
 
 ## 1.1.1 - 2026-04-05
 

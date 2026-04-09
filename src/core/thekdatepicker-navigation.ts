@@ -1,10 +1,10 @@
-import { toLocalStartOfDay } from "./date-utils.js";
+import { toLocalStartOfDay } from './date-utils.js';
 
 export function getDefaultFocusedDay(
   selectedDate: Date | null,
   minDate: Date | null,
   maxDate: Date | null,
-  isDateDisabled: (date: Date) => boolean,
+  isDateDisabled: (date: Date) => boolean
 ): Date {
   const candidate = selectedDate ? new Date(selectedDate) : new Date();
   const normalized = toLocalStartOfDay(candidate);
@@ -24,7 +24,7 @@ export function moveFocusedDay(baseTs: number, deltaDays: number): Date {
 export function moveFocusToWeekBoundary(
   baseTs: number,
   weekStartsOn: number,
-  toEnd: boolean,
+  toEnd: boolean
 ): Date {
   const base = new Date(baseTs);
   const currentDay = base.getDay();

@@ -1,4 +1,4 @@
-import type { DateInput, ResolvedOptions, ThekDatePickerOptions, ThekDatePickerThemeOption } from "./types.js";
+import type { DateInput, ResolvedOptions, ThekDatePickerOptions, ThekDatePickerThemeOption } from './types.js';
 export declare class ThekDatePicker {
     readonly input: HTMLInputElement;
     options: ResolvedOptions;
@@ -6,6 +6,7 @@ export declare class ThekDatePicker {
     private triggerButtonEl;
     private suspiciousIndicatorEl;
     private revertIndicatorEl;
+    private statusTextEl;
     private pickerEl;
     private monthLabelEl;
     private weekdaysEl;
@@ -18,7 +19,6 @@ export declare class ThekDatePicker {
     private viewportFrame;
     private localizedMonthNames;
     private localizedWeekdayNames;
-    private readonly scrollListenerOptions;
     private selectedDate;
     private viewDate;
     private openState;
@@ -32,8 +32,8 @@ export declare class ThekDatePicker {
     private readonly handleInput;
     private readonly handleInputKeyDown;
     private readonly handlePaste;
-    private readonly handleDocumentPointerDown;
-    private readonly handleViewportChange;
+    readonly onGlobalPointerDown: (event: PointerEvent) => void;
+    readonly onGlobalViewportChange: () => void;
     private readonly handleThemeMediaChange;
     private readonly handlePickerKeyDown;
     private readonly handlePickerClick;
@@ -64,6 +64,8 @@ export declare class ThekDatePicker {
     private applyAutoTheme;
     private getThemeTargets;
     private applyThemeVars;
+    private setTimeInputs;
+    private getAppendTarget;
     private isDateDisabled;
     private getDefaultFocusedDay;
     private ensureFocusableDay;
@@ -73,11 +75,13 @@ export declare class ThekDatePicker {
     private moveFocusToWeekBoundary;
     private moveFocusedMonth;
     private selectFocusedDay;
+    private measurePickerRect;
     private positionPicker;
     private ensureDayCells;
     private commitInput;
     private syncInput;
     private updateSuspiciousState;
+    private syncStatusDescription;
     private revalidateSelection;
     private render;
 }
