@@ -1,5 +1,13 @@
 # Release Notes
 
+## Unreleased
+
+### Fixed
+
+- **ARIA Role Mismatch:** Removed `role="dialog"` from the popover and updated the input to `aria-haspopup="grid"` to correctly reflect the calendar dropdown pattern without violating focus-trapping requirements for modal dialogs. (SEV-2)
+- **Strict Paste Validation:** The paste handler now strictly validates the entire pasted string against the format before allowing it, preventing invalid data (like `99/99/9999`) from being momentarily accepted before blur. (SEV-3)
+- **Security & CSP Compliance:** Refactored DOM construction to eliminate `innerHTML` usage in favor of `document.createElement`. This prevents potential XSS vectors and ensures compatibility with strict Content Security Policies (CSP) and Trusted Types. (SEV-4)
+
 ## 1.1.2 - 2026-04-09
 
 ### Fixed

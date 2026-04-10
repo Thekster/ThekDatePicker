@@ -18,7 +18,6 @@ import { isSuspiciousDate } from './thekdatepicker-suspicious.js';
 import { applyThemeVars } from './thekdatepicker-theme.js';
 import {
   applyMaskedInputWithCaret,
-  buildPasteAllowedPattern,
   isAllowedInputKey
 } from './thekdatepicker-input.js';
 import {
@@ -149,12 +148,9 @@ export class ThekDatePicker {
     const text = event.clipboardData?.getData('text') ?? '';
     if (!text) return;
 
-    const format = fullFormat(this.options);
-    // Let extractInput decide if it's perfectly valid first
     if (extractInput(text, this.options)) return;
 
-    const allowed = buildPasteAllowedPattern(format, this.options);
-    if (!allowed.test(text)) event.preventDefault();
+    event.preventDefault();
   };
 
   public readonly onGlobalPointerDown = (event: PointerEvent): void => {
@@ -353,7 +349,7 @@ export class ThekDatePicker {
     this.input.disabled = this.options.disabled;
     this.input.setAttribute('inputmode', 'text');
     this.input.setAttribute('autocomplete', 'off');
-    this.input.setAttribute('aria-haspopup', 'dialog');
+    this.input.setAttribute('aria-haspopup', 'grid');
     this.input.setAttribute('aria-expanded', 'false');
     if (!this.pickerEl.id) {
       this.pickerEl.id = `thekdp-picker-${Math.random().toString(36).slice(2, 9)}`;

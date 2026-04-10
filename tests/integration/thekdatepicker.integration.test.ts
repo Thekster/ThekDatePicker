@@ -69,6 +69,36 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
+  it('does not use role="dialog" or aria-haspopup="dialog" (combobox/grid pattern without focus trapping)', () => {
+    const picker = new ThekDatePicker('#date-input');
+    picker.open();
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    const popover = document.querySelector('.thekdp-popover') as HTMLDivElement;
+
+    expect(input.getAttribute('aria-haspopup')).not.toBe('dialog');
+    expect(popover.getAttribute('role')).not.toBe('dialog');
+    expect(popover.hasAttribute('aria-modal')).toBe(false);
+
+    picker.destroy();
+  });
+
+  it('rejects completely invalid pasted dates immediately instead of deferring to blur', () => {
+    const picker = new ThekDatePicker('#date-input', { format: 'DD/MM/YYYY' });
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    const preventDefault = vi.fn();
+
+    const event = new Event('paste') as any;
+    event.clipboardData = {
+      getData: () => '99/99/9999'
+    };
+    event.preventDefault = preventDefault;
+
+    input.dispatchEvent(event);
+    expect(preventDefault).toHaveBeenCalled();
+
+    picker.destroy();
+  });
+
   it('closes when the trigger is clicked again while open', () => {
     const picker = new ThekDatePicker('#date-input');
     const trigger = document.querySelector('.thekdp-trigger-btn') as HTMLButtonElement;
@@ -974,7 +1004,7 @@ describe('ThekDatePicker integration', () => {
 
     const input = document.querySelector('#date-input') as HTMLInputElement;
     expect(input.classList.contains('thekdp-input')).toBe(true);
-    expect(input.getAttribute('aria-haspopup')).toBe('dialog');
+    expect(input.getAttribute('aria-haspopup')).toBe('grid');
     expect(input.hasAttribute('aria-invalid')).toBe(true);
 
     picker.destroy();

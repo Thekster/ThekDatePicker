@@ -59,26 +59,69 @@ export function createPickerPopover(cssPrefix: string = 'thekdp'): HTMLDivElemen
   picker.className = `${cssPrefix}-popover`;
   picker.hidden = true;
   picker.tabIndex = -1;
-  picker.setAttribute('role', 'dialog');
-  picker.setAttribute('aria-modal', 'false');
   picker.style.touchAction = 'manipulation';
-  picker.innerHTML = `
-    <div class="${cssPrefix}-header">
-      <button type="button" class="${cssPrefix}-nav-btn" data-action="prev-year" aria-label="Previous year">«</button>
-      <button type="button" class="${cssPrefix}-nav-btn" data-action="prev-month" aria-label="Previous month">‹</button>
-      <span class="${cssPrefix}-current-month" aria-live="polite"></span>
-      <button type="button" class="${cssPrefix}-nav-btn" data-action="next-month" aria-label="Next month">›</button>
-      <button type="button" class="${cssPrefix}-nav-btn" data-action="next-year" aria-label="Next year">»</button>
-    </div>
-    <div class="${cssPrefix}-weekdays" role="row"></div>
-    <div class="${cssPrefix}-days" role="grid" aria-readonly="true"></div>
-    <div class="${cssPrefix}-footer">
-      <div class="${cssPrefix}-time"></div>
-      <div class="${cssPrefix}-actions">
-        <button type="button" class="${cssPrefix}-link-btn" data-action="today">Now</button>
-        <button type="button" class="${cssPrefix}-ok-btn" data-action="ok">OK</button>
-      </div>
-    </div>
-  `;
+
+  const header = document.createElement('div');
+  header.className = `${cssPrefix}-header`;
+
+  const createNavBtn = (action: string, label: string, text: string) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `${cssPrefix}-nav-btn`;
+    btn.dataset.action = action;
+    btn.setAttribute('aria-label', label);
+    btn.textContent = text;
+    return btn;
+  };
+
+  header.appendChild(createNavBtn('prev-year', 'Previous year', '«'));
+  header.appendChild(createNavBtn('prev-month', 'Previous month', '‹'));
+  const currentMonth = document.createElement('span');
+  currentMonth.className = `${cssPrefix}-current-month`;
+  currentMonth.setAttribute('aria-live', 'polite');
+  header.appendChild(currentMonth);
+  header.appendChild(createNavBtn('next-month', 'Next month', '›'));
+  header.appendChild(createNavBtn('next-year', 'Next year', '»'));
+
+  const weekdays = document.createElement('div');
+  weekdays.className = `${cssPrefix}-weekdays`;
+  weekdays.setAttribute('role', 'row');
+
+  const days = document.createElement('div');
+  days.className = `${cssPrefix}-days`;
+  days.setAttribute('role', 'grid');
+  days.setAttribute('aria-readonly', 'true');
+
+  const footer = document.createElement('div');
+  footer.className = `${cssPrefix}-footer`;
+
+  const time = document.createElement('div');
+  time.className = `${cssPrefix}-time`;
+
+  const actions = document.createElement('div');
+  actions.className = `${cssPrefix}-actions`;
+
+  const todayBtn = document.createElement('button');
+  todayBtn.type = 'button';
+  todayBtn.className = `${cssPrefix}-link-btn`;
+  todayBtn.dataset.action = 'today';
+  todayBtn.textContent = 'Now';
+
+  const okBtn = document.createElement('button');
+  okBtn.type = 'button';
+  okBtn.className = `${cssPrefix}-ok-btn`;
+  okBtn.dataset.action = 'ok';
+  okBtn.textContent = 'OK';
+
+  actions.appendChild(todayBtn);
+  actions.appendChild(okBtn);
+  footer.appendChild(time);
+  footer.appendChild(actions);
+
+  picker.appendChild(header);
+  picker.appendChild(weekdays);
+  picker.appendChild(days);
+  picker.appendChild(footer);
+
   return picker;
 }

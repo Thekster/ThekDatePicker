@@ -53,11 +53,3 @@ export function isAllowedInputKey(
   if (/^\d$/.test(key) || separators.has(key)) return true;
   return formatUsesMeridiem(format) && /^[aApPmM]$/.test(key);
 }
-
-export function buildPasteAllowedPattern(format: string, options: ResolvedOptions): RegExp {
-  const separators = getAllowedInputSeparators(options)
-    .map((item) => item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-    .join('');
-  const letterSet = formatUsesMeridiem(format) ? 'aApPmM' : '';
-  return new RegExp(`^[0-9${letterSet}${separators}]*$`);
-}

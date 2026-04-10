@@ -526,27 +526,57 @@ function createPickerPopover(cssPrefix = "thekdp") {
 	picker.className = `${cssPrefix}-popover`;
 	picker.hidden = true;
 	picker.tabIndex = -1;
-	picker.setAttribute("role", "dialog");
-	picker.setAttribute("aria-modal", "false");
 	picker.style.touchAction = "manipulation";
-	picker.innerHTML = `
-    <div class="${cssPrefix}-header">
-      <button type="button" class="${cssPrefix}-nav-btn" data-action="prev-year" aria-label="Previous year">«</button>
-      <button type="button" class="${cssPrefix}-nav-btn" data-action="prev-month" aria-label="Previous month">‹</button>
-      <span class="${cssPrefix}-current-month" aria-live="polite"></span>
-      <button type="button" class="${cssPrefix}-nav-btn" data-action="next-month" aria-label="Next month">›</button>
-      <button type="button" class="${cssPrefix}-nav-btn" data-action="next-year" aria-label="Next year">»</button>
-    </div>
-    <div class="${cssPrefix}-weekdays" role="row"></div>
-    <div class="${cssPrefix}-days" role="grid" aria-readonly="true"></div>
-    <div class="${cssPrefix}-footer">
-      <div class="${cssPrefix}-time"></div>
-      <div class="${cssPrefix}-actions">
-        <button type="button" class="${cssPrefix}-link-btn" data-action="today">Now</button>
-        <button type="button" class="${cssPrefix}-ok-btn" data-action="ok">OK</button>
-      </div>
-    </div>
-  `;
+	const header = document.createElement("div");
+	header.className = `${cssPrefix}-header`;
+	const createNavBtn = (action, label, text) => {
+		const btn = document.createElement("button");
+		btn.type = "button";
+		btn.className = `${cssPrefix}-nav-btn`;
+		btn.dataset.action = action;
+		btn.setAttribute("aria-label", label);
+		btn.textContent = text;
+		return btn;
+	};
+	header.appendChild(createNavBtn("prev-year", "Previous year", "«"));
+	header.appendChild(createNavBtn("prev-month", "Previous month", "‹"));
+	const currentMonth = document.createElement("span");
+	currentMonth.className = `${cssPrefix}-current-month`;
+	currentMonth.setAttribute("aria-live", "polite");
+	header.appendChild(currentMonth);
+	header.appendChild(createNavBtn("next-month", "Next month", "›"));
+	header.appendChild(createNavBtn("next-year", "Next year", "»"));
+	const weekdays = document.createElement("div");
+	weekdays.className = `${cssPrefix}-weekdays`;
+	weekdays.setAttribute("role", "row");
+	const days = document.createElement("div");
+	days.className = `${cssPrefix}-days`;
+	days.setAttribute("role", "grid");
+	days.setAttribute("aria-readonly", "true");
+	const footer = document.createElement("div");
+	footer.className = `${cssPrefix}-footer`;
+	const time = document.createElement("div");
+	time.className = `${cssPrefix}-time`;
+	const actions = document.createElement("div");
+	actions.className = `${cssPrefix}-actions`;
+	const todayBtn = document.createElement("button");
+	todayBtn.type = "button";
+	todayBtn.className = `${cssPrefix}-link-btn`;
+	todayBtn.dataset.action = "today";
+	todayBtn.textContent = "Now";
+	const okBtn = document.createElement("button");
+	okBtn.type = "button";
+	okBtn.className = `${cssPrefix}-ok-btn`;
+	okBtn.dataset.action = "ok";
+	okBtn.textContent = "OK";
+	actions.appendChild(todayBtn);
+	actions.appendChild(okBtn);
+	footer.appendChild(time);
+	footer.appendChild(actions);
+	picker.appendChild(header);
+	picker.appendChild(weekdays);
+	picker.appendChild(days);
+	picker.appendChild(footer);
 	return picker;
 }
 //#endregion
@@ -628,11 +658,6 @@ function isAllowedInputKey(key, format, allowedSeparators) {
 	if (/^\d$/.test(key) || separators.has(key)) return true;
 	return formatUsesMeridiem(format) && /^[aApPmM]$/.test(key);
 }
-function buildPasteAllowedPattern(format, options) {
-	const separators = getAllowedInputSeparators(options).map((item) => item.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("");
-	const letterSet = formatUsesMeridiem(format) ? "aApPmM" : "";
-	return new RegExp(`^[0-9${letterSet}${separators}]*$`);
-}
 //#endregion
 //#region src/core/thekdatepicker-navigation.ts
 function getDefaultFocusedDay(selectedDate, minDate, maxDate, isDateDisabled) {
@@ -666,7 +691,14 @@ function moveFocusedMonth(baseTs, deltaMonths) {
 //#endregion
 //#region src/core/thekdatepicker-render.ts
 function renderWeekdays(weekdaysEl, weekdayNames, weekStartsOn, rotateWeekdayLabels, cssPrefix) {
-	weekdaysEl.innerHTML = rotateWeekdayLabels(weekdayNames, weekStartsOn).map((day) => `<div class="${cssPrefix}-weekday-cell" role="columnheader">${day}</div>`).join("");
+	weekdaysEl.innerHTML = "";
+	rotateWeekdayLabels(weekdayNames, weekStartsOn).forEach((day) => {
+		const cell = document.createElement("div");
+		cell.className = `${cssPrefix}-weekday-cell`;
+		cell.setAttribute("role", "columnheader");
+		cell.textContent = day;
+		weekdaysEl.appendChild(cell);
+	});
 }
 function resolveMonthLabel(localizedMonthNames, month, year, locale) {
 	return `${localizedMonthNames[month] ?? getMonthNames(locale)[month]} ${year}`;
@@ -728,14 +760,34 @@ function ensureTimeInputs(timeContainer, actions, cssPrefix) {
 	let hourInputEl = timeContainer.querySelector("[data-time-unit=\"hour\"]");
 	let minuteInputEl = timeContainer.querySelector("[data-time-unit=\"minute\"]");
 	if (!hourInputEl || !minuteInputEl) {
-		timeContainer.innerHTML = `
-      <label class="${cssPrefix}-time-label" for="${cssPrefix}-time-hour">Time</label>
-      <input id="${cssPrefix}-time-hour" aria-label="Hour" class="${cssPrefix}-time-input" type="number" min="0" max="23" data-time-unit="hour" />
-      <span>:</span>
-      <input aria-label="Minute" class="${cssPrefix}-time-input" type="number" min="0" max="59" data-time-unit="minute" />
-    `;
-		hourInputEl = timeContainer.querySelector("[data-time-unit=\"hour\"]");
-		minuteInputEl = timeContainer.querySelector("[data-time-unit=\"minute\"]");
+		timeContainer.innerHTML = "";
+		const label = document.createElement("label");
+		label.className = `${cssPrefix}-time-label`;
+		label.htmlFor = `${cssPrefix}-time-hour`;
+		label.textContent = "Time";
+		const hourInput = document.createElement("input");
+		hourInput.id = `${cssPrefix}-time-hour`;
+		hourInput.setAttribute("aria-label", "Hour");
+		hourInput.className = `${cssPrefix}-time-input`;
+		hourInput.type = "number";
+		hourInput.min = "0";
+		hourInput.max = "23";
+		hourInput.dataset.timeUnit = "hour";
+		const colon = document.createElement("span");
+		colon.textContent = ":";
+		const minuteInput = document.createElement("input");
+		minuteInput.setAttribute("aria-label", "Minute");
+		minuteInput.className = `${cssPrefix}-time-input`;
+		minuteInput.type = "number";
+		minuteInput.min = "0";
+		minuteInput.max = "59";
+		minuteInput.dataset.timeUnit = "minute";
+		timeContainer.appendChild(label);
+		timeContainer.appendChild(hourInput);
+		timeContainer.appendChild(colon);
+		timeContainer.appendChild(minuteInput);
+		hourInputEl = hourInput;
+		minuteInputEl = minuteInput;
 	}
 	timeContainer.hidden = false;
 	actions.classList.add(`${cssPrefix}-actions-with-ok`);
@@ -1100,9 +1152,8 @@ var ThekDatePicker = class {
 		}
 		const text = event.clipboardData?.getData("text") ?? "";
 		if (!text) return;
-		const format = fullFormat(this.options);
 		if (extractInput(text, this.options)) return;
-		if (!buildPasteAllowedPattern(format, this.options).test(text)) event.preventDefault();
+		event.preventDefault();
 	};
 	onGlobalPointerDown = (event) => {
 		if (!this.openState) return;
@@ -1250,7 +1301,7 @@ var ThekDatePicker = class {
 		this.input.disabled = this.options.disabled;
 		this.input.setAttribute("inputmode", "text");
 		this.input.setAttribute("autocomplete", "off");
-		this.input.setAttribute("aria-haspopup", "dialog");
+		this.input.setAttribute("aria-haspopup", "grid");
 		this.input.setAttribute("aria-expanded", "false");
 		if (!this.pickerEl.id) this.pickerEl.id = `thekdp-picker-${Math.random().toString(36).slice(2, 9)}`;
 		this.input.setAttribute("aria-controls", this.pickerEl.id);

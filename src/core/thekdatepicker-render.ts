@@ -7,9 +7,14 @@ export function renderWeekdays(
   rotateWeekdayLabels: (weekdayNames: string[], weekStartsOn: number) => string[],
   cssPrefix: string
 ): void {
-  weekdaysEl.innerHTML = rotateWeekdayLabels(weekdayNames, weekStartsOn)
-    .map((day) => `<div class="${cssPrefix}-weekday-cell" role="columnheader">${day}</div>`)
-    .join('');
+  weekdaysEl.innerHTML = '';
+  rotateWeekdayLabels(weekdayNames, weekStartsOn).forEach((day) => {
+    const cell = document.createElement('div');
+    cell.className = `${cssPrefix}-weekday-cell`;
+    cell.setAttribute('role', 'columnheader');
+    cell.textContent = day;
+    weekdaysEl.appendChild(cell);
+  });
 }
 
 export function resolveMonthLabel(
@@ -114,14 +119,40 @@ export function ensureTimeInputs(
   let minuteInputEl = timeContainer.querySelector<HTMLInputElement>('[data-time-unit="minute"]');
 
   if (!hourInputEl || !minuteInputEl) {
-    timeContainer.innerHTML = `
-      <label class="${cssPrefix}-time-label" for="${cssPrefix}-time-hour">Time</label>
-      <input id="${cssPrefix}-time-hour" aria-label="Hour" class="${cssPrefix}-time-input" type="number" min="0" max="23" data-time-unit="hour" />
-      <span>:</span>
-      <input aria-label="Minute" class="${cssPrefix}-time-input" type="number" min="0" max="59" data-time-unit="minute" />
-    `;
-    hourInputEl = timeContainer.querySelector<HTMLInputElement>('[data-time-unit="hour"]');
-    minuteInputEl = timeContainer.querySelector<HTMLInputElement>('[data-time-unit="minute"]');
+    timeContainer.innerHTML = '';
+
+    const label = document.createElement('label');
+    label.className = `${cssPrefix}-time-label`;
+    label.htmlFor = `${cssPrefix}-time-hour`;
+    label.textContent = 'Time';
+
+    const hourInput = document.createElement('input');
+    hourInput.id = `${cssPrefix}-time-hour`;
+    hourInput.setAttribute('aria-label', 'Hour');
+    hourInput.className = `${cssPrefix}-time-input`;
+    hourInput.type = 'number';
+    hourInput.min = '0';
+    hourInput.max = '23';
+    hourInput.dataset.timeUnit = 'hour';
+
+    const colon = document.createElement('span');
+    colon.textContent = ':';
+
+    const minuteInput = document.createElement('input');
+    minuteInput.setAttribute('aria-label', 'Minute');
+    minuteInput.className = `${cssPrefix}-time-input`;
+    minuteInput.type = 'number';
+    minuteInput.min = '0';
+    minuteInput.max = '59';
+    minuteInput.dataset.timeUnit = 'minute';
+
+    timeContainer.appendChild(label);
+    timeContainer.appendChild(hourInput);
+    timeContainer.appendChild(colon);
+    timeContainer.appendChild(minuteInput);
+
+    hourInputEl = hourInput;
+    minuteInputEl = minuteInput;
   }
 
   timeContainer.hidden = false;
