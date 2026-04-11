@@ -87,7 +87,7 @@ describe('ThekDatePicker integration', () => {
     const input = document.querySelector('#date-input') as HTMLInputElement;
     const preventDefault = vi.fn();
 
-    const event = new Event('paste') as any;
+    const event = new Event('paste') as unknown as ClipboardEvent;
     event.clipboardData = {
       getData: () => '99/99/9999'
     };

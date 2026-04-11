@@ -1,6 +1,7 @@
 {
-  "name": "thekdatepicker",
-  "version": "1.1.2",
+  "name": "thekdatepicker-monorepo",
+  "version": "1.2.0",
+  "private": true,
   "description": "A framework-agnostic date/time picker library with themes.",
   "keywords": [
     "calendar",
@@ -19,57 +20,26 @@
     "type": "git",
     "url": "git+https://github.com/Thekster/ThekDatePicker.git"
   },
-  "files": [
-    "dist"
-  ],
   "type": "module",
-  "sideEffects": [
-    "**/*.css"
+  "workspaces": [
+    "packages/*"
   ],
-  "main": "./dist/thekdatepicker.umd.cjs",
-  "module": "./dist/thekdatepicker.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/thekdatepicker.js",
-      "require": "./dist/thekdatepicker.umd.cjs"
-    },
-    "./min": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/thekdatepicker.min.js",
-      "require": "./dist/thekdatepicker.umd.min.cjs"
-    },
-    "./css/base.css": "./dist/css/base.css",
-    "./css/thekdatepicker.css": "./dist/css/thekdatepicker.css",
-    "./css/*": "./dist/css/*"
-  },
   "scripts": {
-    "dev": "vite --open /showcase/index.html",
-    "build": "vite build && cross-env THEK_MINIFY=1 vite build --emptyOutDir false && tsc && shx mkdir -p dist/themes && shx cp dist/css/thekdatepicker.css dist/css/base.css && shx cp dist/css/thekdatepicker.css dist/themes/base.css",
-    "build:showcase": "vite build --config vite.showcase.config.ts",
-    "preview": "vite preview",
-    "test": "vitest",
-    "test:run": "vitest run",
-    "coverage": "vitest run --coverage",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
-    "format": "oxfmt --check",
-    "format:write": "oxfmt --write",
-    "release:check": "npm run lint && npm run format && npm run build && npm run test:run",
-    "prepublishOnly": "npm run release:check"
+    "dev": "npm run dev -w packages/ThekDatePicker",
+    "build": "npm run build -w packages/ThekDatePicker && npm run build -w packages/ThekDatePicker-vue",
+    "build:showcase": "npm run build:showcase -w packages/ThekDatePicker",
+    "preview": "npm run preview -w packages/ThekDatePicker",
+    "test": "npm run test -w packages/ThekDatePicker && npm run test -w packages/ThekDatePicker-vue",
+    "test:run": "npm run test:run -w packages/ThekDatePicker && npm run test:run -w packages/ThekDatePicker-vue",
+    "coverage": "npm run coverage -w packages/ThekDatePicker",
+    "lint": "npm run lint -w packages/ThekDatePicker && npm run lint -w packages/ThekDatePicker-vue",
+    "lint:fix": "npm run lint:fix -w packages/ThekDatePicker && npm run lint:fix -w packages/ThekDatePicker-vue",
+    "format": "npm run format -w packages/ThekDatePicker && npm run format -w packages/ThekDatePicker-vue",
+    "format:write": "npm run format:write -w packages/ThekDatePicker && npm run format:write -w packages/ThekDatePicker-vue",
+    "release:check": "npm run lint && npm run format && npm run build && npm run test"
   },
   "devDependencies": {
-    "@types/node": "^25.2.1",
-    "cross-env": "^10.1.0",
-    "esbuild": "^0.28.0",
-    "jsdom": "^29.0.1",
     "oxfmt": "^0.44.0",
-    "oxlint": "^1.58.0",
-    "shx": "^0.4.0",
-    "terser": "^5.46.0",
-    "typescript": "^6.0.2",
-    "vite": "^8.0.1",
-    "vitest": "^4.0.18"
+    "oxlint": "^1.58.0"
   }
 }

@@ -1,5 +1,4 @@
-import { applyMaskToInput, formatUsesMeridiem, getAllowedInputSeparators } from './date-utils.js';
-import type { ResolvedOptions } from './types.js';
+import { applyMaskToInput, formatUsesMeridiem } from './date-utils.js';
 
 function isMaskChar(char: string, usesMeridiem: boolean): boolean {
   if (/^\d$/.test(char)) return true;

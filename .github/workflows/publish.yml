@@ -31,5 +31,8 @@ jobs:
       - name: Verify release package
         run: npm run release:check
 
-      - name: Publish to npm
-        run: npm publish
+      - name: Publish core package
+        run: npm publish -w packages/ThekDatePicker
+
+      - name: Publish Vue package
+        run: npm publish -w packages/ThekDatePicker-vue

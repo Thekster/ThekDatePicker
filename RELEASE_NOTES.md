@@ -2,8 +2,20 @@
 
 ## Unreleased
 
+## 1.2.0 - 2026-04-11
+
+### Added
+
+- **Vue Wrapper Package:** Added `thekdatepicker-vue` as a rendered Vue component that creates its own input, forwards standard input attributes, exposes picker methods through refs, and ships with dedicated wrapper tests and README usage docs. (SEV-2)
+
+### Changed
+
+- **Monorepo Validation Scope:** Root test and release-check scripts now validate both the core package and the Vue wrapper package instead of only the core workspace.
+
 ### Fixed
 
+- **CI Build/Test Order:** CI now builds packages before running artifact-dependent tests so package verification no longer depends on stale local output. (SEV-1)
+- **GitHub Pages Artifact Path:** Pages deployment now uploads the showcase output from the package workspace path used by the monorepo build. (SEV-1)
 - **ARIA Role Mismatch:** Removed `role="dialog"` from the popover and updated the input to `aria-haspopup="grid"` to correctly reflect the calendar dropdown pattern without violating focus-trapping requirements for modal dialogs. (SEV-2)
 - **Strict Paste Validation:** The paste handler now strictly validates the entire pasted string against the format before allowing it, preventing invalid data (like `99/99/9999`) from being momentarily accepted before blur. (SEV-3)
 - **Security & CSP Compliance:** Refactored DOM construction to eliminate `innerHTML` usage in favor of `document.createElement`. This prevents potential XSS vectors and ensures compatibility with strict Content Security Policies (CSP) and Trusted Types. (SEV-4)
@@ -14,7 +26,7 @@
 
 - **Release Surface Alignment:** Corrected package metadata and build output so the documented CSS entrypoint now ships as `dist/css/base.css`, the bundled CSS still ships as `dist/css/thekdatepicker.css`, and declaration-side CSS imports resolve against a real file in `dist/themes/base.css`. (SEV-1)
 - **Publish Artifact Drift:** Rebuilt the package output to match current source modules, preventing `src`/`dist` divergence from shipping stale runtime behavior. (SEV-1)
-- **Workflow Readiness:** Fixed CI, publish, and GitHub Pages deployment flow so releases validate with non-watch tests, formatted sources, provenance publishing, and an auto-deployed showcase. (SEV-1)
+- **Workflow Readiness:** Fixed CI, publish, and GitHub Pages deployment flow so releases validate with non-watch tests, formatted sources, and an auto-deployed showcase. (SEV-1)
 - **Constraint Parsing Consistency:** `setMinDate()` and `setMaxDate()` now accept values in the configured picker format before falling back to ISO parsing, matching the public API contract. (SEV-2)
 - **Global Default Date:** New instances now honor `defaultDate` supplied through global options instead of ignoring it during construction. (SEV-2)
 - **Popover Placement:** Popover positioning now measures the real panel, shifts within the available container width, and flips above the input when there is not enough vertical space below. (SEV-2)
@@ -28,7 +40,7 @@
 ### Changed
 
 - **Release Validation Order:** `release:check` now builds before package-artifact tests so package verification runs against actual generated output.
-- **Generated Artifact Tooling:** `showcase-dist` is now ignored by formatter/linter config so local Pages builds do not pollute source-quality checks.
+- **Generated Artifact Tooling:** Package workspace formatter/linter config now ignores `showcase-dist` so local Pages builds do not pollute source-quality checks.
 - **Documentation Scope:** README copy now describes the library as browser-first and explicitly notes the current SSR/client-only boundary and accessibility scope.
 
 ## 1.1.1 - 2026-04-05
@@ -45,7 +57,7 @@
 
 ### Changed
 
-- **Build Pipeline:** CSS is now correctly integrated into the Vite pipeline, ensuring `base.css` is minified and correctly distributed without manual copy scripts. (SEV-3)
+- **Build Pipeline:** CSS is now correctly integrated into the Vite pipeline, ensuring `base.css` is minified and correctly distributed. (SEV-3)
 
 ## 1.1.0 - 2026-04-04
 

@@ -1,0 +1,1240 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ThekDatePicker | Framework-Agnostic Date Picker</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css"
+    />
+    <link rel="stylesheet" href="../src/themes/base.css" />
+    <link rel="stylesheet" href="./testpage.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="showcase-toolbar">
+      <div class="toolbar-group">
+        <label for="page-theme-select">Page Theme</label>
+        <select id="page-theme-select">
+          <option value="light" selected>Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="app-container">
+      <aside>
+        <div class="logo"><i class="fa-regular fa-calendar-days"></i> ThekDatePicker</div>
+        <nav>
+          <ul>
+            <li><a href="#docs" class="active">Quick Docs</a></li>
+            <li><a href="#basic">Basic</a></li>
+            <li><a href="#time24">24h Time</a></li>
+            <li><a href="#time12">12h AM/PM</a></li>
+            <li><a href="#behavior">Behavior</a></li>
+            <li><a href="#constraints">Constraints</a></li>
+            <li><a href="#events">Events</a></li>
+            <li><a href="#api">API</a></li>
+            <li><a href="#configurator">Configurator</a></li>
+            <li><a href="#reference">Reference</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main>
+        <h1>ThekDatePicker</h1>
+        <p class="description">
+          Framework-agnostic date/time picker with strict mask typing, flexible separators, and
+          themed UI.
+        </p>
+
+        <section id="docs">
+          <h2><i class="fa-solid fa-book"></i> Quick Docs</h2>
+          <div class="demo-card">
+            <div class="demo-content quick-docs-list">
+              <div class="quick-doc-item">
+                <h3>NPM / ESM</h3>
+                <p>Use this in modern bundlers like Vite, Webpack, or Nuxt.</p>
+                <pre class="quick-doc-code" data-lang="bash">
+npm install
+npm run dev</pre
+                >
+                <pre class="quick-doc-code" data-lang="javascript">
+import { createDatePicker, setGlobalOptions } from 'thekdatepicker';
+import 'thekdatepicker/css/base.css';
+
+setGlobalOptions({
+  format: 'YYYY-MM-DD',
+  theme: 'auto',
+  reactiveTheme: true,
+  themeAttribute: 'data-showcase-theme',
+  useLocaleDefaults: true,
+  locale: 'en-US'
+});
+
+createDatePicker('#my-date', {
+  enableTime: true,
+  timeFormat: 'hh:mm A'
+});</pre
+                >
+              </div>
+              <div class="quick-doc-item">
+                <h3>Browser CDN</h3>
+                <p>Use this directly in plain HTML without a build step.</p>
+                <pre class="quick-doc-code" data-lang="html">
+&lt;link rel="stylesheet" href="https://unpkg.com/thekdatepicker/dist/css/base.css"&gt;
+&lt;input id="my-date" type="text"&gt;
+&lt;script src="https://unpkg.com/thekdatepicker/dist/thekdatepicker.umd.cjs"&gt;&lt;/script&gt;
+&lt;script&gt;
+  ThekDatePicker.setGlobalOptions({
+    theme: 'auto',
+    reactiveTheme: true,
+    themeAttribute: 'data-theme'
+  });
+  ThekDatePicker.createDatePicker('#my-date');
+&lt;/script&gt;</pre
+                >
+              </div>
+              <div class="quick-doc-item">
+                <h3>Theme Usage</h3>
+                <p>Use a template or pass a theme token object per instance.</p>
+                <pre class="quick-doc-code" data-lang="javascript">
+createDatePicker('#date-a', { theme: 'dark' });</pre
+                >
+                <pre class="quick-doc-code" data-lang="javascript">
+createDatePicker('#date-b', {
+  theme: {
+    primary: '#e11d48',
+    bgSurface: '#fff1f2',
+    border: '#fecdd3'
+  }
+});</pre
+                >
+                <pre class="quick-doc-code" data-lang="javascript">
+setGlobalOptions({
+  format: 'YYYY-MM-DD',
+  theme: 'light'
+});</pre
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="basic">
+          <h2><i class="fa-solid fa-calendar"></i> Basic Date</h2>
+          <div class="demo-card">
+            <div class="demo-content">
+              <label for="basic-input">Date</label>
+              <input id="basic-input" type="text" class="showcase-picker-input" />
+              <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
+              <div class="code-snippet">
+                <pre>
+createDatePicker('#basic-input', {
+  format: 'DD/MM/YYYY',
+  defaultDate: new Date()
+});</pre
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="time24">
+          <h2><i class="fa-regular fa-clock"></i> Date Time (24h)</h2>
+          <div class="demo-card">
+            <div class="demo-content">
+              <label for="datetime24-input">Date + Time (24h)</label>
+              <input id="datetime24-input" type="text" class="showcase-picker-input" />
+              <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
+              <div class="code-snippet">
+                <pre>
+createDatePicker('#datetime24-input', {
+  format: 'YYYY-MM-DD',
+  enableTime: true,
+  timeFormat: 'HH:mm',
+  defaultDate: new Date()
+});</pre
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="time12">
+          <h2><i class="fa-solid fa-clock-rotate-left"></i> Date Time (12h AM/PM)</h2>
+          <div class="demo-card">
+            <div class="demo-content">
+              <label for="datetime12-input">Date + Time (12h)</label>
+              <input id="datetime12-input" type="text" class="showcase-picker-input" />
+              <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
+              <div class="code-snippet">
+                <pre>
+createDatePicker('#datetime12-input', {
+  format: 'MM/DD/YYYY',
+  enableTime: true,
+  timeFormat: 'hh:mm A',
+  defaultDate: new Date()
+});</pre
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-card">
+            <div class="demo-content">
+              <label for="datetime12-lower-input">Date + Time (12h lowercase)</label>
+              <input id="datetime12-lower-input" type="text" class="showcase-picker-input" />
+              <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
+              <div class="code-snippet">
+                <pre>
+createDatePicker('#datetime12-lower-input', {
+  format: 'DD.MM.YYYY',
+  enableTime: true,
+  timeFormat: 'hh:mm a',
+  defaultDate: new Date()
+});</pre
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="behavior">
+          <h2><i class="fa-solid fa-sliders"></i> Behavior Variants</h2>
+          <div class="demo-card">
+            <div class="demo-content">
+              <label for="open-on-click-input">Open on input click</label>
+              <input id="open-on-click-input" type="text" class="showcase-picker-input" />
+              <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
+              <div class="code-snippet">
+                <pre>
+createDatePicker('#open-on-click-input', {
+  format: 'DD/MM/YYYY',
+  openOnInputClick: true
+});</pre
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-card">
+            <div class="demo-content">
+              <label for="no-button-input">No calendar button</label>
+              <input id="no-button-input" type="text" class="showcase-picker-input" />
+              <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
+              <div class="code-snippet">
+                <pre>
+createDatePicker('#no-button-input', {
+  format: 'YYYY/MM/DD',
+  showCalendarButton: false
+});</pre
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="constraints">
+          <h2><i class="fa-solid fa-lock"></i> Constraints</h2>
+          <div class="demo-card">
+            <div class="demo-content">
+              <label for="range-input">Min/Max</label>
+              <input id="range-input" type="text" class="showcase-picker-input" />
+              <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
+              <div class="code-snippet">
+                <pre>
+createDatePicker('#range-input', {
+  format: 'MM/DD/YYYY',
+  minDate: '2026-01-10',
+  maxDate: '2026-12-20'
+});</pre
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-card">
+            <div class="demo-content">
+              <label for="monday-start-input">Week starts on Monday</label>
+              <input id="monday-start-input" type="text" class="showcase-picker-input" />
+              <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
+              <div class="code-snippet">
+                <pre>
+createDatePicker('#monday-start-input', {
+  format: 'DD/MM/YYYY',
+  weekStartsOn: 1
+});</pre
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-card">
+            <div class="demo-content">
+              <label for="suspicious-input">Suspicious Date Warning</label>
+              <input id="suspicious-input" type="text" class="showcase-picker-input" />
+              <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
+              <div class="code-snippet">
+                <pre>
+createDatePicker('#suspicious-input', {
+  format: 'YYYY-MM-DD',
+  suspiciousWarning: true,
+  suspiciousYearSpan: 100,
+  suspiciousMinYear: 1900,
+  suspiciousMaxYear: 2100
+});</pre
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="events">
+          <h2><i class="fa-regular fa-bell"></i> Events</h2>
+          <div class="demo-card">
+            <div class="demo-content">
+              <label for="events-input">Event callbacks demo</label>
+              <input id="events-input" type="text" class="showcase-picker-input" />
+              <p class="api-help">
+                This demo logs `onOpen`, `onChange`, and `onClose` as they happen.
+              </p>
+              <div class="event-log-container">
+                <div class="event-log-header">
+                  <span>Event Log</span>
+                  <button id="events-clear-log" class="api-btn">Clear</button>
+                </div>
+                <div id="events-log" class="event-log"></div>
+              </div>
+              <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
+              <div class="code-snippet">
+                <pre>
+createDatePicker('#events-input', {
+  format: 'DD/MM/YYYY',
+  onOpen: () => log('onOpen'),
+  onChange: (date, formatted) => log(`onChange: ${formatted}`),
+  onClose: () => log('onClose')
+});</pre
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="api">
+          <h2><i class="fa-solid fa-terminal"></i> API Methods</h2>
+          <div class="demo-card">
+            <div class="demo-content">
+              <input id="api-target" type="text" class="showcase-picker-input" />
+              <div style="display: flex; gap: 0.5rem; margin-top: 0.625rem; flex-wrap: wrap">
+                <button id="api-open" class="api-btn">Open</button>
+                <button id="api-close" class="api-btn">Close</button>
+                <button id="api-now" class="api-btn">Set Now</button>
+                <button id="api-clear" class="api-btn">Clear</button>
+              </div>
+              <div
+                id="api-output"
+                style="margin-top: 0.625rem; font-size: 0.85rem; color: var(--text-muted)"
+              ></div>
+              <p class="api-help">
+                `open()` shows the popover, `close()` hides it, `setDate(new Date())` sets current
+                date/time, and `clear()` resets value.
+              </p>
+              <button class="toggle-code" onclick="toggleCode(this)">Show Code</button>
+              <div class="code-snippet">
+                <pre>
+const apiPicker = createDatePicker('#api-target', {
+  format: 'DD/MM/YYYY HH:mm',
+  enableTime: true
+});
+
+apiPicker.open();
+apiPicker.setDate(new Date());
+apiPicker.clear();</pre
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="configurator">
+          <h2><i class="fa-solid fa-wand-magic-sparkles"></i> Theme Configurator</h2>
+          <div class="demo-card">
+            <div class="demo-content configurator-grid">
+              <div class="configurator-settings">
+                <div class="configurator-settings-grid">
+                  <label
+                    >Template
+                    <select id="cfg-template">
+                      <option value="light" selected>Light</option>
+                      <option value="dark">Dark</option>
+                    </select>
+                  </label>
+                  <label
+                    >Primary
+                    <select id="cfg-primary"></select
+                  ></label>
+                  <label
+                    >Primary Strong
+                    <select id="cfg-primary-strong"></select
+                  ></label>
+                  <label
+                    >Primary Contrast
+                    <select id="cfg-primary-contrast"></select
+                  ></label>
+                  <label
+                    >Surface
+                    <select id="cfg-surface"></select
+                  ></label>
+                  <label
+                    >Panel
+                    <select id="cfg-panel"></select
+                  ></label>
+                  <label
+                    >Border
+                    <select id="cfg-border"></select
+                  ></label>
+                  <label
+                    >Text Main
+                    <select id="cfg-text-main"></select
+                  ></label>
+                  <label
+                    >Text Muted
+                    <select id="cfg-text-muted"></select
+                  ></label>
+                  <label
+                    >Shadow
+                    <input
+                      id="cfg-shadow"
+                      type="text"
+                      value="0 0.875rem 1.875rem rgba(13, 21, 33, 0.18)"
+                  /></label>
+                  <label>Font Family <input id="cfg-font" type="text" value="inherit" /></label>
+                  <label>Radius <input id="cfg-radius" type="text" value="0.625rem" /></label>
+                  <label
+                    >Control Height <input id="cfg-height" type="text" value="2.25rem"
+                  /></label>
+                </div>
+              </div>
+              <div class="configurator-preview">
+                <label for="config-preview-input" style="display: block; margin-bottom: 0.5rem"
+                  >Live Preview</label
+                >
+                <input
+                  id="config-preview-input"
+                  type="text"
+                  style="display: block; width: 16.25rem"
+                />
+                <div style="margin-top: 0.75rem">
+                  <button id="copy-theme-css" class="api-btn">Copy Theme Object</button>
+                </div>
+                <pre
+                  id="config-css-output"
+                  class="code-snippet visible"
+                  style="margin-top: 0.75rem"
+                ></pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="reference">
+          <h2><i class="fa-solid fa-table-list"></i> API Reference Tables</h2>
+          <div class="demo-card">
+            <div class="demo-content reference-wrap">
+              <h3 class="ref-title">Config Options</h3>
+              <table class="ref-table">
+                <thead>
+                  <tr>
+                    <th>Property</th>
+                    <th>Type</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>format</td>
+                    <td>string</td>
+                    <td>DD/MM/YYYY</td>
+                    <td>Date mask/parse/display format.</td>
+                  </tr>
+                  <tr>
+                    <td>locale</td>
+                    <td>string</td>
+                    <td>system locale</td>
+                    <td>Locale used for deriving defaults.</td>
+                  </tr>
+                  <tr>
+                    <td>useLocaleDefaults</td>
+                    <td>boolean</td>
+                    <td>false</td>
+                    <td>Derives format/time/week-start from locale unless explicitly set.</td>
+                  </tr>
+                  <tr>
+                    <td>enableTime</td>
+                    <td>boolean</td>
+                    <td>false</td>
+                    <td>Controls visibility of popover time inputs.</td>
+                  </tr>
+                  <tr>
+                    <td>timeFormat</td>
+                    <td>string</td>
+                    <td>HH:mm</td>
+                    <td>Used only when `format` has no time tokens and `enableTime` is true.</td>
+                  </tr>
+                  <tr>
+                    <td>minDate / maxDate</td>
+                    <td>Date | string | number</td>
+                    <td>undefined</td>
+                    <td>Selection bounds.</td>
+                  </tr>
+                  <tr>
+                    <td>defaultDate</td>
+                    <td>Date | string | number</td>
+                    <td>undefined</td>
+                    <td>Initial value.</td>
+                  </tr>
+                  <tr>
+                    <td>placeholder</td>
+                    <td>string</td>
+                    <td>derived</td>
+                    <td>Input placeholder override.</td>
+                  </tr>
+                  <tr>
+                    <td>disabled</td>
+                    <td>boolean</td>
+                    <td>false</td>
+                    <td>Disables interaction.</td>
+                  </tr>
+                  <tr>
+                    <td>appendTo</td>
+                    <td>HTMLElement</td>
+                    <td>document.body</td>
+                    <td>Popover mount target.</td>
+                  </tr>
+                  <tr>
+                    <td>weekStartsOn</td>
+                    <td>0..6</td>
+                    <td>0</td>
+                    <td>First weekday.</td>
+                  </tr>
+                  <tr>
+                    <td>closeOnSelect</td>
+                    <td>boolean</td>
+                    <td>true</td>
+                    <td>Close after date click in date-only mode.</td>
+                  </tr>
+                  <tr>
+                    <td>showCalendarButton</td>
+                    <td>boolean</td>
+                    <td>true</td>
+                    <td>Renders trigger button.</td>
+                  </tr>
+                  <tr>
+                    <td>openOnInputClick</td>
+                    <td>boolean</td>
+                    <td>false</td>
+                    <td>Open on input click.</td>
+                  </tr>
+                  <tr>
+                    <td>theme</td>
+                    <td>'light' | 'dark' | 'auto' | Partial&lt;ThekDatePickerTheme&gt;</td>
+                    <td>{}</td>
+                    <td>Per-instance template or token overrides from JavaScript.</td>
+                  </tr>
+                  <tr>
+                    <td>reactiveTheme</td>
+                    <td>boolean</td>
+                    <td>false</td>
+                    <td>When true and `theme: 'auto'`, follows page theme changes.</td>
+                  </tr>
+                  <tr>
+                    <td>themeAttribute</td>
+                    <td>string</td>
+                    <td>data-theme</td>
+                    <td>Document attribute used to detect `light`/`dark` page theme.</td>
+                  </tr>
+                  <tr>
+                    <td>suspiciousWarning</td>
+                    <td>boolean</td>
+                    <td>false</td>
+                    <td>Enables suspicious-date warning indicator.</td>
+                  </tr>
+                  <tr>
+                    <td>suspiciousYearSpan</td>
+                    <td>number</td>
+                    <td>100</td>
+                    <td>Warns when year is outside current year ± span.</td>
+                  </tr>
+                  <tr>
+                    <td>suspiciousMinYear</td>
+                    <td>number</td>
+                    <td>undefined</td>
+                    <td>Optional absolute lower year bound for warning.</td>
+                  </tr>
+                  <tr>
+                    <td>suspiciousMaxYear</td>
+                    <td>number</td>
+                    <td>undefined</td>
+                    <td>Optional absolute upper year bound for warning.</td>
+                  </tr>
+                  <tr>
+                    <td>suspiciousMessage</td>
+                    <td>string</td>
+                    <td>Suspicious date value</td>
+                    <td>Tooltip text for warning state.</td>
+                  </tr>
+                  <tr>
+                    <td>revertWarning</td>
+                    <td>boolean</td>
+                    <td>true</td>
+                    <td>
+                      Shows sticky `!` pill; tooltip includes rejected user input until
+                      corrected/null commit.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>revertMessage</td>
+                    <td>string</td>
+                    <td>Invalid input value</td>
+                    <td>Tooltip text for revert indicator state.</td>
+                  </tr>
+                </tbody>
+              </table>
+              <h3 class="ref-title">Instance Properties</h3>
+              <table class="ref-table">
+                <thead>
+                  <tr>
+                    <th>Property</th>
+                    <th>Type</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>input</td>
+                    <td>HTMLInputElement</td>
+                    <td>set at init</td>
+                    <td>Target input element.</td>
+                  </tr>
+                  <tr>
+                    <td>options</td>
+                    <td>ResolvedOptions</td>
+                    <td>resolved</td>
+                    <td>Runtime config with defaults applied.</td>
+                  </tr>
+                </tbody>
+              </table>
+              <h3 class="ref-title">Functions / Methods</h3>
+              <table class="ref-table">
+                <thead>
+                  <tr>
+                    <th>Function</th>
+                    <th>Type</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>createDatePicker(target, options?)</td>
+                    <td>factory</td>
+                    <td>n/a</td>
+                    <td>Creates and returns a new ThekDatePicker instance.</td>
+                  </tr>
+                  <tr>
+                    <td>setGlobalOptions(options)</td>
+                    <td>global function</td>
+                    <td>n/a</td>
+                    <td>Sets and merges global defaults for new instances.</td>
+                  </tr>
+                  <tr>
+                    <td>getGlobalOptions()</td>
+                    <td>global function</td>
+                    <td>n/a</td>
+                    <td>Returns current global defaults.</td>
+                  </tr>
+                  <tr>
+                    <td>resetGlobalOptions()</td>
+                    <td>global function</td>
+                    <td>n/a</td>
+                    <td>Clears global defaults back to library defaults.</td>
+                  </tr>
+                  <tr>
+                    <td>open()</td>
+                    <td>instance method</td>
+                    <td>n/a</td>
+                    <td>Opens the datepicker popover.</td>
+                  </tr>
+                  <tr>
+                    <td>close()</td>
+                    <td>instance method</td>
+                    <td>n/a</td>
+                    <td>Closes the datepicker popover.</td>
+                  </tr>
+                  <tr>
+                    <td>toggle()</td>
+                    <td>instance method</td>
+                    <td>n/a</td>
+                    <td>Toggles popover open/close state.</td>
+                  </tr>
+                  <tr>
+                    <td>setDate(value, triggerChange?)</td>
+                    <td>instance method</td>
+                    <td>triggerChange=true</td>
+                    <td>Parses and sets date value; clamps against min/max.</td>
+                  </tr>
+                  <tr>
+                    <td>getDate()</td>
+                    <td>instance method</td>
+                    <td>n/a</td>
+                    <td>Returns selected date or null.</td>
+                  </tr>
+                  <tr>
+                    <td>clear(triggerChange?)</td>
+                    <td>instance method</td>
+                    <td>triggerChange=true</td>
+                    <td>Clears current value and input display.</td>
+                  </tr>
+                  <tr>
+                    <td>setMinDate(value)</td>
+                    <td>instance method</td>
+                    <td>n/a</td>
+                    <td>Updates minimum selectable date.</td>
+                  </tr>
+                  <tr>
+                    <td>setMaxDate(value)</td>
+                    <td>instance method</td>
+                    <td>n/a</td>
+                    <td>Updates maximum selectable date.</td>
+                  </tr>
+                  <tr>
+                    <td>setDisabled(disabled)</td>
+                    <td>instance method</td>
+                    <td>n/a</td>
+                    <td>Enables or disables interaction.</td>
+                  </tr>
+                  <tr>
+                    <td>setTheme(theme)</td>
+                    <td>instance method</td>
+                    <td>n/a</td>
+                    <td>
+                      Applies template (`light`/`dark`/`auto`) or theme token object at runtime.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>destroy()</td>
+                    <td>instance method</td>
+                    <td>n/a</td>
+                    <td>Removes listeners and DOM bindings.</td>
+                  </tr>
+                  <tr>
+                    <td>formatDate(date, format)</td>
+                    <td>utility function</td>
+                    <td>n/a</td>
+                    <td>Formats a Date by ThekDatePicker tokens.</td>
+                  </tr>
+                  <tr>
+                    <td>parseDateByFormat(value, format)</td>
+                    <td>utility function</td>
+                    <td>n/a</td>
+                    <td>Parses text strictly with token format.</td>
+                  </tr>
+                  <tr>
+                    <td>applyMaskToInput(value, format)</td>
+                    <td>utility function</td>
+                    <td>n/a</td>
+                    <td>Applies typing mask and separators to input text.</td>
+                  </tr>
+                </tbody>
+              </table>
+              <h3 class="ref-title">Events</h3>
+              <table class="ref-table">
+                <thead>
+                  <tr>
+                    <th>Event</th>
+                    <th>Type</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>onOpen</td>
+                    <td>(instance) =&gt; void</td>
+                    <td>undefined</td>
+                    <td>Fires when popover opens.</td>
+                  </tr>
+                  <tr>
+                    <td>onChange</td>
+                    <td>(date, formatted, instance) =&gt; void</td>
+                    <td>undefined</td>
+                    <td>Fires when selected value changes.</td>
+                  </tr>
+                  <tr>
+                    <td>onClose</td>
+                    <td>(instance) =&gt; void</td>
+                    <td>undefined</td>
+                    <td>Fires when popover closes.</td>
+                  </tr>
+                </tbody>
+              </table>
+              <h3 class="ref-title">Theme Tokens</h3>
+              <table class="ref-table">
+                <thead>
+                  <tr>
+                    <th>Token</th>
+                    <th>Type</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>primary</td>
+                    <td>string</td>
+                    <td>system accent</td>
+                    <td>Main accent color.</td>
+                  </tr>
+                  <tr>
+                    <td>primaryStrong</td>
+                    <td>string</td>
+                    <td>accent mix</td>
+                    <td>Stronger accent for active states.</td>
+                  </tr>
+                  <tr>
+                    <td>primaryContrast</td>
+                    <td>string</td>
+                    <td>system accent text</td>
+                    <td>Text color on accent surfaces.</td>
+                  </tr>
+                  <tr>
+                    <td>bgSurface</td>
+                    <td>string</td>
+                    <td>system canvas</td>
+                    <td>Input and popover base background.</td>
+                  </tr>
+                  <tr>
+                    <td>bgPanel</td>
+                    <td>string</td>
+                    <td>system canvas mix</td>
+                    <td>Subtle panel and hover background.</td>
+                  </tr>
+                  <tr>
+                    <td>border</td>
+                    <td>string</td>
+                    <td>system border mix</td>
+                    <td>Borders for controls and popover.</td>
+                  </tr>
+                  <tr>
+                    <td>textMain</td>
+                    <td>string</td>
+                    <td>system canvas text</td>
+                    <td>Primary text color.</td>
+                  </tr>
+                  <tr>
+                    <td>textMuted</td>
+                    <td>string</td>
+                    <td>system muted mix</td>
+                    <td>Secondary text color.</td>
+                  </tr>
+                  <tr>
+                    <td>shadow</td>
+                    <td>string</td>
+                    <td>token shadow</td>
+                    <td>Popover box-shadow.</td>
+                  </tr>
+                  <tr>
+                    <td>radius</td>
+                    <td>string</td>
+                    <td>0.375rem</td>
+                    <td>Corner radius for controls.</td>
+                  </tr>
+                  <tr>
+                    <td>fontFamily</td>
+                    <td>string</td>
+                    <td>inherit</td>
+                    <td>Font family for component text.</td>
+                  </tr>
+                  <tr>
+                    <td>controlHeight</td>
+                    <td>string</td>
+                    <td>2rem</td>
+                    <td>Input and button height.</td>
+                  </tr>
+                </tbody>
+              </table>
+              <h3 class="ref-title">Default Init (All Defaults Explicit)</h3>
+              <pre class="quick-doc-code" data-lang="javascript">
+createDatePicker('#my-date', {
+  format: 'DD/MM/YYYY',
+  locale: undefined,
+  useLocaleDefaults: false,
+  enableTime: false,
+  timeFormat: 'HH:mm',
+  minDate: undefined,
+  maxDate: undefined,
+  defaultDate: undefined,
+  placeholder: undefined, // defaults to derived format
+  disabled: false,
+  appendTo: document.body,
+  weekStartsOn: 0,
+  closeOnSelect: true,
+  showCalendarButton: true,
+  openOnInputClick: false,
+  theme: {},
+  reactiveTheme: false,
+  themeAttribute: 'data-theme',
+  suspiciousWarning: false,
+  suspiciousYearSpan: 100,
+  suspiciousMinYear: undefined,
+  suspiciousMaxYear: undefined,
+  suspiciousMessage: 'Suspicious date value',
+  revertWarning: true,
+  revertMessage: 'Invalid input value',
+  onChange: undefined,
+  onOpen: undefined,
+  onClose: undefined
+});</pre
+              >
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module">
+      import { createDatePicker, setGlobalOptions } from '../src/index.ts';
+
+      window.toggleCode = (btn) => {
+        const snippet = btn.nextElementSibling;
+        snippet.classList.toggle('visible');
+        btn.textContent = snippet.classList.contains('visible') ? 'Hide Code' : 'Show Code';
+      };
+
+      const ensureCodeTag = (pre, lang) => {
+        let code = pre.querySelector('code');
+        if (!code) {
+          code = document.createElement('code');
+          code.textContent = pre.textContent ?? '';
+          pre.textContent = '';
+          pre.appendChild(code);
+        }
+        if (lang) code.className = `language-${lang}`;
+        return code;
+      };
+
+      const inferLang = (pre) => {
+        const explicit = pre.dataset.lang;
+        if (explicit) return explicit;
+        const text = pre.textContent || '';
+        if (text.includes('&lt;') || text.includes('<script')) return 'html';
+        if (text.includes('npm ') || text.includes('pnpm ') || text.includes('yarn '))
+          return 'bash';
+        return 'javascript';
+      };
+
+      const highlightPre = (pre, lang) => {
+        if (!window.hljs) return;
+        const code = ensureCodeTag(pre, lang || inferLang(pre));
+        window.hljs.highlightElement(code);
+      };
+
+      const highlightAllCode = () => {
+        if (!window.hljs) return;
+        document.querySelectorAll('pre').forEach((pre) => {
+          highlightPre(pre);
+        });
+      };
+
+      const pageThemeSelect = document.getElementById('page-theme-select');
+
+      const applyPageTheme = (theme) => {
+        const resolved = theme === 'dark' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-showcase-theme', resolved);
+        pageThemeSelect.value = resolved;
+      };
+
+      pageThemeSelect.addEventListener('change', (e) => applyPageTheme(e.target.value));
+
+      setGlobalOptions({
+        theme: 'auto',
+        reactiveTheme: true,
+        themeAttribute: 'data-showcase-theme'
+      });
+
+      createDatePicker('#basic-input', {
+        format: 'DD/MM/YYYY',
+        defaultDate: new Date()
+      });
+
+      createDatePicker('#datetime24-input', {
+        format: 'YYYY-MM-DD',
+        enableTime: true,
+        timeFormat: 'HH:mm',
+        defaultDate: new Date()
+      });
+
+      createDatePicker('#datetime12-input', {
+        format: 'MM/DD/YYYY',
+        enableTime: true,
+        timeFormat: 'hh:mm A',
+        defaultDate: new Date()
+      });
+
+      createDatePicker('#datetime12-lower-input', {
+        format: 'DD.MM.YYYY',
+        enableTime: true,
+        timeFormat: 'hh:mm a',
+        defaultDate: new Date()
+      });
+
+      createDatePicker('#open-on-click-input', {
+        format: 'DD/MM/YYYY',
+        openOnInputClick: true
+      });
+
+      createDatePicker('#no-button-input', {
+        format: 'YYYY/MM/DD',
+        showCalendarButton: false
+      });
+
+      createDatePicker('#range-input', {
+        format: 'MM/DD/YYYY',
+        minDate: '2026-01-10',
+        maxDate: '2026-12-20'
+      });
+
+      createDatePicker('#monday-start-input', {
+        format: 'DD/MM/YYYY',
+        weekStartsOn: 1
+      });
+
+      createDatePicker('#suspicious-input', {
+        format: 'YYYY-MM-DD',
+        suspiciousWarning: true,
+        suspiciousYearSpan: 100,
+        suspiciousMinYear: 1900,
+        suspiciousMaxYear: 2100
+      });
+
+      const eventsLog = document.getElementById('events-log');
+      const appendEvent = (message) => {
+        const row = document.createElement('div');
+        row.className = 'log-entry';
+        row.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+        eventsLog.prepend(row);
+        while (eventsLog.children.length > 30) {
+          eventsLog.removeChild(eventsLog.lastChild);
+        }
+      };
+
+      createDatePicker('#events-input', {
+        format: 'DD/MM/YYYY',
+        onOpen: () => appendEvent('onOpen'),
+        onChange: (_date, formatted) => appendEvent(`onChange: ${formatted || '(empty)'}`),
+        onClose: () => appendEvent('onClose')
+      });
+
+      document.getElementById('events-clear-log').addEventListener('click', () => {
+        eventsLog.innerHTML = '';
+      });
+
+      const apiPicker = createDatePicker('#api-target', {
+        format: 'DD/MM/YYYY HH:mm',
+        enableTime: true
+      });
+      let configPreviewPicker = createDatePicker('#config-preview-input', {
+        format: 'DD/MM/YYYY',
+        defaultDate: new Date()
+      });
+
+      const output = document.getElementById('api-output');
+      const renderValue = () => {
+        const val = apiPicker.getDate();
+        output.textContent = val ? `Current: ${val.toISOString()}` : 'Current: (empty)';
+      };
+
+      document.getElementById('api-open').addEventListener('click', () => apiPicker.open());
+      document.getElementById('api-close').addEventListener('click', () => apiPicker.close());
+      document.getElementById('api-now').addEventListener('click', () => {
+        apiPicker.setDate(new Date());
+        renderValue();
+      });
+      document.getElementById('api-clear').addEventListener('click', () => {
+        apiPicker.clear();
+        renderValue();
+      });
+
+      const configFields = [
+        'cfg-primary',
+        'cfg-primary-strong',
+        'cfg-primary-contrast',
+        'cfg-surface',
+        'cfg-panel',
+        'cfg-border',
+        'cfg-text-main',
+        'cfg-text-muted',
+        'cfg-shadow',
+        'cfg-font',
+        'cfg-radius',
+        'cfg-height'
+      ];
+      const templateDefaults = {
+        light: {
+          'cfg-primary': '#2f7fe4',
+          'cfg-primary-strong': '#1f6bcc',
+          'cfg-primary-contrast': '#ffffff',
+          'cfg-surface': '#ffffff',
+          'cfg-panel': '#ebf0f7',
+          'cfg-border': '#d8dee6',
+          'cfg-text-main': '#1d2838',
+          'cfg-text-muted': '#6b7a90',
+          'cfg-shadow': '0 0.875rem 1.875rem rgba(13, 21, 33, 0.18)',
+          'cfg-font': 'inherit',
+          'cfg-radius': '0.625rem',
+          'cfg-height': '2rem'
+        },
+        dark: {
+          'cfg-primary': '#60a5fa',
+          'cfg-primary-strong': '#3b82f6',
+          'cfg-primary-contrast': '#0f172a',
+          'cfg-surface': '#111827',
+          'cfg-panel': '#1f2937',
+          'cfg-border': '#374151',
+          'cfg-text-main': '#f3f4f6',
+          'cfg-text-muted': '#9ca3af',
+          'cfg-shadow': '0 1rem 2.125rem rgba(0, 0, 0, 0.45)',
+          'cfg-font': 'inherit',
+          'cfg-radius': '0.625rem',
+          'cfg-height': '2rem'
+        }
+      };
+      const colorOptions = [
+        { label: 'Ocean Blue', value: '#2f7fe4' },
+        { label: 'Navy', value: '#1e3a8a' },
+        { label: 'Indigo', value: '#4f46e5' },
+        { label: 'Emerald', value: '#10b981' },
+        { label: 'Forest', value: '#166534' },
+        { label: 'Rose', value: '#e11d48' },
+        { label: 'Orange', value: '#f97316' },
+        { label: 'Amber', value: '#f59e0b' },
+        { label: 'Slate', value: '#334155' },
+        { label: 'Snow', value: '#ffffff' },
+        { label: 'Ink', value: '#0f172a' }
+      ];
+      const colorDefaults = {
+        'cfg-primary': '#2f7fe4',
+        'cfg-primary-strong': '#1f6bcc',
+        'cfg-primary-contrast': '#ffffff',
+        'cfg-surface': '#ffffff',
+        'cfg-panel': '#ebf0f7',
+        'cfg-border': '#d8dee6',
+        'cfg-text-main': '#1d2838',
+        'cfg-text-muted': '#6b7a90'
+      };
+      const colorFieldIds = Object.keys(colorDefaults);
+      const ensureSelectOption = (select, value) => {
+        if (!value) return;
+        const exists = Array.from(select.options).some(
+          (o) => o.value.toLowerCase() === String(value).toLowerCase()
+        );
+        if (exists) return;
+        const custom = document.createElement('option');
+        custom.value = value;
+        custom.textContent = `Custom (${value})`;
+        select.appendChild(custom);
+      };
+      colorFieldIds.forEach((id) => {
+        const select = document.getElementById(id);
+        colorOptions.forEach((opt) => {
+          const o = document.createElement('option');
+          o.value = opt.value;
+          o.textContent = `${opt.label} (${opt.value})`;
+          select.appendChild(o);
+        });
+        ensureSelectOption(select, colorDefaults[id]);
+        select.value = colorDefaults[id];
+      });
+      const configCssOutput = document.getElementById('config-css-output');
+      const cfgTemplate = document.getElementById('cfg-template');
+      const applyTemplate = (template) => {
+        const data = templateDefaults[template] || templateDefaults.light;
+        Object.entries(data).forEach(([id, value]) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (el.tagName === 'SELECT') {
+            ensureSelectOption(el, value);
+          }
+          el.value = value;
+        });
+        applyConfigurator();
+      };
+      const createThemeFromFields = () => ({
+        primary: document.getElementById('cfg-primary').value,
+        primaryStrong: document.getElementById('cfg-primary-strong').value,
+        primaryContrast: document.getElementById('cfg-primary-contrast').value,
+        bgSurface: document.getElementById('cfg-surface').value,
+        bgPanel: document.getElementById('cfg-panel').value,
+        border: document.getElementById('cfg-border').value,
+        textMain: document.getElementById('cfg-text-main').value,
+        textMuted: document.getElementById('cfg-text-muted').value,
+        shadow: document.getElementById('cfg-shadow').value,
+        radius: document.getElementById('cfg-radius').value,
+        fontFamily: document.getElementById('cfg-font').value,
+        controlHeight: document.getElementById('cfg-height').value
+      });
+      const toThemeObjectSnippet = (theme) => `const theme = ${JSON.stringify(theme, null, 2)};`;
+      const applyConfigurator = () => {
+        const theme = createThemeFromFields();
+        configPreviewPicker.setTheme(theme);
+        configCssOutput.textContent = toThemeObjectSnippet(theme);
+        highlightPre(configCssOutput, 'javascript');
+      };
+      configFields.forEach((id) => {
+        const el = document.getElementById(id);
+        el.addEventListener('input', applyConfigurator);
+        el.addEventListener('change', applyConfigurator);
+      });
+      document.getElementById('copy-theme-css').addEventListener('click', async () => {
+        const text = configCssOutput.textContent || '';
+        if (!text.trim()) return;
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (_e) {
+          // no-op
+        }
+      });
+      cfgTemplate.addEventListener('change', (e) => {
+        applyTemplate(e.target.value);
+      });
+      applyTemplate('light');
+
+      const prefersDark =
+        window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const selectedTheme = pageThemeSelect.value;
+      const initialTheme = selectedTheme || (prefersDark ? 'dark' : 'light');
+      applyPageTheme(initialTheme);
+      highlightAllCode();
+      renderValue();
+      window.addEventListener('scroll', () => {
+        const sections = document.querySelectorAll('section');
+        const links = document.querySelectorAll('nav a');
+        let current = '';
+        sections.forEach((section) => {
+          if (window.scrollY >= section.offsetTop - 100) current = section.id;
+        });
+        links.forEach((link) => {
+          link.classList.toggle('active', link.getAttribute('href') === `#${current}`);
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -12,6 +12,12 @@ Live showcase: https://thekster.github.io/ThekDatePicker/
 npm install thekdatepicker
 ```
 
+Vue wrapper:
+
+```bash
+npm install thekdatepicker thekdatepicker-vue vue
+```
+
 ## CSS
 
 ```ts
@@ -43,6 +49,34 @@ const picker = createDatePicker('#my-date', {
 ```
 
 If you use SSR or prerendering, import and instantiate it only on the client. Runtime defaults such as `appendTo` and auto-theme detection are resolved against browser APIs at instantiation time.
+
+## Vue
+
+```ts
+import "thekdatepicker/css/base.css";
+import { createApp, ref } from "vue";
+import { ThekDatePickerVue } from "thekdatepicker-vue";
+
+const App = {
+  components: { ThekDatePickerVue },
+  setup() {
+    const selectedDate = ref<Date | null>(null);
+    return { selectedDate };
+  },
+  template: `
+    <ThekDatePickerVue
+      v-model="selectedDate"
+      format="YYYY-MM-DD"
+      :enable-time="true"
+      placeholder="Pick a date"
+    />
+  `
+};
+
+createApp(App).mount("#app");
+```
+
+The Vue wrapper renders its own input element, forwards normal input attributes such as `id`, `name`, and `class`, and recreates the underlying picker when option props change.
 
 ## Browser CDN
 

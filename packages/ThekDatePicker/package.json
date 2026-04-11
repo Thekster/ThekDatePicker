@@ -1,0 +1,73 @@
+{
+  "name": "thekdatepicker",
+  "version": "1.2.0",
+  "description": "A framework-agnostic date/time picker library with themes.",
+  "keywords": [
+    "calendar",
+    "date",
+    "datepicker",
+    "framework-agnostic",
+    "time"
+  ],
+  "homepage": "https://github.com/Thekster/ThekDatePicker#readme",
+  "bugs": {
+    "url": "https://github.com/Thekster/ThekDatePicker/issues"
+  },
+  "license": "MIT",
+  "author": "thekster",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Thekster/ThekDatePicker.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/thekdatepicker.umd.cjs",
+  "module": "./dist/thekdatepicker.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/thekdatepicker.js",
+      "require": "./dist/thekdatepicker.umd.cjs"
+    },
+    "./min": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/thekdatepicker.min.js",
+      "require": "./dist/thekdatepicker.umd.min.cjs"
+    },
+    "./css/base.css": "./dist/css/base.css",
+    "./css/thekdatepicker.css": "./dist/css/thekdatepicker.css",
+    "./css/*": "./dist/css/*"
+  },
+  "scripts": {
+    "dev": "vite --open /showcase/index.html",
+    "build": "vite build && cross-env THEK_MINIFY=1 vite build --emptyOutDir false && tsc && shx mkdir -p dist/themes && shx cp dist/css/thekdatepicker.css dist/css/base.css && shx cp dist/css/thekdatepicker.css dist/themes/base.css",
+    "build:showcase": "vite build --config vite.showcase.config.ts",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "coverage": "vitest run --coverage",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt --check",
+    "format:write": "oxfmt --write",
+    "prepublishOnly": "npm run build && npm run test:run"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^25.2.1",
+    "cross-env": "^10.1.0",
+    "esbuild": "^0.28.0",
+    "jsdom": "^29.0.1",
+    "shx": "^0.4.0",
+    "terser": "^5.46.0",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.1",
+    "vitest": "^4.0.18"
+  }
+}

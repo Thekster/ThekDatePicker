@@ -16,10 +16,7 @@ import {
 } from './thekdatepicker-dom.js';
 import { isSuspiciousDate } from './thekdatepicker-suspicious.js';
 import { applyThemeVars } from './thekdatepicker-theme.js';
-import {
-  applyMaskedInputWithCaret,
-  isAllowedInputKey
-} from './thekdatepicker-input.js';
+import { applyMaskedInputWithCaret, isAllowedInputKey } from './thekdatepicker-input.js';
 import {
   getDefaultFocusedDay,
   moveFocusedDay as computeFocusedDay,
