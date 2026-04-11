@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.2.1 - 2026-04-11
+
+### Changed
+
+- **Follow-up Release Alignment:** Bumped package metadata for a follow-up release so the core library and Vue wrapper can be republished and validated together after the npm package-name recovery.
+
 ## 1.2.0 - 2026-04-11
 
 ### Added
