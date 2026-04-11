@@ -1,6 +1,17 @@
 # Release Notes
 
-## Unreleased
+## 1.2.2 - 2026-04-11
+
+### Fixed
+
+- **Calendar Week Row Layout:** Restored the showcase and base-theme day grid layout after the ARIA row grouping change so month days render in proper week rows instead of stacking by weekday columns. (SEV-1)
+- **Time Input Keyboard Behavior:** Time fields now keep focus-local `ArrowUp` and `ArrowDown` handling for stepping hour and minute values instead of letting calendar navigation intercept those keys. (SEV-2)
+- **24-Hour Time Padding:** Time inputs now preserve two-digit `HH:mm` display values such as `09:05` instead of collapsing to unpadded browser-native number formatting. (SEV-2)
+- **GitHub Pages Showcase Bootstrapping:** Moved showcase initialization into a bundled module entry so the published Pages build includes the actual runtime setup and no longer ships a broken static page with missing client logic. (SEV-1)
+
+### Changed
+
+- **Showcase Navigation:** Added a GitHub repository link to the showcase sidebar for direct source access from the published demo.
 
 ## 1.2.1 - 2026-04-11
 

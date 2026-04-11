@@ -301,6 +301,63 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
+  it('pads the 24-hour time inputs to two digits', () => {
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'YYYY-MM-DD',
+      enableTime: true,
+      timeFormat: 'HH:mm'
+    });
+
+    picker.setDate(new Date(2026, 1, 8, 9, 5));
+    picker.open();
+
+    const hourInput = document.querySelector('[data-time-unit="hour"]') as HTMLInputElement;
+    const minuteInput = document.querySelector('[data-time-unit="minute"]') as HTMLInputElement;
+
+    expect(hourInput.value).toBe('09');
+    expect(minuteInput.value).toBe('05');
+
+    picker.destroy();
+  });
+
+  it('uses up and down arrows to step time input values', () => {
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'YYYY-MM-DD',
+      enableTime: true,
+      timeFormat: 'HH:mm'
+    });
+
+    picker.setDate(new Date(2026, 1, 8, 9, 5));
+    picker.open();
+
+    const hourInput = document.querySelector('[data-time-unit="hour"]') as HTMLInputElement;
+    hourInput.focus();
+
+    const upEvent = new KeyboardEvent('keydown', {
+      key: 'ArrowUp',
+      bubbles: true,
+      cancelable: true
+    });
+    hourInput.dispatchEvent(upEvent);
+
+    expect(upEvent.defaultPrevented).toBe(true);
+    expect(hourInput.value).toBe('10');
+    expect(picker.getDate()?.getHours()).toBe(10);
+
+    const downEvent = new KeyboardEvent('keydown', {
+      key: 'ArrowDown',
+      bubbles: true,
+      cancelable: true
+    });
+    hourInput.dispatchEvent(downEvent);
+
+    expect(downEvent.defaultPrevented).toBe(true);
+    expect(hourInput.value).toBe('09');
+    expect(picker.getDate()?.getHours()).toBe(9);
+
+    picker.destroy();
+  });
+
   it('can disable calendar button creation', () => {
     const picker = new ThekDatePicker('#date-input', { showCalendarButton: false });
     expect(document.querySelector('.thekdp-trigger-btn')).toBeNull();
@@ -1027,6 +1084,20 @@ describe('ThekDatePicker integration', () => {
 
     expect(popover.getAttribute('aria-labelledby')).toBe(monthLabel.id);
     expect(grid.getAttribute('aria-labelledby')).toBe(monthLabel.id);
+
+    picker.destroy();
+  });
+
+  it('renders the day grid as six week rows with seven cells each', () => {
+    const picker = new ThekDatePicker('#date-input', { format: 'YYYY-MM-DD' });
+    picker.open();
+
+    const rows = Array.from(document.querySelectorAll('.thekdp-days-row'));
+    expect(rows).toHaveLength(6);
+    rows.forEach((row) => {
+      expect(row.getAttribute('role')).toBe('row');
+      expect(row.querySelectorAll('.thekdp-day-cell')).toHaveLength(7);
+    });
 
     picker.destroy();
   });

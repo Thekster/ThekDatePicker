@@ -34,9 +34,16 @@
   border-radius: var(--thekdp-radius);
   box-shadow: var(--thekdp-shadow);
   color: var(--thekdp-text-main);
+  color-scheme: light;
+  font-family: var(--thekdp-font-family);
   padding: 0.625rem;
   width: 17.875rem;
-  font-family: var(--thekdp-font-family);
+}
+
+@media (prefers-color-scheme: dark) {
+  .thekdp-popover {
+    color-scheme: dark;
+  }
 }
 
 .thekdp-input-wrap {
@@ -251,6 +258,11 @@
 .thekdp-days {
   display: grid;
   gap: 0.125rem;
+}
+
+.thekdp-days-row {
+  display: grid;
+  gap: 0.125rem;
   grid-template-columns: repeat(7, 1fr);
 }
 
@@ -319,9 +331,12 @@
 }
 
 .thekdp-time-input {
+  appearance: textfield;
+  background: var(--thekdp-bg-surface);
   border: 0.0625rem solid var(--thekdp-border);
   border-radius: 0.375rem;
   color: var(--thekdp-text-main);
+  font-family: var(--thekdp-font-family);
   font-size: 0.75rem;
   padding: 0.1875rem 0.25rem;
   text-align: center;

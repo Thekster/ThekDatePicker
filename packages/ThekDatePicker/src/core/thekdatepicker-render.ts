@@ -1,5 +1,9 @@
 import { formatSpokenDate, getMonthNames, isSameDay, toLocalStartOfDay } from './date-utils.js';
 
+function pad2(value: number): string {
+  return String(value).padStart(2, '0');
+}
+
 export function renderWeekdays(
   weekdaysEl: HTMLDivElement,
   weekdayNames: string[],
@@ -130,9 +134,11 @@ export function ensureTimeInputs(
     hourInput.id = `${cssPrefix}-time-hour`;
     hourInput.setAttribute('aria-label', 'Hour');
     hourInput.className = `${cssPrefix}-time-input`;
-    hourInput.type = 'number';
+    hourInput.type = 'text';
+    hourInput.inputMode = 'numeric';
     hourInput.min = '0';
     hourInput.max = '23';
+    hourInput.maxLength = 2;
     hourInput.dataset.timeUnit = 'hour';
 
     const colon = document.createElement('span');
@@ -141,9 +147,11 @@ export function ensureTimeInputs(
     const minuteInput = document.createElement('input');
     minuteInput.setAttribute('aria-label', 'Minute');
     minuteInput.className = `${cssPrefix}-time-input`;
-    minuteInput.type = 'number';
+    minuteInput.type = 'text';
+    minuteInput.inputMode = 'numeric';
     minuteInput.min = '0';
     minuteInput.max = '59';
+    minuteInput.maxLength = 2;
     minuteInput.dataset.timeUnit = 'minute';
 
     timeContainer.appendChild(label);
@@ -168,8 +176,8 @@ export function syncTimeInputs(
   minuteInputEl: HTMLInputElement | null,
   selectedDate: Date
 ): void {
-  if (hourInputEl) hourInputEl.value = String(selectedDate.getHours());
-  if (minuteInputEl) minuteInputEl.value = String(selectedDate.getMinutes());
+  if (hourInputEl) hourInputEl.value = pad2(selectedDate.getHours());
+  if (minuteInputEl) minuteInputEl.value = pad2(selectedDate.getMinutes());
 }
 
 export function hideTimeInputs(

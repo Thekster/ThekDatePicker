@@ -183,6 +183,7 @@ export class ThekDatePicker {
 
   private readonly handlePickerKeyDown = (event: KeyboardEvent): void => {
     if (!this.openState || this.options.disabled) return;
+    if (this.isTimeInputTarget(event.target)) return;
 
     switch (event.key) {
       case 'Escape':
@@ -297,6 +298,43 @@ export class ThekDatePicker {
     const base = this.selectedDate ? new Date(this.selectedDate) : new Date();
     base.setHours(Math.max(0, Math.min(23, hour)), Math.max(0, Math.min(59, minute)), 0, 0);
     this.setDate(base, true);
+  };
+
+  private readonly handleTimeInput = (event: Event): void => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    target.value = target.value.replaceAll(/\D+/g, '').slice(0, 2);
+    this.handleTimeChange();
+  };
+
+  private readonly handleTimeKeyDown = (event: KeyboardEvent): void => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement) || !target.dataset.timeUnit) return;
+
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      event.preventDefault();
+      const delta = event.key === 'ArrowUp' ? 1 : -1;
+      this.stepTimeInput(target, delta);
+      return;
+    }
+
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    if (
+      event.key === 'Backspace' ||
+      event.key === 'Delete' ||
+      event.key === 'Tab' ||
+      event.key === 'Enter' ||
+      event.key === 'Escape' ||
+      event.key === 'ArrowLeft' ||
+      event.key === 'ArrowRight' ||
+      event.key === 'Home' ||
+      event.key === 'End'
+    ) {
+      return;
+    }
+
+    if (/^\d$/.test(event.key)) return;
+    event.preventDefault();
   };
 
   constructor(target: string | HTMLInputElement, options: ThekDatePickerOptions = {}) {
@@ -533,8 +571,8 @@ export class ThekDatePicker {
     this.input.removeEventListener('paste', this.handlePaste);
     this.triggerButtonEl?.removeEventListener('click', this.handleTriggerClick);
     unregisterGlobalPicker(this);
-    this.hourInputEl?.removeEventListener('change', this.handleTimeChange);
-    this.minuteInputEl?.removeEventListener('change', this.handleTimeChange);
+    this.detachTimeInputListeners(this.hourInputEl);
+    this.detachTimeInputListeners(this.minuteInputEl);
   }
 
   private emitChange(): void {
@@ -670,21 +708,47 @@ export class ThekDatePicker {
     minuteInputEl: HTMLInputElement | null
   ): void {
     if (this.hourInputEl && this.hourInputEl !== hourInputEl) {
-      this.hourInputEl.removeEventListener('change', this.handleTimeChange);
+      this.detachTimeInputListeners(this.hourInputEl);
     }
     if (this.minuteInputEl && this.minuteInputEl !== minuteInputEl) {
-      this.minuteInputEl.removeEventListener('change', this.handleTimeChange);
+      this.detachTimeInputListeners(this.minuteInputEl);
     }
 
     if (hourInputEl && this.hourInputEl !== hourInputEl) {
-      hourInputEl.addEventListener('change', this.handleTimeChange);
+      this.attachTimeInputListeners(hourInputEl);
     }
     if (minuteInputEl && this.minuteInputEl !== minuteInputEl) {
-      minuteInputEl.addEventListener('change', this.handleTimeChange);
+      this.attachTimeInputListeners(minuteInputEl);
     }
 
     this.hourInputEl = hourInputEl;
     this.minuteInputEl = minuteInputEl;
+  }
+
+  private attachTimeInputListeners(input: HTMLInputElement | null): void {
+    input?.addEventListener('change', this.handleTimeChange);
+    input?.addEventListener('input', this.handleTimeInput);
+    input?.addEventListener('keydown', this.handleTimeKeyDown);
+  }
+
+  private detachTimeInputListeners(input: HTMLInputElement | null): void {
+    input?.removeEventListener('change', this.handleTimeChange);
+    input?.removeEventListener('input', this.handleTimeInput);
+    input?.removeEventListener('keydown', this.handleTimeKeyDown);
+  }
+
+  private isTimeInputTarget(target: EventTarget | null): target is HTMLInputElement {
+    return target instanceof HTMLInputElement && !!target.dataset.timeUnit;
+  }
+
+  private stepTimeInput(input: HTMLInputElement, delta: number): void {
+    const isHour = input.dataset.timeUnit === 'hour';
+    const max = isHour ? 23 : 59;
+    const value = Number(input.value);
+    const normalized = Number.isNaN(value) ? 0 : value;
+    const next = (normalized + delta + (max + 1)) % (max + 1);
+    input.value = String(next).padStart(2, '0');
+    this.handleTimeChange();
   }
 
   private getAppendTarget(): HTMLElement {
