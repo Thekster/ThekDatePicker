@@ -61,8 +61,7 @@ export function isValidDate(date: Date): boolean {
   return !Number.isNaN(date.getTime());
 }
 
-const ISO_DATE_RE =
-  /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T ](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?(?:Z|[+-]\d{2}:?\d{2})?$/;
+const ISO_DATE_RE = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T ](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/;
 
 export function parseIsoDateString(value: string): Date | null {
   const match = ISO_DATE_RE.exec(value);

@@ -14,6 +14,8 @@ npm install thekdatepicker
 import 'thekdatepicker/css/base.css';
 ```
 
+CSS is not injected by the JavaScript entrypoint. Import it explicitly.
+
 Or in HTML:
 
 ```html
@@ -62,7 +64,7 @@ picker.destroy();
 ```html
 <link rel="stylesheet" href="https://unpkg.com/thekdatepicker/dist/css/base.css" />
 <input id="my-date" type="text" />
-<script src="https://unpkg/thekdatepicker/dist/thekdatepicker.umd.cjs"></script>
+<script src="https://unpkg.com/thekdatepicker/dist/thekdatepicker.umd.cjs"></script>
 <script>
   ThekDatePicker.createDatePicker('#my-date');
 </script>

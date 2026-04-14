@@ -9,10 +9,12 @@ describe('package artifacts', () => {
     expect(existsSync(resolve(root, 'dist/css/thekdatepicker.css'))).toBe(true);
     expect(existsSync(resolve(root, 'dist/css/base.css'))).toBe(true);
     expect(existsSync(resolve(root, 'dist/themes/base.css'))).toBe(true);
+    expect(existsSync(resolve(root, 'dist/css/thekdatepicker.css.d.ts'))).toBe(true);
+    expect(existsSync(resolve(root, 'dist/css/base.css.d.ts'))).toBe(true);
   });
 
-  it('keeps the type entry CSS import aligned with shipped files', () => {
+  it('keeps the type entry free of side-effect CSS imports', () => {
     const dts = readFileSync(resolve(root, 'dist/index.d.ts'), 'utf8');
-    expect(dts).toContain('./themes/base.css');
+    expect(dts).not.toContain('.css');
   });
 });

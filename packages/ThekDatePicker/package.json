@@ -1,6 +1,6 @@
 {
   "name": "thekdatepicker",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "A framework-agnostic date/time picker library with themes.",
   "keywords": [
     "calendar",
@@ -40,13 +40,18 @@
       "import": "./dist/thekdatepicker.min.js",
       "require": "./dist/thekdatepicker.umd.min.cjs"
     },
-    "./css/base.css": "./dist/css/base.css",
-    "./css/thekdatepicker.css": "./dist/css/thekdatepicker.css",
-    "./css/*": "./dist/css/*"
+    "./css/base.css": {
+      "types": "./dist/css/base.css.d.ts",
+      "default": "./dist/css/base.css"
+    },
+    "./css/thekdatepicker.css": {
+      "types": "./dist/css/thekdatepicker.css.d.ts",
+      "default": "./dist/css/thekdatepicker.css"
+    }
   },
   "scripts": {
     "dev": "vite --open /showcase/index.html",
-    "build": "vite build && cross-env THEK_MINIFY=1 vite build --emptyOutDir false && tsc && shx mkdir -p dist/themes && shx cp dist/css/thekdatepicker.css dist/css/base.css && shx cp dist/css/thekdatepicker.css dist/themes/base.css",
+    "build": "vite build && cross-env THEK_MINIFY=1 vite build --emptyOutDir false && tsc && shx mkdir -p dist/css dist/themes && shx cp src/themes/base.css dist/css/thekdatepicker.css && shx cp src/themes/base.css dist/css/base.css && shx cp src/themes/base.css dist/themes/base.css && shx cp src/themes/base.d.ts dist/css/base.css.d.ts && shx cp src/themes/base.d.ts dist/css/thekdatepicker.css.d.ts && shx cp src/themes/base.d.ts dist/themes/base.css.d.ts",
     "build:showcase": "vite build --config vite.showcase.config.ts",
     "preview": "vite preview",
     "test": "vitest",

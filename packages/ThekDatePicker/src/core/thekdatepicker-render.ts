@@ -117,12 +117,23 @@ export function renderDayGrid(args: {
 export function ensureTimeInputs(
   timeContainer: HTMLDivElement,
   actions: HTMLDivElement,
+  usesMeridiem: boolean,
   cssPrefix: string
-): { hourInputEl: HTMLInputElement | null; minuteInputEl: HTMLInputElement | null } {
+): {
+  hourInputEl: HTMLInputElement | null;
+  minuteInputEl: HTMLInputElement | null;
+  meridiemInputEl: HTMLSelectElement | null;
+} {
   let hourInputEl = timeContainer.querySelector<HTMLInputElement>('[data-time-unit="hour"]');
   let minuteInputEl = timeContainer.querySelector<HTMLInputElement>('[data-time-unit="minute"]');
+  let meridiemInputEl = timeContainer.querySelector<HTMLSelectElement>(
+    '[data-time-unit="meridiem"]'
+  );
+  const shouldRebuild = usesMeridiem
+    ? !hourInputEl || !minuteInputEl || !meridiemInputEl
+    : !hourInputEl || !minuteInputEl || !!meridiemInputEl;
 
-  if (!hourInputEl || !minuteInputEl) {
+  if (shouldRebuild) {
     timeContainer.innerHTML = '';
 
     const label = document.createElement('label');
@@ -136,8 +147,8 @@ export function ensureTimeInputs(
     hourInput.className = `${cssPrefix}-time-input`;
     hourInput.type = 'text';
     hourInput.inputMode = 'numeric';
-    hourInput.min = '0';
-    hourInput.max = '23';
+    hourInput.min = usesMeridiem ? '1' : '0';
+    hourInput.max = usesMeridiem ? '12' : '23';
     hourInput.maxLength = 2;
     hourInput.dataset.timeUnit = 'hour';
 
@@ -158,6 +169,27 @@ export function ensureTimeInputs(
     timeContainer.appendChild(hourInput);
     timeContainer.appendChild(colon);
     timeContainer.appendChild(minuteInput);
+    if (usesMeridiem) {
+      const meridiemSelect = document.createElement('select');
+      meridiemSelect.className = `${cssPrefix}-time-meridiem`;
+      meridiemSelect.setAttribute('aria-label', 'AM or PM');
+      meridiemSelect.dataset.timeUnit = 'meridiem';
+
+      const amOption = document.createElement('option');
+      amOption.value = 'AM';
+      amOption.textContent = 'AM';
+      meridiemSelect.appendChild(amOption);
+
+      const pmOption = document.createElement('option');
+      pmOption.value = 'PM';
+      pmOption.textContent = 'PM';
+      meridiemSelect.appendChild(pmOption);
+
+      timeContainer.appendChild(meridiemSelect);
+      meridiemInputEl = meridiemSelect;
+    } else {
+      meridiemInputEl = null;
+    }
 
     hourInputEl = hourInput;
     minuteInputEl = minuteInput;
@@ -167,17 +199,23 @@ export function ensureTimeInputs(
   actions.classList.add(`${cssPrefix}-actions-with-ok`);
   return {
     hourInputEl: hourInputEl ?? null,
-    minuteInputEl: minuteInputEl ?? null
+    minuteInputEl: minuteInputEl ?? null,
+    meridiemInputEl: meridiemInputEl ?? null
   };
 }
 
 export function syncTimeInputs(
   hourInputEl: HTMLInputElement | null,
   minuteInputEl: HTMLInputElement | null,
-  selectedDate: Date
+  meridiemInputEl: HTMLSelectElement | null,
+  selectedDate: Date,
+  usesMeridiem: boolean
 ): void {
-  if (hourInputEl) hourInputEl.value = pad2(selectedDate.getHours());
+  const hours24 = selectedDate.getHours();
+  const hours12 = ((hours24 + 11) % 12) + 1;
+  if (hourInputEl) hourInputEl.value = pad2(usesMeridiem ? hours12 : hours24);
   if (minuteInputEl) minuteInputEl.value = pad2(selectedDate.getMinutes());
+  if (meridiemInputEl) meridiemInputEl.value = hours24 >= 12 ? 'PM' : 'AM';
 }
 
 export function hideTimeInputs(

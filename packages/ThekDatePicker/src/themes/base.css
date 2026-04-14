@@ -343,7 +343,22 @@
   width: 2.625rem;
 }
 
+.thekdp-time-meridiem {
+  background: var(--thekdp-bg-surface);
+  border: 0.0625rem solid var(--thekdp-border);
+  border-radius: 0.375rem;
+  color: var(--thekdp-text-main);
+  font-family: var(--thekdp-font-family);
+  font-size: 0.75rem;
+  padding: 0.1875rem 0.25rem;
+}
+
 .thekdp-time-input:focus {
+  border-color: var(--thekdp-primary);
+  outline: none;
+}
+
+.thekdp-time-meridiem:focus {
   border-color: var(--thekdp-primary);
   outline: none;
 }

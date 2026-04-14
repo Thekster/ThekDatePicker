@@ -1,39 +1,112 @@
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function createSvgElement<K extends keyof SVGElementTagNameMap>(
+  tagName: K,
+  attributes: Record<string, string>
+): SVGElementTagNameMap[K] {
+  const element = document.createElementNS(SVG_NS, tagName);
+  for (const [name, value] of Object.entries(attributes)) {
+    element.setAttribute(name, value);
+  }
+  return element;
+}
+
+function createCalendarIcon(cssPrefix: string): SVGSVGElement {
+  const svg = createSvgElement('svg', {
+    class: `${cssPrefix}-trigger-icon`,
+    viewBox: '0 0 24 24',
+    'aria-hidden': 'true',
+    focusable: 'false'
+  });
+  svg.appendChild(
+    createSvgElement('rect', {
+      x: '3',
+      y: '4.5',
+      width: '18',
+      height: '16',
+      rx: '2.5',
+      ry: '2.5',
+      fill: 'none',
+      stroke: 'currentColor',
+      'stroke-width': '1.8'
+    })
+  );
+  for (const [x1, y1, x2, y2, extra] of [
+    ['3', '9', '21', '9', {}],
+    ['8', '2.5', '8', '7', { 'stroke-linecap': 'round' }],
+    ['16', '2.5', '16', '7', { 'stroke-linecap': 'round' }]
+  ] as const) {
+    svg.appendChild(
+      createSvgElement('line', {
+        x1,
+        y1,
+        x2,
+        y2,
+        stroke: 'currentColor',
+        'stroke-width': '1.8',
+        ...extra
+      })
+    );
+  }
+  for (const [cx, cy] of [
+    ['8', '12.5'],
+    ['12', '12.5'],
+    ['16', '12.5'],
+    ['8', '16.5'],
+    ['12', '16.5']
+  ] as const) {
+    svg.appendChild(createSvgElement('circle', { cx, cy, r: '0.95', fill: 'currentColor' }));
+  }
+  return svg;
+}
+
+function createWarningIcon(cssPrefix: string): SVGSVGElement {
+  const svg = createSvgElement('svg', {
+    class: `${cssPrefix}-indicator-icon`,
+    viewBox: '0 0 24 24',
+    'aria-hidden': 'true',
+    focusable: 'false'
+  });
+  svg.appendChild(
+    createSvgElement('path', {
+      d: 'M12 3.5L21 19.5H3L12 3.5Z',
+      fill: 'none',
+      stroke: 'currentColor',
+      'stroke-width': '1.8',
+      'stroke-linejoin': 'round'
+    })
+  );
+  svg.appendChild(
+    createSvgElement('line', {
+      x1: '12',
+      y1: '9',
+      x2: '12',
+      y2: '13.2',
+      stroke: 'currentColor',
+      'stroke-width': '1.8',
+      'stroke-linecap': 'round'
+    })
+  );
+  svg.appendChild(
+    createSvgElement('circle', { cx: '12', cy: '16.4', r: '1', fill: 'currentColor' })
+  );
+  return svg;
+}
+
 export function createTriggerButton(cssPrefix: string = 'thekdp'): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = `${cssPrefix}-trigger-btn`;
   button.setAttribute('aria-label', 'Toggle calendar');
-  button.innerHTML = `
-    <svg class="${cssPrefix}-trigger-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <rect x="3" y="4.5" width="18" height="16" rx="2.5" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.8"></rect>
-      <line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="1.8"></line>
-      <line x1="8" y1="2.5" x2="8" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></line>
-      <line x1="16" y1="2.5" x2="16" y2="7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></line>
-      <circle cx="8" cy="12.5" r="0.95" fill="currentColor"></circle>
-      <circle cx="12" cy="12.5" r="0.95" fill="currentColor"></circle>
-      <circle cx="16" cy="12.5" r="0.95" fill="currentColor"></circle>
-      <circle cx="8" cy="16.5" r="0.95" fill="currentColor"></circle>
-      <circle cx="12" cy="16.5" r="0.95" fill="currentColor"></circle>
-    </svg>
-  `;
+  button.appendChild(createCalendarIcon(cssPrefix));
   return button;
-}
-
-function warningSvgMarkup(cssPrefix: string = 'thekdp'): string {
-  return `
-    <svg class="${cssPrefix}-indicator-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M12 3.5L21 19.5H3L12 3.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path>
-      <line x1="12" y1="9" x2="12" y2="13.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></line>
-      <circle cx="12" cy="16.4" r="1" fill="currentColor"></circle>
-    </svg>
-  `;
 }
 
 export function createSuspiciousIndicator(cssPrefix: string = 'thekdp'): HTMLSpanElement {
   const suspiciousIndicator = document.createElement('span');
   suspiciousIndicator.className = `${cssPrefix}-suspicious-indicator`;
   suspiciousIndicator.setAttribute('aria-hidden', 'true');
-  suspiciousIndicator.innerHTML = warningSvgMarkup(cssPrefix);
+  suspiciousIndicator.appendChild(createWarningIcon(cssPrefix));
   suspiciousIndicator.hidden = true;
   return suspiciousIndicator;
 }
@@ -42,7 +115,7 @@ export function createRevertIndicator(cssPrefix: string = 'thekdp'): HTMLSpanEle
   const revertIndicator = document.createElement('span');
   revertIndicator.className = `${cssPrefix}-revert-indicator`;
   revertIndicator.setAttribute('aria-hidden', 'true');
-  revertIndicator.innerHTML = warningSvgMarkup(cssPrefix);
+  revertIndicator.appendChild(createWarningIcon(cssPrefix));
   revertIndicator.hidden = true;
   return revertIndicator;
 }

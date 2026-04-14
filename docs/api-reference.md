@@ -229,6 +229,8 @@ Time format when format has no time tokens.
 timeFormat?: string  // Default: 'HH:mm'
 ```
 
+When time controls are shown, the popover follows the effective 12-hour or 24-hour mode.
+
 ### minDate
 
 Minimum allowed date.
@@ -300,6 +302,8 @@ Show the calendar trigger button.
 ```ts
 showCalendarButton?: boolean  // Default: true
 ```
+
+This only controls the trigger button. Validation indicators and assistive status text still remain attached to the input.
 
 ### openOnInputClick
 

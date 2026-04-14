@@ -364,6 +364,28 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
+  it('keeps warning and status infrastructure when the calendar button is disabled', () => {
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'YYYY-MM-DD',
+      showCalendarButton: false,
+      suspiciousWarning: true,
+      revertWarning: true
+    });
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+
+    picker.setDate('0120-12-14');
+    expect(document.querySelector('.thekdp-input-wrap')).not.toBeNull();
+    expect(document.querySelector('.thekdp-suspicious-indicator')).not.toBeNull();
+    expect(input.getAttribute('aria-describedby')).toBeTruthy();
+
+    input.value = '--12';
+    input.dispatchEvent(new Event('blur', { bubbles: true }));
+    const revertIndicator = document.querySelector('.thekdp-revert-indicator') as HTMLSpanElement;
+    expect(revertIndicator.hidden).toBe(false);
+
+    picker.destroy();
+  });
+
   it('sanitizes letters during typing', () => {
     const input = document.querySelector('#date-input') as HTMLInputElement;
     const picker = new ThekDatePicker('#date-input', { format: 'DD/MM/YYYY' });
@@ -520,6 +542,39 @@ describe('ThekDatePicker integration', () => {
     picker.setDate('02-08-2026 9:05 pm');
     expect(input.value).toBe('02/08/2026 09:05 PM');
     expect(picker.getDate()?.getHours()).toBe(21);
+    picker.destroy();
+  });
+
+  it('uses meridiem-aware time controls when the effective format is 12-hour', () => {
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'MM/DD/YYYY',
+      enableTime: true,
+      timeFormat: 'hh:mm A'
+    });
+
+    picker.setDate('02/08/2026 09:05 PM');
+    picker.open();
+
+    const hourInput = document.querySelector('[data-time-unit="hour"]') as HTMLInputElement;
+    const minuteInput = document.querySelector('[data-time-unit="minute"]') as HTMLInputElement;
+    const meridiemInput = document.querySelector(
+      '[data-time-unit="meridiem"]'
+    ) as HTMLSelectElement;
+
+    expect(hourInput.value).toBe('09');
+    expect(minuteInput.value).toBe('05');
+    expect(meridiemInput.value).toBe('PM');
+
+    hourInput.value = '10';
+    hourInput.dispatchEvent(new Event('input', { bubbles: true }));
+    meridiemInput.value = 'AM';
+    meridiemInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+    expect(picker.getDate()?.getHours()).toBe(10);
+    expect((document.querySelector('#date-input') as HTMLInputElement).value).toBe(
+      '02/08/2026 10:05 AM'
+    );
+
     picker.destroy();
   });
 
@@ -732,6 +787,27 @@ describe('ThekDatePicker integration', () => {
 
     picker.setDate('30/01/2026');
     expect((document.querySelector('#date-input') as HTMLInputElement).value).toBe('20/01/2026');
+
+    picker.destroy();
+  });
+
+  it('revalidates view state and emits change when setters clamp the current value', () => {
+    const onChange = vi.fn();
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'YYYY-MM-DD',
+      onChange
+    });
+
+    picker.setDate('2026-01-15', false);
+    picker.setMaxDate('2026-01-10');
+
+    expect(picker.getDate()?.getDate()).toBe(10);
+    expect((document.querySelector('#date-input') as HTMLInputElement).value).toBe('2026-01-10');
+    expect(onChange).toHaveBeenCalledTimes(1);
+
+    picker.open();
+    const selectedCell = document.querySelector('.thekdp-day-cell-selected') as HTMLButtonElement;
+    expect(selectedCell.dataset.ts).toBe(String(new Date(2026, 0, 10).setHours(0, 0, 0, 0)));
 
     picker.destroy();
   });

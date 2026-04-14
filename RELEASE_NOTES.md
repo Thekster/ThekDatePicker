@@ -1,5 +1,23 @@
 # Release Notes
 
+## 1.2.3 - 2026-04-14
+
+### Fixed
+
+- **TypeScript Consumer Packaging:** Removed the root declaration-side CSS side-effect import, added typed CSS subpath exports, and verified external TypeScript consumers can import both the package entrypoint and documented CSS path without TS2882 failures. (SEV-1)
+- **Triggerless Warning Infrastructure:** `showCalendarButton: false` now disables only the trigger button instead of silently removing suspicious/revert indicators and assistive status text. (SEV-2)
+- **Time Control Semantics:** Popover time controls now follow the effective 12-hour or 24-hour mode, including explicit AM/PM selection when the configured format uses meridiem tokens. (SEV-2)
+- **Constraint Setter Revalidation:** `setMinDate()` and `setMaxDate()` now fully revalidate selected value, calendar view state, and emitted change notifications when the current value is clamped. (SEV-2)
+- **ISO Input Safety:** Offset-bearing ISO strings are no longer accepted as if they were local wall-clock values, preventing silent timezone corruption during string normalization. (SEV-2)
+- **Trusted Types / CSP DOM Construction:** Static SVG icon construction now uses DOM APIs instead of `innerHTML`, eliminating the remaining Trusted Types and strict CSP incompatibility in picker UI scaffolding. (SEV-3)
+- **Combobox Semantics:** The input now carries explicit combobox role semantics instead of only partial grid-popup attributes. (SEV-3)
+
+### Changed
+
+- **Public API Contract:** `DateInput` now explicitly includes `null | undefined` in the published types to match actual runtime clearing behavior.
+- **Extension Surface Cleanup:** Removed the undocumented, nonfunctional `cssPrefix` option from the public API instead of pretending the shipped CSS supported arbitrary prefixes.
+- **Documentation Accuracy:** README and docs now state that CSS must be imported explicitly, clarify trigger-button behavior, and fix the broken unpkg CDN script URL.
+
 ## 1.2.2 - 2026-04-11
 
 ### Fixed

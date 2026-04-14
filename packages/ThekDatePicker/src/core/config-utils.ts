@@ -242,7 +242,6 @@ export function resolveOptions(options: ThekDatePickerOptions): ResolvedOptions 
   const suspiciousMessage = merged.suspiciousMessage ?? 'Suspicious date value';
   const revertWarning = merged.revertWarning ?? true;
   const revertMessage = merged.revertMessage ?? 'Invalid input value';
-  const cssPrefix = merged.cssPrefix ?? 'thekdp';
 
   return {
     format,
@@ -272,7 +271,6 @@ export function resolveOptions(options: ThekDatePickerOptions): ResolvedOptions 
     suspiciousMessage,
     revertWarning,
     revertMessage,
-    cssPrefix,
     onChange: merged.onChange,
     onOpen: merged.onOpen,
     onClose: merged.onClose

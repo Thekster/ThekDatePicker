@@ -1,6 +1,6 @@
 import type { ThekDatePicker } from './thekdatepicker.js';
 
-export type DateInput = Date | string;
+export type DateInput = Date | string | null | undefined;
 
 export interface ThekDatePickerTheme {
   primary: string;
@@ -47,7 +47,6 @@ export interface ThekDatePickerOptions {
   suspiciousMessage?: string;
   revertWarning?: boolean;
   revertMessage?: string;
-  cssPrefix?: string;
   onChange?: (date: Date | null, formatted: string, instance: ThekDatePicker) => void;
   onOpen?: (instance: ThekDatePicker) => void;
   onClose?: (instance: ThekDatePicker) => void;
@@ -83,7 +82,6 @@ export interface ResolvedOptions {
   suspiciousMessage: string;
   revertWarning: boolean;
   revertMessage: string;
-  cssPrefix: string;
   onChange?: (date: Date | null, formatted: string, instance: ThekDatePicker) => void;
   onOpen?: (instance: ThekDatePicker) => void;
   onClose?: (instance: ThekDatePicker) => void;

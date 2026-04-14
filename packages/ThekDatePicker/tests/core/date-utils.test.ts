@@ -32,6 +32,12 @@ describe('date utils', () => {
     expect(parsedAmPm?.getHours()).toBe(21);
   });
 
+  it('does not accept ISO strings with timezone suffixes as local wall-clock input', async () => {
+    const { parseIsoDateString } = await import('../../src/core/date-utils');
+    expect(parseIsoDateString('2026-02-08T09:05Z')).toBeNull();
+    expect(parseIsoDateString('2026-02-08T09:05+02:00')).toBeNull();
+  });
+
   it('correctly identifies meridiem usage with escaped literals', async () => {
     const { formatUsesMeridiem } = await import('../../src/core/date-utils');
     expect(formatUsesMeridiem('DD/MM/YYYY HH:mm')).toBe(false);

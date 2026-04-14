@@ -24,6 +24,8 @@ npm install thekdatepicker thekdatepicker-vue vue
 import 'thekdatepicker/css/base.css';
 ```
 
+CSS is not injected by the JavaScript entrypoint. Import it explicitly.
+
 ## Quick Start
 
 ```html
@@ -142,7 +144,7 @@ setGlobalOptions({
 | `locale`             | `string`                                                      | system locale                   | Locale used for deriving defaults when `useLocaleDefaults` is enabled.                                                                                    |
 | `useLocaleDefaults`  | `boolean`                                                     | `false`                         | If true, derives `format`, `timeFormat`, and `weekStartsOn` from locale unless explicitly provided.                                                       |
 | `enableTime`         | `boolean`                                                     | `false`                         | Controls visibility of time controls in popover.                                                                                                          |
-| `timeFormat`         | `string`                                                      | `'HH:mm'`                       | Time token format used only when `format` has no time tokens and `enableTime` is true.                                                                    |
+| `timeFormat`         | `string`                                                      | `'HH:mm'`                       | Time token format used only when `format` has no time tokens and `enableTime` is true; popover time controls follow the effective 12h/24h mode.          |
 | `minDate`            | `Date \| string \| null \| undefined`                         | `undefined`                     | Minimum allowed date. Values below are clamped.                                                                                                           |
 | `maxDate`            | `Date \| string \| null \| undefined`                         | `undefined`                     | Maximum allowed date. Values above are clamped.                                                                                                           |
 | `defaultDate`        | `Date \| string \| null \| undefined`                         | `undefined`                     | Initial value for input/picker.                                                                                                                           |
@@ -225,7 +227,7 @@ setGlobalOptions({
 
 ## Migration Notes
 
-- `DateInput` no longer accepts `number` to avoid second-vs-millisecond ambiguity.
+- `DateInput` accepts `Date | string | null | undefined` and does not accept `number` to avoid second-vs-millisecond ambiguity.
 - If you previously passed numeric timestamps to `setDate`, switch to:
   - `setDateFromTimestamp(timestampMs)`
   - or `setDate(new Date(timestampMs))`

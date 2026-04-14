@@ -29,7 +29,6 @@ const pickerOptionKeys = [
   "suspiciousMessage",
   "revertWarning",
   "revertMessage",
-  "cssPrefix",
 ] as const;
 
 type PickerOptionKey = (typeof pickerOptionKeys)[number];
@@ -156,10 +155,6 @@ export const ThekDatePickerVue = defineComponent({
       type: String,
       default: undefined,
     },
-    cssPrefix: {
-      type: String,
-      default: undefined,
-    },
   },
   emits: ["update:modelValue", "change", "open", "close"],
   setup(props, { attrs, emit, expose }) {
@@ -197,8 +192,6 @@ export const ThekDatePickerVue = defineComponent({
       assignOptionIfDefined(options, "suspiciousMessage", props.suspiciousMessage);
       assignOptionIfDefined(options, "revertWarning", props.revertWarning);
       assignOptionIfDefined(options, "revertMessage", props.revertMessage);
-      assignOptionIfDefined(options, "cssPrefix", props.cssPrefix);
-
       options.onChange = (date, formatted, instance) => {
         emit("update:modelValue", date);
         emit("change", date, formatted, instance);
