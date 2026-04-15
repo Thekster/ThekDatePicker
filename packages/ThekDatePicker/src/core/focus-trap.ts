@@ -19,6 +19,12 @@ export class FocusTrap {
     this.active = false;
   }
 
+  public refresh(): void {
+    if (this.active) {
+      this.updateFocusableElements();
+    }
+  }
+
   private updateFocusableElements(): void {
     const selector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
     this.focusableElements = Array.from(this.container.querySelectorAll(selector)) as HTMLElement[];
@@ -29,7 +35,6 @@ export class FocusTrap {
   private handleKeyDown = (event: KeyboardEvent): void => {
     if (event.key !== 'Tab') return;
 
-    this.updateFocusableElements();
     if (this.focusableElements.length === 0) return;
 
     if (event.shiftKey) {

@@ -77,6 +77,7 @@ export class ThekDatePicker {
   private meridiemInputEl: HTMLSelectElement | null = null;
   private focusedDayTs: number | null = null;
   private openFocusFrame: number | null = null;
+  private viewportFrame: number | null = null;
   private localizedMonthNames: string[];
   private localizedWeekdayNames: string[];
 
@@ -188,6 +189,14 @@ export class ThekDatePicker {
     }
     this.close();
     this.commitInput();
+  };
+
+  public readonly onGlobalViewportChange = (): void => {
+    if (!this.openState || this.viewportFrame != null) return;
+    this.viewportFrame = window.requestAnimationFrame(() => {
+      this.viewportFrame = null;
+      if (this.openState) this.positionPicker();
+    });
   };
 
   private readonly handleObservers = (): void => {
@@ -466,7 +475,8 @@ export class ThekDatePicker {
     this.resizeObserver.observe(this.pickerEl);
 
     this.intersectionObserver = new IntersectionObserver(this.handleIntersection, {
-      threshold: 0
+      threshold: 0,
+      rootMargin: '50px'
     });
     this.intersectionObserver.observe(this.input);
 
@@ -487,6 +497,11 @@ export class ThekDatePicker {
     if (this.destroyed || !this.openState) return;
     this.openState = false;
     this.input.setAttribute('aria-expanded', 'false');
+
+    if (this.viewportFrame != null) {
+      window.cancelAnimationFrame(this.viewportFrame);
+      this.viewportFrame = null;
+    }
 
     this.focusTrap.deactivate();
     this.resizeObserver?.disconnect();
@@ -597,6 +612,10 @@ export class ThekDatePicker {
     this.destroyed = true;
 
     this.cancelPendingOpenFocus();
+    if (this.viewportFrame != null) {
+      window.cancelAnimationFrame(this.viewportFrame);
+      this.viewportFrame = null;
+    }
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
     this.intersectionObserver?.disconnect();
@@ -1232,6 +1251,7 @@ export class ThekDatePicker {
     } else {
       hideTimeInputs(timeContainer, actions, CSS_PREFIX);
     }
+    this.focusTrap.refresh();
   }
 }
 

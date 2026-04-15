@@ -24,7 +24,14 @@ npm install thekdatepicker thekdatepicker-vue vue
 import 'thekdatepicker/css/base.css';
 ```
 
-CSS is not injected by the JavaScript entrypoint. Import it explicitly.
+CSS is not injected by the JavaScript entrypoint by default. Alternatively, you can use the zero-config utility:
+
+```ts
+import { injectBaseStyles } from 'thekdatepicker';
+
+// Injects <style> tag into <head>
+injectBaseStyles();
+```
 
 ## Quick Start
 
