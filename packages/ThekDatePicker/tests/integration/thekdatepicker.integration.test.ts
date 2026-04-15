@@ -4,6 +4,19 @@ import { ThekDatePicker, resetGlobalOptions, setGlobalOptions } from '../../src/
 describe('ThekDatePicker integration', () => {
   beforeEach(() => {
     document.body.innerHTML = '<input id="date-input" />';
+    
+    class MockResizeObserver {
+      observe = vi.fn();
+      unobserve = vi.fn();
+      disconnect = vi.fn();
+    }
+    class MockIntersectionObserver {
+      observe = vi.fn();
+      unobserve = vi.fn();
+      disconnect = vi.fn();
+    }
+    vi.stubGlobal('ResizeObserver', MockResizeObserver);
+    vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
   });
 
   afterEach(() => {
@@ -1020,58 +1033,45 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
-  it('balances resize and scroll listeners across many create/destroy cycles', () => {
-    const addSpy = vi.spyOn(window, 'addEventListener');
-    const removeSpy = vi.spyOn(window, 'removeEventListener');
-
-    for (let i = 0; i < 1000; i += 1) {
-      document.body.innerHTML = '<input id="date-input" />';
-      const picker = new ThekDatePicker('#date-input');
-      picker.destroy();
+  it('initializes ResizeObserver and IntersectionObserver when opened', () => {
+    const observeSpy = vi.fn();
+    class MockResizeObserver {
+      observe = observeSpy;
+      disconnect = vi.fn();
     }
+    class MockIntersectionObserver {
+      observe = observeSpy;
+      disconnect = vi.fn();
+    }
+    vi.stubGlobal('ResizeObserver', MockResizeObserver);
+    vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
 
-    const addedResize = addSpy.mock.calls.filter(([type]) => type === 'resize').length;
-    const removedResize = removeSpy.mock.calls.filter(([type]) => type === 'resize').length;
-    const addedScroll = addSpy.mock.calls.filter(([type]) => type === 'scroll').length;
-    const removedScroll = removeSpy.mock.calls.filter(([type]) => type === 'scroll').length;
-
-    expect(addedResize).toBe(1000);
-    expect(removedResize).toBe(1000);
-    expect(addedScroll).toBe(1000);
-    expect(removedScroll).toBe(1000);
-
-    addSpy.mockRestore();
-    removeSpy.mockRestore();
-  });
-
-  it('registers the shared scroll listener as passive and capture-based', () => {
-    const addSpy = vi.spyOn(window, 'addEventListener');
     const picker = new ThekDatePicker('#date-input');
-
-    const scrollCall = addSpy.mock.calls.find(([type]) => type === 'scroll');
-    expect(scrollCall).toBeDefined();
-    expect(scrollCall?.[2]).toEqual({ capture: true, passive: true });
-
-    addSpy.mockRestore();
+    picker.open();
+    
+    expect(observeSpy).toHaveBeenCalled();
     picker.destroy();
   });
 
-  it('uses one shared global listener set for multiple live pickers', () => {
-    document.body.innerHTML = '<input id="date-input-a" /><input id="date-input-b" />';
-    const addSpy = vi.spyOn(window, 'addEventListener');
+  it('disconnects observers when closed or destroyed', () => {
+    const disconnectSpy = vi.fn();
+    class MockResizeObserver {
+      observe = vi.fn();
+      disconnect = disconnectSpy;
+    }
+    class MockIntersectionObserver {
+      observe = vi.fn();
+      disconnect = disconnectSpy;
+    }
+    vi.stubGlobal('ResizeObserver', MockResizeObserver);
+    vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
 
-    const pickerA = new ThekDatePicker('#date-input-a');
-    const pickerB = new ThekDatePicker('#date-input-b');
-
-    const addedResize = addSpy.mock.calls.filter(([type]) => type === 'resize').length;
-    const addedScroll = addSpy.mock.calls.filter(([type]) => type === 'scroll').length;
-
-    expect(addedResize).toBe(1);
-    expect(addedScroll).toBe(1);
-
-    addSpy.mockRestore();
-    pickerA.destroy();
-    pickerB.destroy();
+    const picker = new ThekDatePicker('#date-input');
+    picker.open();
+    picker.close();
+    
+    expect(disconnectSpy).toHaveBeenCalled();
+    picker.destroy();
   });
 
   it('does not inject HTML from malicious string values', () => {

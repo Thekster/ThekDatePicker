@@ -76,9 +76,13 @@ export class ThekDatePicker {
   private meridiemInputEl: HTMLSelectElement | null = null;
   private focusedDayTs: number | null = null;
   private openFocusFrame: number | null = null;
-  private viewportFrame: number | null = null;
   private localizedMonthNames: string[];
   private localizedWeekdayNames: string[];
+
+  private resizeObserver: ResizeObserver | null = null;
+  private intersectionObserver: IntersectionObserver | null = null;
+  private lastInputRect: DOMRect | null = null;
+  private lastPickerRect: DOMRect | null = null;
 
   private selectedDate: Date | null = null;
   private viewDate: Date = new Date();
@@ -184,12 +188,19 @@ export class ThekDatePicker {
     this.commitInput();
   };
 
-  public readonly onGlobalViewportChange = (): void => {
-    if (!this.openState || this.viewportFrame != null) return;
-    this.viewportFrame = window.requestAnimationFrame(() => {
-      this.viewportFrame = null;
-      if (this.openState) this.positionPicker();
-    });
+  private readonly handleObservers = (): void => {
+    if (!this.openState) return;
+    this.positionPicker();
+  };
+
+  private readonly handleIntersection = (entries: IntersectionObserverEntry[]): void => {
+    if (!this.openState) return;
+    for (const entry of entries) {
+      if (!entry.isIntersecting) {
+        this.close();
+        return;
+      }
+    }
   };
 
   private readonly handleThemeMediaChange = (): void => {
@@ -443,6 +454,16 @@ export class ThekDatePicker {
     }
     this.openState = true;
     this.input.setAttribute('aria-expanded', 'true');
+
+    this.resizeObserver = new ResizeObserver(this.handleObservers);
+    this.resizeObserver.observe(this.input);
+    this.resizeObserver.observe(this.pickerEl);
+
+    this.intersectionObserver = new IntersectionObserver(this.handleIntersection, {
+      threshold: 0
+    });
+    this.intersectionObserver.observe(this.input);
+
     this.ensureFocusableDay();
     this.positionPicker();
     this.pickerEl.hidden = false;
@@ -459,11 +480,15 @@ export class ThekDatePicker {
     if (this.destroyed || !this.openState) return;
     this.openState = false;
     this.input.setAttribute('aria-expanded', 'false');
+
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+    this.intersectionObserver?.disconnect();
+    this.intersectionObserver = null;
+    this.lastInputRect = null;
+    this.lastPickerRect = null;
+
     this.cancelPendingOpenFocus();
-    if (this.viewportFrame != null) {
-      window.cancelAnimationFrame(this.viewportFrame);
-      this.viewportFrame = null;
-    }
     this.pickerEl.hidden = true;
     this.options.onClose?.(this);
   }
@@ -564,10 +589,10 @@ export class ThekDatePicker {
     this.destroyed = true;
 
     this.cancelPendingOpenFocus();
-    if (this.viewportFrame != null) {
-      window.cancelAnimationFrame(this.viewportFrame);
-      this.viewportFrame = null;
-    }
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+    this.intersectionObserver?.disconnect();
+    this.intersectionObserver = null;
 
     this.hideRevertIndicator();
     this.unbind();
@@ -957,12 +982,28 @@ export class ThekDatePicker {
       this.pickerEl.style.pointerEvents = prevPointerEvents;
     }
 
+    this.lastPickerRect = rect;
     return rect;
   }
 
   private positionPicker(): void {
     const inputRect = this.input.getBoundingClientRect();
-    const pickerRect = this.measurePickerRect();
+    const pickerRect = this.lastPickerRect || this.measurePickerRect();
+
+    if (
+      this.lastInputRect &&
+      inputRect.top === this.lastInputRect.top &&
+      inputRect.left === this.lastInputRect.left &&
+      inputRect.width === this.lastInputRect.width &&
+      inputRect.height === this.lastInputRect.height &&
+      pickerRect.width === this.lastPickerRect?.width &&
+      pickerRect.height === this.lastPickerRect?.height
+    ) {
+      return;
+    }
+
+    this.lastInputRect = inputRect;
+
     const appendTo = this.getAppendTarget();
     const isBodyMount = appendTo === document.body;
     const containerRect = isBodyMount ? null : appendTo.getBoundingClientRect();

@@ -7,7 +7,8 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 export default defineConfig({
   test: {
     environment: 'jsdom',
-    testTimeout: 30000
+    testTimeout: 30000,
+    setupFiles: [resolve(__dirname, 'tests/setup.ts')]
   },
   build: {
     minify: process.env.THEK_MINIFY === '1' ? 'terser' : false,
