@@ -1,5 +1,38 @@
 import { applyMaskToInput, formatUsesMeridiem } from './date-utils.js';
 
+const INPUT_TOKENS = [
+  'YYYY',
+  'YY',
+  'DD',
+  'D',
+  'MM',
+  'M',
+  'HH',
+  'H',
+  'hh',
+  'h',
+  'mm',
+  'm',
+  'A',
+  'a'
+];
+const TOKEN_LENGTHS = new Map<string, number>([
+  ['YYYY', 4],
+  ['YY', 2],
+  ['DD', 2],
+  ['D', 2],
+  ['MM', 2],
+  ['M', 2],
+  ['HH', 2],
+  ['H', 2],
+  ['hh', 2],
+  ['h', 2],
+  ['mm', 2],
+  ['m', 2],
+  ['A', 2],
+  ['a', 2]
+]);
+
 function isMaskChar(char: string, usesMeridiem: boolean): boolean {
   if (/^\d$/.test(char)) return true;
   if (!usesMeridiem) return false;
@@ -41,6 +74,52 @@ export function applyMaskedInputWithCaret(input: HTMLInputElement, format: strin
 
   const nextCaret = caretIndexForMaskCharCount(nextValue, maskCharsBeforeCaret, usesMeridiem);
   input.setSelectionRange(nextCaret, nextCaret);
+}
+
+export function applyMaskedTextInsertion(
+  input: HTMLInputElement,
+  text: string,
+  format: string
+): void {
+  const usesMeridiem = formatUsesMeridiem(format);
+  const selectionStart = input.selectionStart ?? input.value.length;
+  const selectionEnd = input.selectionEnd ?? selectionStart;
+  const previousValue = input.value;
+  const nextRawValue =
+    previousValue.slice(0, selectionStart) + text + previousValue.slice(selectionEnd);
+  const nextValue = applyMaskToInput(nextRawValue, format);
+  const maskCharsBeforeCaret = countMaskChars(
+    previousValue.slice(0, selectionStart) + text,
+    usesMeridiem
+  );
+
+  input.value = nextValue;
+  const nextCaret = caretIndexForMaskCharCount(nextValue, maskCharsBeforeCaret, usesMeridiem);
+  input.setSelectionRange(nextCaret, nextCaret);
+}
+
+export function getMaskedFormatLength(format: string): number {
+  let length = 0;
+  for (let i = 0; i < format.length; i += 1) {
+    if (format[i] === '[') {
+      const end = format.indexOf(']', i);
+      if (end !== -1) {
+        length += end - i - 1;
+        i = end;
+        continue;
+      }
+    }
+
+    const token = INPUT_TOKENS.find((item) => format.startsWith(item, i));
+    if (token) {
+      length += TOKEN_LENGTHS.get(token) ?? 0;
+      i += token.length - 1;
+      continue;
+    }
+
+    length += 1;
+  }
+  return length;
 }
 
 export function isAllowedInputKey(

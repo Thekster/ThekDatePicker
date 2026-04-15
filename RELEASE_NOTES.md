@@ -1,5 +1,13 @@
 # Release Notes
 
+## 1.2.4 - 2026-04-15
+
+### Fixed
+
+- **Partial Paste Workflow:** Partial pasted values now pass through the input mask instead of being blocked outright, so users can paste fragments such as `12-12-` and finish the remaining segments manually. (SEV-2)
+- **Invalid Blur Preservation:** Invalid or incomplete typed values are no longer silently replaced with the last committed date on blur; the raw text remains in the input and is exposed as an invalid state for correction. (SEV-2)
+- **Validation Semantics:** The input now distinguishes truly invalid raw text from merely suspicious-but-valid dates, preserving `aria-invalid`, status messaging, and styling for actual invalid entry without regressing the suspicious-date warning flow. (SEV-3)
+
 ## 1.2.3 - 2026-04-14
 
 ### Fixed

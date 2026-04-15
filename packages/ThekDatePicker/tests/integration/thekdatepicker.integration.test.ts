@@ -82,10 +82,30 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
-  it('rejects completely invalid pasted dates immediately instead of deferring to blur', () => {
+  it('allows partial pasted dates and normalizes them through the mask', () => {
     const picker = new ThekDatePicker('#date-input', { format: 'DD/MM/YYYY' });
     const input = document.querySelector('#date-input') as HTMLInputElement;
     const preventDefault = vi.fn();
+
+    const event = new Event('paste') as unknown as ClipboardEvent;
+    event.clipboardData = {
+      getData: () => '12-12-'
+    };
+    event.preventDefault = preventDefault;
+
+    input.dispatchEvent(event);
+    expect(preventDefault).toHaveBeenCalled();
+    expect(input.value).toBe('12/12');
+
+    picker.destroy();
+  });
+
+  it('rejects fully invalid pasted dates without changing the current value', () => {
+    const picker = new ThekDatePicker('#date-input', { format: 'DD/MM/YYYY' });
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    const preventDefault = vi.fn();
+
+    picker.setDate('08/02/2026');
 
     const event = new Event('paste') as unknown as ClipboardEvent;
     event.clipboardData = {
@@ -95,6 +115,9 @@ describe('ThekDatePicker integration', () => {
 
     input.dispatchEvent(event);
     expect(preventDefault).toHaveBeenCalled();
+    expect(input.value).toBe('08/02/2026');
+    expect(input.classList.contains('thekdp-input-invalid')).toBe(true);
+    expect(input.getAttribute('aria-invalid')).toBe('');
 
     picker.destroy();
   });
@@ -380,8 +403,8 @@ describe('ThekDatePicker integration', () => {
 
     input.value = '--12';
     input.dispatchEvent(new Event('blur', { bubbles: true }));
-    const revertIndicator = document.querySelector('.thekdp-revert-indicator') as HTMLSpanElement;
-    expect(revertIndicator.hidden).toBe(false);
+    expect(input.classList.contains('thekdp-input-invalid')).toBe(true);
+    expect(input.getAttribute('aria-invalid')).toBe('');
 
     picker.destroy();
   });
@@ -875,7 +898,7 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
-  it('shows revert indicator when invalid input is reverted on blur', () => {
+  it('keeps invalid input in the field and marks it invalid on blur', () => {
     const picker = new ThekDatePicker('#date-input', {
       format: 'DD/MM/YYYY',
       revertWarning: true,
@@ -887,19 +910,18 @@ describe('ThekDatePicker integration', () => {
     input.value = '---12';
     input.dispatchEvent(new Event('blur', { bubbles: true }));
 
-    expect(input.value).toBe('08/02/2026');
-    expect(input.classList.contains('thekdp-input-reverted')).toBe(true);
-    expect(input.title).toContain('Invalid value reverted');
+    expect(input.value).toBe('---12');
+    expect(input.classList.contains('thekdp-input-invalid')).toBe(true);
+    expect(input.getAttribute('aria-invalid')).toBe('');
+    expect(input.title).toContain('Invalid input value');
     expect(input.title).toContain('---12');
     const indicator = document.querySelector('.thekdp-revert-indicator') as HTMLSpanElement;
-    expect(indicator.hidden).toBe(false);
-    expect(indicator.querySelector('svg')).not.toBeNull();
-    expect(indicator.title).toContain('---12');
+    expect(indicator.hidden).toBe(true);
 
     picker.destroy();
   });
 
-  it('uses default revert tooltip format with rejected raw value', () => {
+  it('uses default invalid tooltip format with rejected raw value', () => {
     const picker = new ThekDatePicker('#date-input', {
       format: 'DD/MM/YYYY',
       revertWarning: true
@@ -910,6 +932,7 @@ describe('ThekDatePicker integration', () => {
     input.value = '--12';
     input.dispatchEvent(new Event('blur', { bubbles: true }));
     expect(input.title).toBe('Invalid input value : --12');
+    expect(input.value).toBe('--12');
 
     picker.destroy();
   });
@@ -952,47 +975,47 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
-  it('keeps revert indicator visible until corrected value is committed', async () => {
+  it('clears invalid state when corrected value is committed', async () => {
     const picker = new ThekDatePicker('#date-input', {
       format: 'DD/MM/YYYY',
       revertWarning: true
     });
     const input = document.querySelector('#date-input') as HTMLInputElement;
-    const indicator = document.querySelector('.thekdp-revert-indicator') as HTMLSpanElement;
 
     picker.setDate('08/02/2026');
     input.value = '---12';
     input.dispatchEvent(new Event('blur', { bubbles: true }));
-    expect(indicator.hidden).toBe(false);
+    expect(input.classList.contains('thekdp-input-invalid')).toBe(true);
 
     input.value = '09';
     input.dispatchEvent(new Event('input', { bubbles: true }));
     await new Promise((resolve) => setTimeout(resolve, 2100));
-    expect(indicator.hidden).toBe(false);
+    expect(input.classList.contains('thekdp-input-invalid')).toBe(false);
 
     input.value = '09/02/2026';
     input.dispatchEvent(new Event('blur', { bubbles: true }));
-    expect(indicator.hidden).toBe(true);
+    expect(input.classList.contains('thekdp-input-invalid')).toBe(false);
+    expect(input.getAttribute('aria-invalid')).toBeNull();
 
     picker.destroy();
   });
 
-  it('clears revert indicator when user commits empty value (null)', () => {
+  it('clears invalid state when user commits empty value (null)', () => {
     const picker = new ThekDatePicker('#date-input', {
       format: 'DD/MM/YYYY',
       revertWarning: true
     });
     const input = document.querySelector('#date-input') as HTMLInputElement;
-    const indicator = document.querySelector('.thekdp-revert-indicator') as HTMLSpanElement;
 
     picker.setDate('08/02/2026');
     input.value = '---12';
     input.dispatchEvent(new Event('blur', { bubbles: true }));
-    expect(indicator.hidden).toBe(false);
+    expect(input.classList.contains('thekdp-input-invalid')).toBe(true);
 
     input.value = '';
     input.dispatchEvent(new Event('blur', { bubbles: true }));
-    expect(indicator.hidden).toBe(true);
+    expect(input.classList.contains('thekdp-input-invalid')).toBe(false);
+    expect(input.getAttribute('aria-invalid')).toBeNull();
 
     picker.destroy();
   });

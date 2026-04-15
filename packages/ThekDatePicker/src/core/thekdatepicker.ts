@@ -17,7 +17,12 @@ import {
 } from './thekdatepicker-dom.js';
 import { isSuspiciousDate } from './thekdatepicker-suspicious.js';
 import { applyThemeVars } from './thekdatepicker-theme.js';
-import { applyMaskedInputWithCaret, isAllowedInputKey } from './thekdatepicker-input.js';
+import {
+  applyMaskedInputWithCaret,
+  applyMaskedTextInsertion,
+  getMaskedFormatLength,
+  isAllowedInputKey
+} from './thekdatepicker-input.js';
 import {
   getDefaultFocusedDay,
   moveFocusedDay as computeFocusedDay,
@@ -80,6 +85,7 @@ export class ThekDatePicker {
   private openState = false;
   private isEmittingChange = false;
   private destroyed = false;
+  private invalidInputDetail: string | null = null;
   private themeObserver: MutationObserver | null = null;
   private themeMediaQuery: MediaQueryList | null = null;
 
@@ -112,6 +118,7 @@ export class ThekDatePicker {
   };
 
   private readonly handleInput = (): void => {
+    this.hideInvalidInputState();
     this.applyMaskedInputWithCaret();
   };
 
@@ -148,10 +155,16 @@ export class ThekDatePicker {
     }
     const text = event.clipboardData?.getData('text') ?? '';
     if (!text) return;
-
-    if (extractInput(text, this.options)) return;
-
     event.preventDefault();
+    const format = fullFormat(this.options);
+    const trimmed = text.trim();
+    const isCompletePaste = trimmed.length >= getMaskedFormatLength(format);
+    if (!extractInput(trimmed, this.options) && isCompletePaste) {
+      this.showInvalidInputState(trimmed);
+      return;
+    }
+    this.hideInvalidInputState();
+    applyMaskedTextInsertion(this.input, text, format);
   };
 
   public readonly onGlobalPointerDown = (event: PointerEvent): void => {
@@ -477,6 +490,7 @@ export class ThekDatePicker {
     this.selectedDate = clampDate(parsed, this.options.minDate, this.options.maxDate);
     this.viewDate = new Date(this.selectedDate);
     this.focusedDayTs = toLocalStartOfDay(this.selectedDate).getTime();
+    this.hideInvalidInputState();
     this.hideRevertIndicator();
     this.syncInput();
     this.render();
@@ -500,6 +514,7 @@ export class ThekDatePicker {
     this.input.value = '';
     this.viewDate = new Date();
     this.focusedDayTs = toLocalStartOfDay(this.viewDate).getTime();
+    this.hideInvalidInputState();
     this.hideRevertIndicator();
     this.updateSuspiciousState();
     this.render();
@@ -561,6 +576,7 @@ export class ThekDatePicker {
     this.unmountInputTrigger();
     this.input.classList.remove(`${CSS_PREFIX}-input`);
     this.input.classList.remove(`${CSS_PREFIX}-input-suspicious`);
+    this.input.classList.remove(`${CSS_PREFIX}-input-invalid`);
     this.input.classList.remove(`${CSS_PREFIX}-input-reverted`);
     this.input.removeAttribute('inputmode');
     this.input.removeAttribute('role');
@@ -697,6 +713,22 @@ export class ThekDatePicker {
     this.syncStatusDescription(detail);
   }
 
+  private showInvalidInputState(rejectedInput: string): void {
+    this.invalidInputDetail = `Invalid input value : ${rejectedInput}`;
+    this.input.classList.add(`${CSS_PREFIX}-input-invalid`);
+    if (this.inputWrapEl) this.inputWrapEl.classList.add(`${CSS_PREFIX}-input-wrap-invalid`);
+    this.syncValidationState();
+    this.syncStatusDescription();
+  }
+
+  private hideInvalidInputState(): void {
+    this.invalidInputDetail = null;
+    this.input.classList.remove(`${CSS_PREFIX}-input-invalid`);
+    if (this.inputWrapEl) this.inputWrapEl.classList.remove(`${CSS_PREFIX}-input-wrap-invalid`);
+    this.syncValidationState();
+    this.syncStatusDescription();
+  }
+
   private hideRevertIndicator(): void {
     this.input.classList.remove(`${CSS_PREFIX}-input-reverted`);
     if (this.inputWrapEl) this.inputWrapEl.classList.remove(`${CSS_PREFIX}-input-wrap-reverted`);
@@ -704,9 +736,7 @@ export class ThekDatePicker {
       this.revertIndicatorEl.hidden = true;
       this.revertIndicatorEl.title = '';
     }
-    if (!this.input.classList.contains(`${CSS_PREFIX}-input-suspicious`)) {
-      this.input.removeAttribute('title');
-    }
+    this.syncValidationState();
     this.syncStatusDescription();
   }
 
@@ -991,10 +1021,10 @@ export class ThekDatePicker {
     }
     const parsed = extractInput(raw, this.options);
     if (!parsed) {
-      this.syncInput();
-      this.showRevertIndicator(raw);
+      this.showInvalidInputState(raw);
       return;
     }
+    this.hideInvalidInputState();
     this.hideRevertIndicator();
     const clamped = clampDate(parsed, this.options.minDate, this.options.maxDate);
     const wasClamped = clamped.getTime() !== parsed.getTime();
@@ -1027,7 +1057,6 @@ export class ThekDatePicker {
       ? isSuspiciousDate(this.selectedDate, this.options)
       : false;
     this.input.classList.toggle(`${CSS_PREFIX}-input-suspicious`, suspicious);
-    this.input.toggleAttribute('aria-invalid', suspicious);
 
     if (this.inputWrapEl) {
       this.inputWrapEl.classList.toggle(`${CSS_PREFIX}-input-wrap-suspicious`, suspicious);
@@ -1037,13 +1066,18 @@ export class ThekDatePicker {
       this.suspiciousIndicatorEl.hidden = !suspicious;
       this.suspiciousIndicatorEl.title = suspicious ? this.options.suspiciousMessage : '';
     }
-
-    if (suspicious) {
-      this.input.title = this.options.suspiciousMessage;
-    } else {
-      this.input.removeAttribute('title');
-    }
+    this.syncValidationState();
     this.syncStatusDescription();
+  }
+
+  private syncValidationState(): void {
+    const suspicious = this.selectedDate
+      ? isSuspiciousDate(this.selectedDate, this.options)
+      : false;
+    const title = this.invalidInputDetail ?? (suspicious ? this.options.suspiciousMessage : '');
+    if (title) this.input.title = title;
+    else this.input.removeAttribute('title');
+    this.input.toggleAttribute('aria-invalid', suspicious || this.invalidInputDetail != null);
   }
 
   private syncStatusDescription(overrideMessage?: string): void {
@@ -1055,6 +1089,10 @@ export class ThekDatePicker {
       this.revertIndicatorEl.title
     ) {
       messages.add(this.revertIndicatorEl.title);
+    }
+
+    if (this.invalidInputDetail) {
+      messages.add(this.invalidInputDetail);
     }
 
     if (
