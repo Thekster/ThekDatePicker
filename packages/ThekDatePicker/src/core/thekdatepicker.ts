@@ -17,6 +17,7 @@ import {
 } from './thekdatepicker-dom.js';
 import { isSuspiciousDate } from './thekdatepicker-suspicious.js';
 import { applyThemeVars } from './thekdatepicker-theme.js';
+import { FocusTrap } from './focus-trap.js';
 import {
   applyMaskedInputWithCaret,
   applyMaskedTextInsertion,
@@ -92,6 +93,7 @@ export class ThekDatePicker {
   private invalidInputDetail: string | null = null;
   private themeObserver: MutationObserver | null = null;
   private themeMediaQuery: MediaQueryList | null = null;
+  private focusTrap: FocusTrap;
 
   private readonly handleInputClick = (): void => {
     if (this.options.disabled) return;
@@ -401,6 +403,7 @@ export class ThekDatePicker {
     this.mountInputTrigger();
 
     this.pickerEl = createPickerPopover(CSS_PREFIX);
+    this.focusTrap = new FocusTrap(this.pickerEl);
 
     this.monthLabelEl = this.pickerEl.querySelector(
       `.${CSS_PREFIX}-current-month`
@@ -437,8 +440,11 @@ export class ThekDatePicker {
     if (!this.monthLabelEl.id) {
       this.monthLabelEl.id = `thekdp-month-${Math.random().toString(36).slice(2, 9)}`;
     }
+    this.pickerEl.setAttribute('role', 'dialog');
+    this.pickerEl.setAttribute('aria-modal', 'false');
     this.pickerEl.setAttribute('aria-labelledby', this.monthLabelEl.id);
     this.daysEl.setAttribute('aria-labelledby', this.monthLabelEl.id);
+    this.daysEl.setAttribute('role', 'grid');
 
     if (this.triggerButtonEl) this.triggerButtonEl.disabled = this.options.disabled;
     this.syncInput();
@@ -467,6 +473,7 @@ export class ThekDatePicker {
     this.ensureFocusableDay();
     this.positionPicker();
     this.pickerEl.hidden = false;
+    this.focusTrap.activate();
     this.cancelPendingOpenFocus();
     this.openFocusFrame = window.requestAnimationFrame(() => {
       this.openFocusFrame = null;
@@ -481,6 +488,7 @@ export class ThekDatePicker {
     this.openState = false;
     this.input.setAttribute('aria-expanded', 'false');
 
+    this.focusTrap.deactivate();
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
     this.intersectionObserver?.disconnect();
@@ -890,7 +898,13 @@ export class ThekDatePicker {
     const cell = this.dayCellEls.find(
       (item) => item.dataset.ts === String(targetTs) && !item.disabled
     );
-    cell?.focus();
+    if (cell) {
+      if (!cell.id) {
+        cell.id = `thekdp-cell-${Math.random().toString(36).slice(2, 9)}`;
+      }
+      this.daysEl.setAttribute('aria-activedescendant', cell.id);
+      cell.focus();
+    }
   }
 
   private cancelPendingOpenFocus(): void {

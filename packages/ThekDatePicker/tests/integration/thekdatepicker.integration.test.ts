@@ -82,16 +82,23 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
-  it('does not use role="dialog" or aria-haspopup="dialog" (combobox/grid pattern without focus trapping)', () => {
+  it('uses role="dialog" and aria-modal="false" for the popover', () => {
     const picker = new ThekDatePicker('#date-input');
     picker.open();
-    const input = document.querySelector('#date-input') as HTMLInputElement;
     const popover = document.querySelector('.thekdp-popover') as HTMLDivElement;
 
-    expect(input.getAttribute('aria-haspopup')).not.toBe('dialog');
-    expect(popover.getAttribute('role')).not.toBe('dialog');
-    expect(popover.hasAttribute('aria-modal')).toBe(false);
+    expect(popover.getAttribute('role')).toBe('dialog');
+    expect(popover.getAttribute('aria-modal')).toBe('false');
 
+    picker.destroy();
+  });
+
+  it('activates FocusTrap when opened', () => {
+    const picker = new ThekDatePicker('#date-input');
+    const trapSpy = vi.spyOn(picker['focusTrap'], 'activate');
+    picker.open();
+    
+    expect(trapSpy).toHaveBeenCalled();
     picker.destroy();
   });
 
