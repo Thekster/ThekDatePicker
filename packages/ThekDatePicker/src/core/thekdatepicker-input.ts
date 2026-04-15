@@ -1,4 +1,4 @@
-import { applyMaskToInput, formatUsesMeridiem } from './date-utils.js';
+import { applyMaskToInput, formatUsesMeridiem, tokenizeFormat } from './date-utils.js';
 
 const INPUT_TOKENS = [
   'YYYY',
@@ -33,33 +33,56 @@ const TOKEN_LENGTHS = new Map<string, number>([
   ['a', 2]
 ]);
 
-function isMaskChar(char: string, usesMeridiem: boolean): boolean {
+function isDataChar(char: string, usesMeridiem: boolean): boolean {
   if (/^\d$/.test(char)) return true;
   if (!usesMeridiem) return false;
   return /^[aApPmM]$/.test(char);
 }
 
-function countMaskChars(value: string, usesMeridiem: boolean): number {
+function countDataChars(value: string, usesMeridiem: boolean): number {
   let count = 0;
   for (const char of value) {
-    if (isMaskChar(char, usesMeridiem)) count += 1;
+    if (isDataChar(char, usesMeridiem)) count += 1;
   }
   return count;
 }
 
-function caretIndexForMaskCharCount(
-  value: string,
-  maskChars: number,
-  usesMeridiem: boolean
-): number {
-  if (maskChars <= 0) return 0;
-  let count = 0;
-  for (let i = 0; i < value.length; i += 1) {
-    if (!isMaskChar(value[i], usesMeridiem)) continue;
-    count += 1;
-    if (count >= maskChars) return i + 1;
+function getCaretForDataCount(value: string, format: string, targetCount: number): number {
+  if (targetCount <= 0) return 0;
+  const parts = tokenizeFormat(format);
+  const usesMeridiem = formatUsesMeridiem(format);
+
+  let currentDataCount = 0;
+  let caret = 0;
+
+  for (const part of parts) {
+    if (part.type === 'literal') {
+      if (caret < value.length && value[caret] === part.value) {
+        caret += 1;
+      }
+      continue;
+    }
+
+    // Token
+    const token = part.value;
+    const isMeridiem = token === 'A' || token === 'a';
+    const len = isMeridiem ? 2 : (TOKEN_LENGTHS.get(token) ?? 0);
+
+    for (let i = 0; i < len; i += 1) {
+      if (caret >= value.length) return caret;
+      if (isDataChar(value[caret], usesMeridiem)) {
+        currentDataCount += 1;
+        caret += 1;
+        if (currentDataCount >= targetCount) return caret;
+      } else {
+        // Skip literal if it was inserted unexpectedly
+        caret += 1;
+        i -= 1; // Retry this data slot
+      }
+    }
   }
-  return value.length;
+
+  return caret;
 }
 
 export function applyMaskedInputWithCaret(input: HTMLInputElement, format: string): void {
@@ -69,10 +92,10 @@ export function applyMaskedInputWithCaret(input: HTMLInputElement, format: strin
   const nextValue = applyMaskToInput(previousValue, format);
   if (nextValue === previousValue) return;
 
-  const maskCharsBeforeCaret = countMaskChars(previousValue.slice(0, caretStart), usesMeridiem);
+  const dataCharsBeforeCaret = countDataChars(previousValue.slice(0, caretStart), usesMeridiem);
   input.value = nextValue;
 
-  const nextCaret = caretIndexForMaskCharCount(nextValue, maskCharsBeforeCaret, usesMeridiem);
+  const nextCaret = getCaretForDataCount(nextValue, format, dataCharsBeforeCaret);
   input.setSelectionRange(nextCaret, nextCaret);
 }
 
@@ -85,16 +108,18 @@ export function applyMaskedTextInsertion(
   const selectionStart = input.selectionStart ?? input.value.length;
   const selectionEnd = input.selectionEnd ?? selectionStart;
   const previousValue = input.value;
+
   const nextRawValue =
     previousValue.slice(0, selectionStart) + text + previousValue.slice(selectionEnd);
   const nextValue = applyMaskToInput(nextRawValue, format);
-  const maskCharsBeforeCaret = countMaskChars(
+
+  const dataCharsBeforeCaret = countDataChars(
     previousValue.slice(0, selectionStart) + text,
     usesMeridiem
   );
 
   input.value = nextValue;
-  const nextCaret = caretIndexForMaskCharCount(nextValue, maskCharsBeforeCaret, usesMeridiem);
+  const nextCaret = getCaretForDataCount(nextValue, format, dataCharsBeforeCaret);
   input.setSelectionRange(nextCaret, nextCaret);
 }
 

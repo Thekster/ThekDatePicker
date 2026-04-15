@@ -16,8 +16,7 @@ const TOKENS = [
   'A',
   'a'
 ] as const;
-type Token = (typeof TOKENS)[number];
-type FormatPart = { type: 'token'; value: Token } | { type: 'literal'; value: string };
+export type FormatPart = { type: 'token'; value: Token } | { type: 'literal'; value: string };
 export const MASK_SEPARATORS = ['/', '-', '.', ',', ':', ' '] as const;
 const TOKEN_MASK_LENGTH: Record<Token, number> = {
   YYYY: 4,
@@ -102,7 +101,7 @@ function resolveTwoDigitYear(value: number, now = new Date()): number {
 
 const formatTokenCache = new Map<string, readonly FormatPart[]>();
 
-function tokenizeFormat(format: string): readonly FormatPart[] {
+export function tokenizeFormat(format: string): readonly FormatPart[] {
   const cached = formatTokenCache.get(format);
   if (cached) return cached;
 
@@ -146,15 +145,16 @@ function tokenizeFormat(format: string): readonly FormatPart[] {
 }
 
 export function applyMaskToInput(value: string, format: string): string {
+  if (!value) return '';
+  const parts = tokenizeFormat(format);
   const digits = value.replace(/\D/g, '');
   const meridiemChars = value.replace(/[^aApPmM]/g, '');
-  const parts = tokenizeFormat(format);
+
   let out = '';
   let digitIndex = 0;
   let meridiemIndex = 0;
-  let hasAnyOutput = false;
 
-  function hasRemainingTokenData(startIndex: number): boolean {
+  function hasRemainingData(startIndex: number): boolean {
     let d = digitIndex;
     let m = meridiemIndex;
     for (let i = startIndex; i < parts.length; i += 1) {
@@ -164,52 +164,52 @@ export function applyMaskToInput(value: string, format: string): string {
         if (m < meridiemChars.length) return true;
         continue;
       }
-      const len = TOKEN_MASK_LENGTH[part.value];
-      if (d < digits.length && len > 0) return true;
-      d += Math.min(len, Math.max(0, digits.length - d));
+      if (d < digits.length) return true;
+      d += TOKEN_MASK_LENGTH[part.value];
     }
     return false;
   }
 
   for (let i = 0; i < parts.length; i += 1) {
     const part = parts[i];
+
     if (part.type === 'literal') {
-      if (!hasAnyOutput) break;
-      if (hasRemainingTokenData(i + 1)) out += part.value;
+      if (hasRemainingData(i + 1)) {
+        out += part.value;
+      }
       continue;
     }
 
     if (part.value === 'A' || part.value === 'a') {
-      const c = meridiemChars[meridiemIndex];
-      if (!c) break;
-      const isPm = c.toLowerCase() === 'p';
+      const char = meridiemChars[meridiemIndex];
+      if (!char) break;
+      const isPm = char.toLowerCase() === 'p';
       const first = part.value === 'A' ? (isPm ? 'P' : 'A') : isPm ? 'p' : 'a';
-      const next = meridiemChars[meridiemIndex + 1];
-      const hasSecond = !!next && /[mM]/.test(next);
-      if (hasSecond) {
-        out += `${first}${part.value === 'A' ? 'M' : 'm'}`;
-        meridiemIndex += 2;
-      } else {
-        out += first;
+
+      // Look ahead for 'M'
+      const nextChar = meridiemChars[meridiemIndex + 1];
+      const hasM = nextChar && nextChar.toLowerCase() === 'm';
+
+      out += first;
+      meridiemIndex += 1;
+      if (hasM) {
+        out += part.value === 'A' ? 'M' : 'm';
         meridiemIndex += 1;
       }
-      hasAnyOutput = true;
       continue;
     }
 
     const len = TOKEN_MASK_LENGTH[part.value];
     if (digitIndex >= digits.length) break;
-    const take = digits.slice(digitIndex, digitIndex + len);
-    if (!take) break;
-    out += take;
-    digitIndex += take.length;
-    hasAnyOutput = true;
-    if (take.length < len) {
-      break;
-    }
+
+    const chunk = digits.slice(digitIndex, digitIndex + len);
+    out += chunk;
+    digitIndex += chunk.length;
+
+    if (chunk.length < len) break;
   }
 
-  return out.trimEnd();
+  return out;
 }
 
 export function normalizeInputSeparatorsToFormat(value: string, format: string): string {
