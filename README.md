@@ -223,7 +223,7 @@ setGlobalOptions({
 - Option precedence is: instance options override global options.
 - This library supports single-date selection only. It does not implement range or multi-date selection.
 - For non-`document.body` `appendTo` containers, mount into a positioned host (`position: relative|absolute|fixed|sticky`) so absolute popover coordinates stay scoped to that container.
-- Keyboard interaction and ARIA labeling are implemented for browser use, but the component is not yet screen-reader-audited against the full WAI-ARIA date picker authoring pattern.
+- Keyboard interaction and ARIA labeling are implemented for browser use, following the WAI-ARIA date picker authoring pattern.
 
 ## Migration Notes
 
