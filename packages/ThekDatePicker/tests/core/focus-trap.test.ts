@@ -25,7 +25,7 @@ describe('FocusTrap', () => {
     trap.activate();
     const last = document.getElementById('last') as HTMLElement;
     const first = document.getElementById('first') as HTMLElement;
-    
+
     last.focus();
     expect(document.activeElement).toBe(last);
 
@@ -39,7 +39,7 @@ describe('FocusTrap', () => {
     trap.activate();
     const first = document.getElementById('first') as HTMLElement;
     const last = document.getElementById('last') as HTMLElement;
-    
+
     first.focus();
     expect(document.activeElement).toBe(first);
 
@@ -52,10 +52,10 @@ describe('FocusTrap', () => {
   it('does nothing when deactivated', () => {
     trap.activate();
     trap.deactivate();
-    
+
     const last = document.getElementById('last') as HTMLElement;
     const first = document.getElementById('first') as HTMLElement;
-    
+
     last.focus();
     const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true });
     container.dispatchEvent(event);

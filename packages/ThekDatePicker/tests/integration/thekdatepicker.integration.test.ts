@@ -4,7 +4,7 @@ import { ThekDatePicker, resetGlobalOptions, setGlobalOptions } from '../../src/
 describe('ThekDatePicker integration', () => {
   beforeEach(() => {
     document.body.innerHTML = '<input id="date-input" />';
-    
+
     class MockResizeObserver {
       observe = vi.fn();
       unobserve = vi.fn();
@@ -97,7 +97,7 @@ describe('ThekDatePicker integration', () => {
     const picker = new ThekDatePicker('#date-input');
     const trapSpy = vi.spyOn(picker['focusTrap'], 'activate');
     picker.open();
-    
+
     expect(trapSpy).toHaveBeenCalled();
     picker.destroy();
   });
@@ -1055,7 +1055,7 @@ describe('ThekDatePicker integration', () => {
 
     const picker = new ThekDatePicker('#date-input');
     picker.open();
-    
+
     expect(observeSpy).toHaveBeenCalled();
     picker.destroy();
   });
@@ -1076,7 +1076,7 @@ describe('ThekDatePicker integration', () => {
     const picker = new ThekDatePicker('#date-input');
     picker.open();
     picker.close();
-    
+
     expect(disconnectSpy).toHaveBeenCalled();
     picker.destroy();
   });
