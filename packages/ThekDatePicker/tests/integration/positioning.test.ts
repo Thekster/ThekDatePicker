@@ -26,7 +26,10 @@ describe('ThekDatePicker positioning', () => {
 
   it('triggers positioning on ancestor scroll via global capture listener', async () => {
     const picker = new ThekDatePicker('#date-input');
-    const positionSpy = vi.spyOn(picker as unknown as { positionPicker: () => void }, 'positionPicker');
+    const positionSpy = vi.spyOn(
+      picker as unknown as { positionPicker: () => void },
+      'positionPicker'
+    );
 
     picker.open();
     // positionPicker is called once on open

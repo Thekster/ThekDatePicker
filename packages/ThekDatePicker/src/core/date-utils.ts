@@ -16,6 +16,7 @@ const TOKENS = [
   'A',
   'a'
 ] as const;
+export type Token = (typeof TOKENS)[number];
 export type FormatPart = { type: 'token'; value: Token } | { type: 'literal'; value: string };
 export const MASK_SEPARATORS = ['/', '-', '.', ',', ':', ' '] as const;
 const TOKEN_MASK_LENGTH: Record<Token, number> = {
@@ -423,7 +424,7 @@ export function parseDateByFormat(value: string, format: string): Date | null {
       }
     }
 
-    cursor += parsed.read;
+    cursor += parsed!.read;
   }
 
   while (cursor < input.length && /\s/.test(input[cursor])) {

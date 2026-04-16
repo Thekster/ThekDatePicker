@@ -1,5 +1,17 @@
 # Release Notes
 
+## 1.2.5 - 2026-04-15
+
+### Fixed
+
+- **Scroll Positioning:** Restored popover's ability to follow its input when the input is inside a scrollable container by re-implementing global capture-based scroll listeners. (SEV-2)
+- **Intersection UX:** Relaxed the intersection threshold with a 50px root margin to prevent the picker from closing abruptly when partially clipped. (SEV-4)
+- **Focus Trap Performance:** Optimized the `FocusTrap` utility to minimize DOM queries by using a manual `refresh()` method called only during re-renders. (SEV-4)
+
+### Added
+
+- **Zero-Config CSS Injection:** Added `injectBaseStyles()` utility for easier setup without manual CSS imports. (SEV-3)
+
 ## 1.2.4 - 2026-04-15
 
 ### Fixed

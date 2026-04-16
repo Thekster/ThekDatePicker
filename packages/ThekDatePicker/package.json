@@ -1,6 +1,6 @@
 {
   "name": "thekdatepicker",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "A framework-agnostic date/time picker library with themes.",
   "keywords": [
     "calendar",

@@ -1,6 +1,6 @@
 {
   "name": "thekdatepicker-monorepo",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "private": true,
   "description": "A framework-agnostic date/time picker library with themes.",
   "keywords": [
