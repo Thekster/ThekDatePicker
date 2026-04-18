@@ -1,6 +1,20 @@
-import type { ThekDatePicker } from './thekdatepicker.js';
-
 export type DateInput = Date | string | null | undefined;
+
+export interface ThekDatePickerApi {
+  open(): void;
+  close(): void;
+  toggle(): void;
+  setDate(value: DateInput | null | undefined, triggerChange?: boolean): void;
+  setDateFromTimestamp(timestampMs: number, triggerChange?: boolean): void;
+  getDate(): Date | null;
+  commitPendingInput(): void;
+  clear(triggerChange?: boolean): void;
+  setMinDate(value: DateInput): void;
+  setMaxDate(value: DateInput): void;
+  setDisabled(disabled: boolean): void;
+  setTheme(theme: ThekDatePickerThemeOption): void;
+  destroy(): void;
+}
 
 export interface ThekDatePickerTheme {
   primary: string;
@@ -47,9 +61,9 @@ export interface ThekDatePickerOptions {
   suspiciousMessage?: string;
   revertWarning?: boolean;
   revertMessage?: string;
-  onChange?: (date: Date | null, formatted: string, instance: ThekDatePicker) => void;
-  onOpen?: (instance: ThekDatePicker) => void;
-  onClose?: (instance: ThekDatePicker) => void;
+  onChange?: (date: Date | null, formatted: string, instance: ThekDatePickerApi) => void;
+  onOpen?: (instance: ThekDatePickerApi) => void;
+  onClose?: (instance: ThekDatePickerApi) => void;
 }
 
 export type ThekDatePickerGlobalOptions = Partial<ThekDatePickerOptions>;
@@ -82,7 +96,7 @@ export interface ResolvedOptions {
   suspiciousMessage: string;
   revertWarning: boolean;
   revertMessage: string;
-  onChange?: (date: Date | null, formatted: string, instance: ThekDatePicker) => void;
-  onOpen?: (instance: ThekDatePicker) => void;
-  onClose?: (instance: ThekDatePicker) => void;
+  onChange?: (date: Date | null, formatted: string, instance: ThekDatePickerApi) => void;
+  onOpen?: (instance: ThekDatePickerApi) => void;
+  onClose?: (instance: ThekDatePickerApi) => void;
 }

@@ -51,6 +51,7 @@ import {
 import { registerGlobalPicker, unregisterGlobalPicker } from './thekdatepicker-global.js';
 import type {
   DateInput,
+  ThekDatePickerApi,
   ResolvedOptions,
   ThekDatePickerOptions,
   ThekDatePickerThemeOption
@@ -58,7 +59,7 @@ import type {
 
 const CSS_PREFIX = 'thekdp';
 
-export class ThekDatePicker {
+export class ThekDatePicker implements ThekDatePickerApi {
   public readonly input: HTMLInputElement;
   public options: ResolvedOptions;
 
@@ -75,6 +76,7 @@ export class ThekDatePicker {
   private hourInputEl: HTMLInputElement | null = null;
   private minuteInputEl: HTMLInputElement | null = null;
   private meridiemInputEl: HTMLSelectElement | null = null;
+  private readonly timeHourInputId = `${CSS_PREFIX}-time-hour-${Math.random().toString(36).slice(2, 9)}`;
   private focusedDayTs: number | null = null;
   private openFocusFrame: number | null = null;
   private viewportFrame: number | null = null;
@@ -298,11 +300,15 @@ export class ThekDatePicker {
       case 'today': {
         const now = clampDate(new Date(), this.options.minDate, this.options.maxDate);
         this.setDate(now, true);
-        if (!this.options.enableTime) this.close();
+        if (!this.options.enableTime) {
+          this.close();
+          this.input.focus();
+        }
         return;
       }
       case 'ok':
         this.close();
+        this.input.focus();
         return;
       case 'day': {
         const ts = Number(actionEl.dataset.ts);
@@ -440,7 +446,7 @@ export class ThekDatePicker {
     this.input.setAttribute('role', 'combobox');
     this.input.setAttribute('inputmode', 'text');
     this.input.setAttribute('autocomplete', 'off');
-    this.input.setAttribute('aria-haspopup', 'grid');
+    this.input.setAttribute('aria-haspopup', 'dialog');
     this.input.setAttribute('aria-expanded', 'false');
     if (!this.pickerEl.id) {
       this.pickerEl.id = `thekdp-picker-${Math.random().toString(36).slice(2, 9)}`;
@@ -555,6 +561,10 @@ export class ThekDatePicker {
 
   public getDate(): Date | null {
     return this.selectedDate ? new Date(this.selectedDate) : null;
+  }
+
+  public commitPendingInput(): void {
+    this.commitInput();
   }
 
   public clear(triggerChange = true): void {
@@ -1151,7 +1161,7 @@ export class ThekDatePicker {
     const title = this.invalidInputDetail ?? (suspicious ? this.options.suspiciousMessage : '');
     if (title) this.input.title = title;
     else this.input.removeAttribute('title');
-    this.input.toggleAttribute('aria-invalid', suspicious || this.invalidInputDetail != null);
+    this.input.toggleAttribute('aria-invalid', this.invalidInputDetail != null);
   }
 
   private syncStatusDescription(overrideMessage?: string): void {
@@ -1238,6 +1248,7 @@ export class ThekDatePicker {
         timeContainer,
         actions,
         this.timeControlsUseMeridiem(),
+        this.timeHourInputId,
         CSS_PREFIX
       );
       this.setTimeInputs(inputs.hourInputEl, inputs.minuteInputEl, inputs.meridiemInputEl);

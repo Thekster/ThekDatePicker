@@ -1,5 +1,19 @@
 # Release Notes
 
+## 1.2.6 - 2026-04-18
+
+### Fixed
+
+- **Popup Accessibility Contract:** Aligned the picker's ARIA model around a labelled date-picker dialog with an internal day grid, so the input now advertises `aria-haspopup="dialog"` and the popup/grid semantics match the trapped-focus behavior. (SEV-2)
+- **Popover Focus Restoration:** Restored focus to the input when internal popover actions such as `OK` and date-only `Today` close the picker, preventing focus from being left on hidden controls. (SEV-2)
+- **Warning vs. Invalid Semantics:** Suspicious-but-accepted dates no longer set `aria-invalid`; only genuinely invalid committed input is exposed as invalid while warning text remains available through descriptive status messaging. (SEV-2)
+- **Multi-Instance Time Control IDs:** Time-enabled pickers now generate per-instance hour input IDs and labels instead of reusing a single static DOM id across multiple open instances. (SEV-3)
+- **Vue/Core API Typing:** Promoted the shared picker method surface into an exported `ThekDatePickerApi` type so the Vue wrapper no longer relies on a cast-only extension seam to call `commitPendingInput()`. (SEV-3)
+
+### Changed
+
+- **Release Documentation:** Updated README and agent guidance to match the shipped popup semantics, the committed-on-blur Vue wrapper behavior, and the current public instance method surface.
+
 ## 1.2.5 - 2026-04-15
 
 ### Fixed

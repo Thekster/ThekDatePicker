@@ -118,6 +118,7 @@ export function ensureTimeInputs(
   timeContainer: HTMLDivElement,
   actions: HTMLDivElement,
   usesMeridiem: boolean,
+  hourInputId: string,
   cssPrefix: string
 ): {
   hourInputEl: HTMLInputElement | null;
@@ -138,11 +139,11 @@ export function ensureTimeInputs(
 
     const label = document.createElement('label');
     label.className = `${cssPrefix}-time-label`;
-    label.htmlFor = `${cssPrefix}-time-hour`;
+    label.htmlFor = hourInputId;
     label.textContent = 'Time';
 
     const hourInput = document.createElement('input');
-    hourInput.id = `${cssPrefix}-time-hour`;
+    hourInput.id = hourInputId;
     hourInput.setAttribute('aria-label', 'Hour');
     hourInput.className = `${cssPrefix}-time-input`;
     hourInput.type = 'text';

@@ -6,6 +6,14 @@ type VuePickerRef = InstanceType<typeof ThekDatePickerVue> & {
   setDate: (value: Date | string | null | undefined, triggerChange?: boolean) => void;
 };
 
+function formatLocalDate(value: Date | null): string | null {
+  if (!value) return null;
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 afterEach(() => {
   document.body.innerHTML = "";
 });
@@ -89,6 +97,55 @@ describe("ThekDatePickerVue", () => {
     const updatedInput = container.querySelector<HTMLInputElement>("#reactive-date");
     expect(updatedInput?.disabled).toBe(true);
     expect(container.querySelector("button")).toBeNull();
+
+    app.unmount();
+  });
+
+  it("emits blur after syncing the committed model value", async () => {
+    const blurSnapshots: Array<string | null> = [];
+    const model = ref<Date | null>(null);
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+
+    const app = createApp(
+      defineComponent({
+        setup() {
+          return () =>
+            h(ThekDatePickerVue, {
+              id: "blur-date",
+              modelValue: model.value,
+              format: "YYYY-MM-DD",
+              "onUpdate:modelValue": (value: Date | null) => {
+                model.value = value;
+              },
+              onBlur: () => {
+                blurSnapshots.push(formatLocalDate(model.value));
+              },
+            });
+        },
+      }),
+    );
+
+    app.mount(container);
+    await nextTick();
+
+    const input = container.querySelector<HTMLInputElement>("#blur-date");
+    expect(input).not.toBeNull();
+
+    if (!input) {
+      app.unmount();
+      throw new Error("Expected blur-date input to be rendered");
+    }
+
+    input.value = "2026-04-11";
+    input.dispatchEvent(new Event("blur", { bubbles: true }));
+    await nextTick();
+
+    expect(model.value).toBeInstanceOf(Date);
+    expect(model.value?.getFullYear()).toBe(2026);
+    expect(model.value?.getMonth()).toBe(3);
+    expect(model.value?.getDate()).toBe(11);
+    expect(blurSnapshots).toEqual(["2026-04-11"]);
 
     app.unmount();
   });

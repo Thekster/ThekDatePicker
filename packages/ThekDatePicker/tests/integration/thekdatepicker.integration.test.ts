@@ -82,13 +82,15 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
-  it('uses role="dialog" and aria-modal="false" for the popover', () => {
+  it('exposes the popup as a labelled dialog with an internal day grid', () => {
     const picker = new ThekDatePicker('#date-input');
     picker.open();
     const popover = document.querySelector('.thekdp-popover') as HTMLDivElement;
+    const grid = document.querySelector('.thekdp-days') as HTMLDivElement;
 
     expect(popover.getAttribute('role')).toBe('dialog');
     expect(popover.getAttribute('aria-modal')).toBe('false');
+    expect(grid.getAttribute('role')).toBe('grid');
 
     picker.destroy();
   });
@@ -901,7 +903,7 @@ describe('ThekDatePicker integration', () => {
     expect(wrap.classList.contains('thekdp-input-wrap-suspicious')).toBe(true);
     expect(indicator.hidden).toBe(false);
     expect(input.title).toBe('Date looks suspicious');
-    expect(input.getAttribute('aria-invalid')).toBe('');
+    expect(input.hasAttribute('aria-invalid')).toBe(false);
 
     picker.destroy();
   });
@@ -1158,6 +1160,41 @@ describe('ThekDatePicker integration', () => {
     picker.destroy();
   });
 
+  it('returns focus to the input when OK closes the calendar', () => {
+    const picker = new ThekDatePicker('#date-input', {
+      format: 'YYYY-MM-DD HH:mm',
+      enableTime: true
+    });
+    picker.open();
+
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    const okButton = document.querySelector('[data-action="ok"]') as HTMLButtonElement;
+    okButton.focus();
+    okButton.click();
+
+    const popover = document.querySelector('.thekdp-popover') as HTMLDivElement;
+    expect(popover.hidden).toBe(true);
+    expect(document.activeElement).toBe(input);
+
+    picker.destroy();
+  });
+
+  it('returns focus to the input when Today closes the date-only calendar', () => {
+    const picker = new ThekDatePicker('#date-input', { format: 'YYYY-MM-DD' });
+    picker.open();
+
+    const input = document.querySelector('#date-input') as HTMLInputElement;
+    const todayButton = document.querySelector('[data-action="today"]') as HTMLButtonElement;
+    todayButton.focus();
+    todayButton.click();
+
+    const popover = document.querySelector('.thekdp-popover') as HTMLDivElement;
+    expect(popover.hidden).toBe(true);
+    expect(document.activeElement).toBe(input);
+
+    picker.destroy();
+  });
+
   it('restores input attributes and classes on destroy', () => {
     const picker = new ThekDatePicker('#date-input', {
       format: 'YYYY-MM-DD',
@@ -1167,8 +1204,8 @@ describe('ThekDatePicker integration', () => {
 
     const input = document.querySelector('#date-input') as HTMLInputElement;
     expect(input.classList.contains('thekdp-input')).toBe(true);
-    expect(input.getAttribute('aria-haspopup')).toBe('grid');
-    expect(input.hasAttribute('aria-invalid')).toBe(true);
+    expect(input.getAttribute('aria-haspopup')).toBe('dialog');
+    expect(input.hasAttribute('aria-invalid')).toBe(false);
 
     picker.destroy();
 
@@ -1180,7 +1217,7 @@ describe('ThekDatePicker integration', () => {
     expect(input.getAttribute('aria-invalid')).toBeNull();
   });
 
-  it('labels the dialog from the current month heading', () => {
+  it('labels the popup and grid from the current month heading', () => {
     const picker = new ThekDatePicker('#date-input', { format: 'YYYY-MM-DD' });
     picker.open();
 
@@ -1220,10 +1257,36 @@ describe('ThekDatePicker integration', () => {
     const input = document.querySelector('#date-input') as HTMLInputElement;
     const describedBy = input.getAttribute('aria-describedby');
     expect(describedBy).toBeTruthy();
+    expect(input.hasAttribute('aria-invalid')).toBe(false);
 
     const description = describedBy ? document.getElementById(describedBy) : null;
     expect(description?.textContent).toContain('Suspicious date value');
 
     picker.destroy();
+  });
+
+  it('uses unique hour input ids for multiple time-enabled pickers', () => {
+    document.body.innerHTML = '<input id="date-input-a" /><input id="date-input-b" />';
+    const pickerA = new ThekDatePicker('#date-input-a', {
+      format: 'YYYY-MM-DD HH:mm',
+      enableTime: true
+    });
+    const pickerB = new ThekDatePicker('#date-input-b', {
+      format: 'YYYY-MM-DD HH:mm',
+      enableTime: true
+    });
+
+    pickerA.open();
+    pickerB.open();
+
+    const hourInputs = Array.from(
+      document.querySelectorAll<HTMLInputElement>('[data-time-unit="hour"]')
+    );
+    expect(hourInputs).toHaveLength(2);
+    expect(hourInputs[0]?.id).toBeTruthy();
+    expect(hourInputs[0]?.id).not.toBe(hourInputs[1]?.id);
+
+    pickerA.destroy();
+    pickerB.destroy();
   });
 });

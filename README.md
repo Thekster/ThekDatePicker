@@ -85,7 +85,7 @@ const App = {
 createApp(App).mount("#app");
 ```
 
-The Vue wrapper renders its own input element, forwards normal input attributes such as `id`, `name`, and `class`, and recreates the underlying picker when option props change.
+The Vue wrapper renders its own input element, forwards normal input attributes such as `id`, `name`, and `class`, recreates the underlying picker when option props change, and emits `blur` only after pending input has been committed back into `v-model`.
 
 ## Browser CDN
 
@@ -206,6 +206,7 @@ setGlobalOptions({
 | `setDate(value, triggerChange?)`                    | `(DateInput, boolean = true) => void`                                   | `triggerChange = true` | Sets value, syncs UI, optional callback trigger.                     |
 | `setDateFromTimestamp(timestampMs, triggerChange?)` | `(number, boolean = true) => void`                                      | `triggerChange = true` | Sets value using an explicit Unix timestamp in milliseconds.         |
 | `getDate()`                                         | `() => Date \| null`                                                    | n/a                    | Returns selected date clone or `null`.                               |
+| `commitPendingInput()`                              | `() => void`                                                            | n/a                    | Parses and commits the current input value without forcing a blur.    |
 | `clear(triggerChange?)`                             | `(boolean = true) => void`                                              | `triggerChange = true` | Clears value and UI.                                                 |
 | `setMinDate(value)`                                 | `(DateInput) => void`                                                   | n/a                    | Updates min date and revalidates selection.                          |
 | `setMaxDate(value)`                                 | `(DateInput) => void`                                                   | n/a                    | Updates max date and revalidates selection.                          |
@@ -230,7 +231,7 @@ setGlobalOptions({
 - Option precedence is: instance options override global options.
 - This library supports single-date selection only. It does not implement range or multi-date selection.
 - For non-`document.body` `appendTo` containers, mount into a positioned host (`position: relative|absolute|fixed|sticky`) so absolute popover coordinates stay scoped to that container.
-- Keyboard interaction and ARIA labeling are implemented for browser use, following the WAI-ARIA date picker authoring pattern.
+- Keyboard interaction and ARIA labeling are implemented for browser use, following a date-picker dialog pattern with `aria-haspopup="dialog"` on the input, `role="dialog"` on the popup, and `role="grid"` on the day grid.
 
 ## Migration Notes
 

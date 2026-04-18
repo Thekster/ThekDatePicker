@@ -1,6 +1,11 @@
 import { defineComponent, h, onBeforeUnmount, onMounted, ref, watch, type PropType } from "vue";
 import { ThekDatePicker, setGlobalOptions } from "thekdatepicker";
-import type { DateInput, ThekDatePickerOptions, ThekDatePickerThemeOption } from "thekdatepicker";
+import type {
+  DateInput,
+  ThekDatePickerApi,
+  ThekDatePickerOptions,
+  ThekDatePickerThemeOption,
+} from "thekdatepicker";
 
 const pickerOptionKeys = [
   "format",
@@ -156,10 +161,10 @@ export const ThekDatePickerVue = defineComponent({
       default: undefined,
     },
   },
-  emits: ["update:modelValue", "change", "open", "close"],
+  emits: ["update:modelValue", "change", "open", "close", "blur"],
   setup(props, { attrs, emit, expose }) {
     const inputRef = ref<HTMLInputElement | null>(null);
-    let picker: ThekDatePicker | null = null;
+    let picker: ThekDatePickerApi | null = null;
 
     const getOptions = (): ThekDatePickerOptions => {
       const options: ThekDatePickerOptions = {};
@@ -233,6 +238,11 @@ export const ThekDatePickerVue = defineComponent({
       syncValueToPicker(currentValue);
     };
 
+    const handleBlur = (event: FocusEvent): void => {
+      picker?.commitPendingInput();
+      emit("blur", event);
+    };
+
     onMounted(() => {
       createPicker();
     });
@@ -264,6 +274,7 @@ export const ThekDatePickerVue = defineComponent({
       open: () => picker?.open(),
       close: () => picker?.close(),
       toggle: () => picker?.toggle(),
+      commitPendingInput: () => picker?.commitPendingInput(),
       clear: (triggerChange?: boolean) => picker?.clear(triggerChange),
       setDate: (value: DateInput | null | undefined, triggerChange?: boolean) =>
         picker?.setDate(value, triggerChange),
@@ -275,6 +286,7 @@ export const ThekDatePickerVue = defineComponent({
         ...attrs,
         ref: inputRef,
         type: typeof attrs.type === "string" ? attrs.type : "text",
+        onBlur: handleBlur,
       });
   },
 });
